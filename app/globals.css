@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f4f4f4;
-  --foreground: #fcfdfc;
+  --back: #f4f4f4;
+  --fore: #fcfdfc;
   --border: #dfe0e2;
   --text: #0b0a0a;
   --mark: #5c76b4;
@@ -19,7 +19,7 @@
 *{
   box-sizing: border-box;
   font-family: Arial, Helvetica, sans-serif;
-  color: var(--text);
+  /* color: var(--text); */
   outline: none;
 }
 

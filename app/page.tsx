@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import GraphViewer from "@/components/GraphViewer";
-import { QueryBar } from "@/components/QueryBar";
+import { Tabs } from "@/components/Tabs";
 import { SelectBar } from "@/components/SelectBar";
 import { createEmptySelectedTerms } from "@/constants/category";
 
@@ -37,17 +37,12 @@ export default function Home() {
   };
 
   return (
-    <div
-      style={{ backgroundColor: "var(--background)" }}
-      className="flex h-screen overflow-hidden"
-    >
+    <div className="bg-back flex h-screen overflow-hidden">
       <div>
         {/* <Tabs /> */}
-        <QueryBar
-          selectedTerms={selectedTerms}
-          selectedCategory={selectedCategory}
+        <Tabs
+          activeCategory={selectedCategory}
           onSelectCategory={setSelectedCategory}
-          onRemoveTerm={handleRemoveTerm}
         />
         <main className="flex h-screen w-full">
           {/**graph visualization*/}
@@ -55,6 +50,7 @@ export default function Home() {
           <SelectBar
             selectedCategory={selectedCategory}
             onSelectedTerm={handleAddTerm}
+            onRemoveTerm={handleRemoveTerm}
             selectedTerms={
               selectedCategory ? selectedTerms[selectedCategory] : []
             }

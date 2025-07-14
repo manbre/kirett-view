@@ -16,8 +16,9 @@ interface Term {
 
 export const SelectBar = ({
   selectedCategory,
-  onSelectedTerm,
   selectedTerms,
+  onSelectedTerm,
+  onRemoveTerm,
 }: SelectBarProps) => {
   const [terms, setTerms] = useState<Term[]>([]);
 
@@ -43,14 +44,7 @@ export const SelectBar = ({
   );
 
   return (
-    <div
-      style={{
-        backgroundColor: "var(--foreground)",
-        height: "calc(100vh - 2.5rem)",
-        border: "1.5px solid var(--border)",
-      }}
-      className="mt-2 ml-2 w-fit overflow-scroll overflow-x-hidden rounded-lg p-1"
-    >
+    <div className="bg-fore mt-2 ml-2 h-[calc(100%_-_2.5rem)] w-fit overflow-scroll overflow-x-hidden rounded-lg border-1 border-[var(--border)] p-1">
       {Object.entries(groupedTerms).map(([groupName, groupTerms]) => (
         <div key={groupName} className="">
           <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1">
@@ -60,11 +54,20 @@ export const SelectBar = ({
               return (
                 <button
                   key={`${term.label}-${index}`}
-                  onClick={() => onSelectedTerm(selectedCategory, term.label)}
-                  style={isSelected ? { color: "var(--mark)" } : undefined}
-                  className={"w-64 justify-self-start p-1 whitespace-normal"}
+                  onClick={() =>
+                    isSelected
+                      ? onRemoveTerm(selectedCategory, term.label)
+                      : onSelectedTerm(selectedCategory, term.label)
+                  }
+                  className={
+                    "w-64 justify-self-start p-1 whitespace-normal hover:cursor-pointer"
+                  }
                 >
-                  {term.label}
+                  <span
+                    className={`${isSelected ? "text-[var(--mark)]" : "text-[var(--text)]"}`}
+                  >
+                    {term.label}
+                  </span>
                 </button>
               );
             })}

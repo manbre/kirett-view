@@ -1,14 +1,18 @@
 "use client";
+import React from "react";
 import { Category, CategoryLabels } from "@/constants/category";
 
 interface TabsProps {
-  activeCategory: Category;
-  onSelect: (category: Category) => void;
+  activeCategory: Category | null;
+  onSelectCategory: (category: Category) => void;
 }
 
-export const Tabs = ({ activeCategory, onSelect }: TabsProps) => {
+export const Tabs: React.FC<TabsProps> = ({
+  activeCategory,
+  onSelectCategory,
+}) => {
   return (
-    <div className="flex flex-col w-fit border-t-2-black border-gray-300 bg-white">
+    <div className="flex h-fit w-screen flex-row pt-1">
       {Object.entries(CategoryLabels).map(([key, label]) => {
         const category = key as Category;
         const isActive = activeCategory === category;
@@ -16,12 +20,13 @@ export const Tabs = ({ activeCategory, onSelect }: TabsProps) => {
         return (
           <button
             key={key}
-            onClick={() => onSelect(category)}
-            className={`px-4 py-2 rounded-t ${
-              isActive ? "bg-blue-600 text-white" : "bg-gray-800 text-gray-500"
+            onClick={() => onSelectCategory(category)}
+            className={`mx-3 border-b-2 hover:cursor-pointer hover:border-[var(--mark)] ${
+              isActive ? "border-[var(--mark)]" : "border-transparent"
             }`}
           >
             {label}
+            {/* <span class="icon">💡</span> */}
           </button>
         );
       })}
