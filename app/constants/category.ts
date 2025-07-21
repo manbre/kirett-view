@@ -11,12 +11,15 @@ export const CategoryLabels: Record<Category, string> = {
   [Category.Procedures]: "Maßnahmen",
   [Category.InvasiveProcedures]: "Invasive Maßnahmen",
   [Category.TreatmentPathways]: "Behandlungspfade",
-  // [Category.StandardOperatingProcedures]: "Standardarbeitsanweisungen",
+  [Category.StandardOperatingProcedures]: "Standardarbeitsanweisungen",
 };
 
 export function createEmptySelectedTerms(): Record<Category, string[]> {
-  return Object.values(Category).reduce((acc, category) => {
-    acc[category] = [];
-    return acc;
-  }, {} as Record<Category, string[]>);
+  return Object.values(Category).reduce(
+    (acc, category) => {
+      acc[category] = [];
+      return acc;
+    },
+    {} as Record<Category, string[]>,
+  );
 }

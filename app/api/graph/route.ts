@@ -6,35 +6,38 @@ export async function GET() {
 
   try {
     const result = await session.run(`
-      MATCH (n:BPRNode)-[r]->(m)
-    RETURN n, r, m
-    LIMIT 10
+MATCH (n { Name: "Paracetamol" })-[r]-(neighbor)
+RETURN n, r, neighbor
     `);
 
     const nodesMap = new Map();
     const edges = [];
 
     result.records.forEach((record) => {
-      const n1 = record.get("n");
-      const n2 = record.get("m");
-      const r = record.get("r");
+      record.keys.forEach((key) => {
+        const value = record.get(key);
 
-      [n1, n2].forEach((node) => {
-        const id = node.identity.toString();
-        if (!nodesMap.has(id)) {
-          nodesMap.set(id, {
-            id,
-            label: node.properties.Name || node.labels?.[0] || "Node",
-            data: node.properties,
+        if (value && value.identity && value.labels) {
+          // Es ist ein Node
+          const id = value.identity.toString();
+          if (!nodesMap.has(id)) {
+            nodesMap.set(id, {
+              id,
+              label: value.properties.Name || value.labels[0] || "Node",
+              data: value.properties,
+            });
+          }
+        }
+
+        if (value && value.identity && value.type) {
+          // Es ist eine Relationship
+          edges.push({
+            id: value.identity.toString(),
+            source: value.start.toString(),
+            target: value.end.toString(),
+            label: value.type,
           });
         }
-      });
-
-      edges.push({
-        id: r.identity.toString(),
-        source: n1.identity.toString(),
-        target: n2.identity.toString(),
-        label: r.type,
       });
     });
 

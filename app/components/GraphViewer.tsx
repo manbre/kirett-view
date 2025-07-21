@@ -3,9 +3,23 @@
 import { GraphCanvas } from "reagraph";
 import { useEffect, useState } from "react";
 
+// Falls du keine Typen hast, kannst du sie hier definieren oder importieren
+type NodeType = {
+  id: string;
+  label: string;
+  data?: any;
+};
+
+type EdgeType = {
+  id: string;
+  source: string;
+  target: string;
+  label?: string;
+};
+
 export default function GraphViewer() {
-  const [nodes, setNodes] = useState([]);
-  const [edges, setEdges] = useState([]);
+  const [nodes, setNodes] = useState<NodeType[]>([]);
+  const [edges, setEdges] = useState<EdgeType[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -13,15 +27,20 @@ export default function GraphViewer() {
       setLoading(true);
       try {
         const result = await fetch("/api/graph");
-        const { nodes, edges } = await result.json();
-        setNodes(nodes);
-        setEdges(edges);
+        const data = await result.json();
+
+        // Defensive check, falls API kein Array zurückgibt
+        setNodes(Array.isArray(data.nodes) ? data.nodes : []);
+        setEdges(Array.isArray(data.edges) ? data.edges : []);
       } catch (error) {
         console.error("error while loading graph:", error);
+        setNodes([]);
+        setEdges([]);
       } finally {
         setLoading(false);
       }
     }
+
     fetchGraph();
   }, []);
 
@@ -42,7 +61,7 @@ export default function GraphViewer() {
         labelType="all"
         onNodeClick={(node) => {
           console.log("Geklickter Knoten:", node);
-          //lazy loading hier
+          // lazy loading hier möglich
         }}
         style={{ width: "100%", height: "100%" }}
       />

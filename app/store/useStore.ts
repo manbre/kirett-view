@@ -1,0 +1,53 @@
+import { create } from "zustand";
+
+interface Store {
+  selectedCategory: Category | null;
+  selectedTerms: SelectedTerm[];
+  suggestions: string[];
+
+  changeCategory: (category: Category) => void;
+  selectTerm: (term: string) => void;
+  unselectTerm: (term: string) => void;
+  fetchSuggestions: () => Promise<void>;
+}
+
+export const useStore = create<Store>((set, get) => ({
+  selectedCategory: null,
+  selectedTerms: [],
+  suggestions: [],
+
+  changeCategory: (category) => {
+    const prev = get().selectedCategory;
+    if (prev === category) return;
+    set({ selectedCategory: category });
+  },
+
+  selectTerm: (term) => {
+    const prev = get().selectedTerms;
+    if (prev.some((t) => t.term === term)) return;
+    const updated = [...prev, { term }];
+    set({ selectedTerms: updated });
+    get().fetchSuggestions();
+  },
+
+  unselectTerm: (term) => {
+    const filtered = get().selectedTerms.filter((t) => !(t.term === term));
+    set({ selectedTerms: filtered });
+    get().fetchSuggestions();
+  },
+
+  fetchSuggestions: async () => {
+    try {
+      const res = await fetch("/api/suggestions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(get().selectedTerms),
+      });
+      const data = await res.json();
+      console.log("suggestions: " + data);
+      set({ suggestions: data });
+    } catch (error) {
+      console.error("error while calling suggestions:", error);
+    }
+  },
+}));

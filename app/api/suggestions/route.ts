@@ -4,9 +4,8 @@ import neo4j from "@/lib/neo4j";
 export async function POST(request: Request) {
   const session = neo4j.session();
   try {
-    const { selected } = await request.json(); // [{ category: "MedicationNode", term: "Ibuprofen" }, ...]
-
-    if (!selected || !Array.isArray(selected)) {
+    const selected = await request.json();
+    if (!Array.isArray(selected)) {
       return NextResponse.json({ error: "Invalid input" }, { status: 400 });
     }
 
@@ -24,10 +23,7 @@ export async function POST(request: Request) {
 
     const result = await session.run(query);
 
-    const suggestions = result.records.map((record) => ({
-      category: record.get("category"),
-      term: record.get("term"),
-    }));
+    const suggestions = result.records.map((record) => record.get("term"));
 
     return NextResponse.json(suggestions);
   } catch (error) {
