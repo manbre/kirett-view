@@ -1,12 +1,18 @@
+const folder = "terms";
+
 export enum Category {
-  TreatmentPathways = "treatment-pathways",
-  InvasiveProcedures = "invasive-procedures",
-  Procedures = "procedures",
-  Medication = "medication",
-  StandardOperatingProcedures = "standard-operating-procedures",
+  Competence = `${folder}/competence`,
+  Actions = `${folder}/actions`,
+  TreatmentPathways = `${folder}/treatment-pathways`,
+  InvasiveProcedures = `${folder}/invasive-procedures`,
+  Procedures = `${folder}/procedures`,
+  Medication = `${folder}/medication`,
+  StandardOperatingProcedures = `${folder}/standard-operating-procedures`,
 }
 
 export const CategoryLabels: Record<Category, string> = {
+  [Category.Competence]: "Kompetenz",
+  [Category.Actions]: "Aktionen",
   [Category.Medication]: "Medikamente",
   [Category.Procedures]: "Maßnahmen",
   [Category.InvasiveProcedures]: "Invasive Maßnahmen",

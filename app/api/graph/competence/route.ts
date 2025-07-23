@@ -1,14 +1,24 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import neo4j from "@/lib/neo4j";
 
-export async function GET() {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { competence: string } },
+) {
   const session = neo4j.session();
+  const { competence } = params;
 
   try {
-    const result = await session.run(`
-MATCH (n { Name: "Paracetamol" })-[r]-(neighbor)
-RETURN n, r, neighbor
-    `);
+    const result = await session.run(
+      `
+    MATCH (n)
+    UNWIND keys(n) AS prop
+    WITH n, prop
+    WHERE prop CONTAINS "Betrifft" AND n[prop] = $targetValue
+    RETURN DISTINCT n
+    `,
+      { targetValue: competence },
+    );
 
     const nodesMap = new Map();
     const edges = [];
@@ -30,7 +40,6 @@ RETURN n, r, neighbor
         }
 
         if (value && value.identity && value.type) {
-          // Es ist eine Relationship
           edges.push({
             id: value.identity.toString(),
             source: value.start.toString(),

@@ -31,7 +31,7 @@ export const TermField = () => {
   return (
     <div className="bg-fore mt-2 ml-2 grid h-[calc(100%_-_2.5rem)] w-fit grid-cols-1 overflow-scroll overflow-x-hidden rounded-lg border-1 border-[var(--border)] p-1 sm:grid-cols-1 md:grid-cols-1">
       {terms.map((term, index) => {
-        const isSelected = selectedTerms.some((t) => t.term === term.label);
+        const isSelected = selectedTerms.includes(term.label);
         const isSuggested = suggestions.includes(term.label);
 
         return (
@@ -41,7 +41,7 @@ export const TermField = () => {
               isSelected ? unselectTerm(term.label) : selectTerm(term.label)
             }
             className={
-              "w-64 justify-self-start p-1 whitespace-normal hover:cursor-pointer"
+              "w-64 justify-self-start border-1 p-1 whitespace-normal hover:cursor-pointer"
             }
           >
             <span

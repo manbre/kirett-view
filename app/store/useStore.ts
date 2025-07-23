@@ -1,13 +1,13 @@
 import { create } from "zustand";
 
 interface Store {
-  selectedCategory: Category | null;
-  selectedTerms: SelectedTerm[];
+  selectedCategory: string | null;
+  selectedTerms: string[];
   suggestions: string[];
 
-  changeCategory: (category: Category) => void;
-  selectTerm: (term: string) => void;
-  unselectTerm: (term: string) => void;
+  changeCategory: (string) => void;
+  selectTerm: (string) => void;
+  unselectTerm: (string) => void;
   fetchSuggestions: () => Promise<void>;
 }
 
@@ -24,21 +24,21 @@ export const useStore = create<Store>((set, get) => ({
 
   selectTerm: (term) => {
     const prev = get().selectedTerms;
-    if (prev.some((t) => t.term === term)) return;
-    const updated = [...prev, { term }];
+    if (prev.includes(term)) return;
+    const updated = [...prev, term];
     set({ selectedTerms: updated });
     get().fetchSuggestions();
   },
 
   unselectTerm: (term) => {
-    const filtered = get().selectedTerms.filter((t) => !(t.term === term));
+    const filtered = get().selectedTerms.filter((t) => t !== term);
     set({ selectedTerms: filtered });
     get().fetchSuggestions();
   },
 
   fetchSuggestions: async () => {
     try {
-      const res = await fetch("/api/suggestions", {
+      const res = await fetch("/api/terms/suggestions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(get().selectedTerms),

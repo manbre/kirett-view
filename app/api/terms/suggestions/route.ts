@@ -9,19 +9,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid input" }, { status: 400 });
     }
 
-    // Build Cypher query for neighbors
-    const terms = selected.map((s) => `"${s.term}"`).join(", ");
-
     const query = `
       MATCH (n)
-      WHERE n.Name IN [${terms}]
+      WHERE n.Name IN $terms
       MATCH (n)-[]-(neighbor)
-      WHERE neighbor.Name IS NOT NULL AND NOT neighbor.Name IN [${terms}]
+      WHERE neighbor.Name IS NOT NULL AND NOT neighbor.Name IN $terms
       RETURN DISTINCT labels(neighbor)[0] AS category, neighbor.Name AS term
       LIMIT 100
     `;
 
-    const result = await session.run(query);
+    const result = await session.run(query, { terms: selected });
 
     const suggestions = result.records.map((record) => record.get("term"));
 

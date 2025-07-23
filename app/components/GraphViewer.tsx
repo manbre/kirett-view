@@ -1,13 +1,20 @@
 "use client";
 
 import { GraphCanvas } from "reagraph";
+import { useStore } from "@/store/useStore";
 import { useEffect, useState } from "react";
 
 // Falls du keine Typen hast, kannst du sie hier definieren oder importieren
+type NodeData = {
+  Name?: string;
+  Typ?: string;
+  [key: string]: unknown; // erlaubt beliebige weitere Properties, aber typsicher
+};
+
 type NodeType = {
   id: string;
   label: string;
-  data?: any;
+  data?: NodeData;
 };
 
 type EdgeType = {
@@ -24,16 +31,31 @@ export default function GraphViewer() {
 
   useEffect(() => {
     async function fetchGraph() {
+      const selectedTerms = useStore.getState().selectedTerms; // SelectedTerm[]
+
+      if (!Array.isArray(selectedTerms) || selectedTerms.length === 0) {
+        setNodes([]);
+        setEdges([]);
+        return;
+      }
+
       setLoading(true);
       try {
-        const result = await fetch("/api/graph");
-        const data = await result.json();
+        const response = await fetch("/api/graph/join", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ selectedTerms }),
+        });
 
-        // Defensive check, falls API kein Array zurückgibt
+        if (!response.ok) {
+          throw new Error("Fehler beim Laden");
+        }
+
+        const data = await response.json();
         setNodes(Array.isArray(data.nodes) ? data.nodes : []);
         setEdges(Array.isArray(data.edges) ? data.edges : []);
       } catch (error) {
-        console.error("error while loading graph:", error);
+        console.error("Fehler beim Laden des Graphen:", error);
         setNodes([]);
         setEdges([]);
       } finally {
@@ -47,18 +69,12 @@ export default function GraphViewer() {
   if (loading) return <p>Graph wird geladen...</p>;
 
   return (
-    <div
-      style={{
-        backgroundColor: "var(--foreground)",
-        height: "calc(100vh - 2.5rem)",
-        border: "1.5px solid var(--border)",
-      }}
-      className="relative mt-2 mr-2 ml-2 flex-1 overflow-hidden rounded-lg p-1"
-    >
+    <div className="bg-fore relative mt-2 mr-2 ml-2 h-[calc(100%_-_2.5rem)] flex-1 overflow-hidden rounded-lg border-1 border-[var(--border)] p-1">
       <GraphCanvas
         nodes={nodes}
         edges={edges}
         labelType="all"
+        draggable={true}
         onNodeClick={(node) => {
           console.log("Geklickter Knoten:", node);
           // lazy loading hier möglich
