@@ -20,15 +20,15 @@ export async function POST(request: NextRequest) {
     const result = await session.run(
       `
       MATCH (n)
-      WHERE any(k IN keys(n) WHERE n[k] IN $terms)
-      MATCH (n)-[r]-(neighbor)
-      RETURN DISTINCT n, r, neighbor
+WHERE n.Name IN $terms OR n.BPR IN $terms
+MATCH (n)-[r]-(neighbor)
+RETURN DISTINCT n, r, neighbor
       `,
       { terms: allTerms },
     );
 
     const nodesMap = new Map();
-    const edges: any[] = [];
+    const edges = [];
 
     result.records.forEach((record) => {
       const n = record.get("n");
