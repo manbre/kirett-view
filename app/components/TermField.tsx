@@ -29,7 +29,7 @@ export const TermField = () => {
   }, [selectedCategory]);
 
   return (
-    <div className="bg-fore mt-2 ml-2 grid h-[calc(100%_-_2.5rem)] w-64 grid-cols-1 overflow-scroll overflow-x-hidden rounded-lg border-1 border-[var(--border)] p-1 sm:grid-cols-1 md:grid-cols-1">
+    <div className="bg-fore mt-2 ml-2 grid h-[calc(100%_-_2.5rem)] w-45 grid-cols-1 overflow-scroll overflow-x-hidden rounded-lg border-1 border-[var(--border)] p-1 sm:grid-cols-1 md:grid-cols-1">
       {terms.map((term, index) => {
         const isSelected = selectedTerms.includes(term.label);
         const isSuggested = suggestions.includes(term.label);
@@ -40,7 +40,7 @@ export const TermField = () => {
             onClick={() =>
               isSelected ? unselectTerm(term.label) : selectTerm(term.label)
             }
-            className={"w-64 justify-self-start p-1 whitespace-normal"}
+            className={"justify-self-center whitespace-normal"}
           >
             <span
               className={`hover:cursor-pointer hover:text-[var(--mark)] ${

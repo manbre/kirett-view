@@ -44,7 +44,6 @@ export const useStore = create<Store>((set, get) => ({
         body: JSON.stringify(get().selectedTerms),
       });
       const data = await res.json();
-      console.log("suggestions: " + data);
       set({ suggestions: data });
     } catch (error) {
       console.error("error while calling suggestions:", error);

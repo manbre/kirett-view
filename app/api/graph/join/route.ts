@@ -20,9 +20,9 @@ export async function POST(request: NextRequest) {
     const result = await session.run(
       `
       MATCH (n)
-WHERE n.Name IN $terms OR n.BPR IN $terms
-MATCH (n)-[r]-(neighbor)
-RETURN DISTINCT n, r, neighbor
+WHERE n.Name IN $terms
+OPTIONAL MATCH (n)-[r]-(neighbor)
+RETURN DISTINCT id(n) AS id, n.name AS name, labels(n) AS labels, n, r, neighbor
       `,
       { terms: allTerms },
     );
@@ -41,7 +41,11 @@ RETURN DISTINCT n, r, neighbor
           nodesMap.set(id, {
             id,
             label: node.properties?.Name ?? node.labels?.[0] ?? "Node",
-            data: node.properties,
+            data: {
+              ...node.properties,
+              labels: node.labels, // z.B. ["DisplayNode"]
+              type: node.labels?.[0] ?? null, // z.B. "DisplayNode"
+            },
           });
         }
       });
