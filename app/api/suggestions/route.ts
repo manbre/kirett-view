@@ -11,11 +11,11 @@ export async function POST(request: Request) {
 
     const query = `
       MATCH (n)
-      WHERE n.Name IN $terms
+        WHERE n.Name IN $terms
       MATCH (n)-[]-(neighbor)
-      WHERE neighbor.Name IS NOT NULL AND NOT neighbor.Name IN $terms
+        WHERE neighbor.Name IS NOT NULL AND NOT neighbor.Name IN $terms
       RETURN DISTINCT labels(neighbor)[0] AS category, neighbor.Name AS term
-      LIMIT 100
+        LIMIT 100
     `;
 
     const result = await session.run(query, { terms: selected });

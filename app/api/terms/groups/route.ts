@@ -5,9 +5,10 @@ export async function GET() {
   const session = neo4j.session();
   try {
     const result = await session.run(`
-            MATCH (n:SAAProcedureNode)
-            RETURN DISTINCT REPLACE(n.Name, "Standardarbeitsanweisung ", "") AS name
-            ORDER BY name
+MATCH (j:JumpNode)
+  WHERE j.BPR = "Disease Groups"
+  AND j.Name <> "Manuelle Selektion"
+RETURN j.Name AS name
             `);
     const options = result.records.map((record) => ({
       value: record.get("name"),
