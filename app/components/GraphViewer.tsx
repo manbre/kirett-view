@@ -138,7 +138,7 @@ export const GraphViewer = () => {
           node && node.data ? <CustomNode node={node} /> : null
         }
         onNodeClick={(node) => {
-          console.log("Geklickter Knoten:", node.data);
+          // console.log("Geklickter Knoten:", node.data);
         }}
         style={{ width: "100%", height: "100%" }}
       />

@@ -29,10 +29,6 @@ type GraphEdge = {
   label: string;
 };
 
-type GraphRecord = Neo4jRecord & {
-  get: (key: "n" | "neighbor" | "r") => Node | Relationship;
-};
-
 type SelectedTerms = Record<Category, string[]>;
 
 export async function POST(request: NextRequest) {
@@ -44,11 +40,11 @@ export async function POST(request: NextRequest) {
   const edges: GraphEdge[] = [];
 
   try {
-    const allRecords: GraphRecord[] = [];
+    const allRecords: Neo4jRecord[] = [];
 
     if (selectedTerms.groups?.length) {
       const records = await getGroupsSubgraph(selectedTerms.groups, session);
-      allRecords.push(...(records as GraphRecord[]));
+      allRecords.push(...records);
     }
 
     if (selectedTerms.medications?.length) {
@@ -56,7 +52,7 @@ export async function POST(request: NextRequest) {
         selectedTerms.medications,
         session,
       );
-      allRecords.push(...(records as GraphRecord[]));
+      allRecords.push(...records);
     }
 
     if (selectedTerms.pathways?.length) {
@@ -64,7 +60,7 @@ export async function POST(request: NextRequest) {
         selectedTerms.pathways,
         session,
       );
-      allRecords.push(...(records as GraphRecord[]));
+      allRecords.push(...records);
     }
 
     if (selectedTerms.procedures?.length) {
@@ -72,31 +68,49 @@ export async function POST(request: NextRequest) {
         selectedTerms.procedures,
         session,
       );
-      allRecords.push(...(records as GraphRecord[]));
+      allRecords.push(...records);
     }
 
     if (selectedTerms.roles?.length) {
       const records = await getRolesSubgraph(selectedTerms.roles, session);
-      allRecords.push(...(records as GraphRecord[]));
+      allRecords.push(...records);
     }
 
     for (const record of allRecords) {
+      // Immer vorhanden
       const n = record.get("n") as Node;
-      const neighbor = record.get("neighbor") as Node;
-      const r = record.get("r") as Relationship;
 
-      [n, neighbor].forEach((node) => {
-        const id = node.identity.toString();
-        if (!nodesMap.has(id)) {
-          nodesMap.set(id, {
-            id,
-            label: node.properties?.Name ?? node.labels?.[0] ?? "Node",
-            data: node.properties,
+      const id = n.identity.toString();
+      if (!nodesMap.has(id)) {
+        nodesMap.set(id, {
+          id,
+          label: n.properties?.Name ?? n.labels?.[0] ?? "Node",
+          data: {
+            ...n.properties,
+            labels: n.labels,
+            type: n.labels?.[0] ?? null,
+          },
+        });
+      }
+
+      // Optional: neighbor und edge
+      if (record.has("neighbor") && record.has("r")) {
+        const neighbor = record.get("neighbor") as Node;
+        const r = record.get("r") as Relationship;
+
+        const neighborId = neighbor.identity.toString();
+        if (!nodesMap.has(neighborId)) {
+          nodesMap.set(neighborId, {
+            id: neighborId,
+            label: neighbor.properties?.Name ?? neighbor.labels?.[0] ?? "Node",
+            data: {
+              ...neighbor.properties,
+              labels: neighbor.labels,
+              type: neighbor.labels?.[0] ?? null,
+            },
           });
         }
-      });
 
-      if (r) {
         edges.push({
           id: r.identity.toString(),
           source: r.start.toString(),

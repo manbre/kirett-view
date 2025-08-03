@@ -25,7 +25,7 @@ export const useStore = create<Store>((set, get) => ({
         [category]: updated,
       },
     }));
-    console.log(get().selectedTerms);
+    // console.log(get().selectedTerms);
     // get().fetchSuggestions();
   },
 

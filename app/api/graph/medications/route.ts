@@ -9,7 +9,7 @@ export async function getMedicationsSubgraph(
 MATCH (n:SAAMedicationNode)-[r]-(neighbor)
     WHERE ANY(term IN $medications WHERE n.Name CONTAINS term)
     AND neighbor.Name <> "Alle Standardarbeitsanweisungen"
-RETURN id(n) AS id, n.name AS name, labels(n) AS labels, n, r, neighbor
+RETURN n, r, neighbor
     `,
     { medications },
   );

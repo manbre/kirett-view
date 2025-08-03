@@ -10,7 +10,7 @@ MATCH (n:BPRNode)-[r]-(neighbor)
     WHERE n.BPR IN $pathways
     AND neighbor.Name <> "Alle Behandlungspfade"
     AND neighbor.Name <> "Andere Krankheiten"
-RETURN id(n) AS id, n.name AS name, labels(n) AS labels, n, r, neighbor
+RETURN n, r, neighbor
     `,
     { pathways },
   );
