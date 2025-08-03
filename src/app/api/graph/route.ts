@@ -8,26 +8,12 @@ import { getProceduresSubgraph } from "./procedures/route";
 import { getRolesSubgraph } from "./roles/route";
 
 import { Category } from "@/constants/category";
-
 import type {
   Session,
   Record as Neo4jRecord,
   Node,
   Relationship,
 } from "neo4j-driver";
-
-type GraphNode = {
-  id: string;
-  label: string;
-  data: Record<string, unknown>;
-};
-
-type GraphEdge = {
-  id: string;
-  source: string;
-  target: string;
-  label: string;
-};
 
 type SelectedTerms = Record<Category, string[]>;
 
@@ -36,93 +22,56 @@ export async function POST(request: NextRequest) {
   const selectedTerms = body.selectedTerms as SelectedTerms;
   const session: Session = neo4j.session();
 
-  const nodesMap = new Map<string, GraphNode>();
-  const edges: GraphEdge[] = [];
+  const nodeIds = new Set<string>();
+  const edgeIds = new Set<string>();
 
   try {
     const allRecords: Neo4jRecord[] = [];
 
     if (selectedTerms.groups?.length) {
-      const records = await getGroupsSubgraph(selectedTerms.groups, session);
-      allRecords.push(...records);
+      allRecords.push(
+        ...(await getGroupsSubgraph(selectedTerms.groups, session)),
+      );
     }
-
     if (selectedTerms.medications?.length) {
-      const records = await getMedicationsSubgraph(
-        selectedTerms.medications,
-        session,
+      allRecords.push(
+        ...(await getMedicationsSubgraph(selectedTerms.medications, session)),
       );
-      allRecords.push(...records);
     }
-
     if (selectedTerms.pathways?.length) {
-      const records = await getPathwaysSubgraph(
-        selectedTerms.pathways,
-        session,
+      allRecords.push(
+        ...(await getPathwaysSubgraph(selectedTerms.pathways, session)),
       );
-      allRecords.push(...records);
     }
-
     if (selectedTerms.procedures?.length) {
-      const records = await getProceduresSubgraph(
-        selectedTerms.procedures,
-        session,
+      allRecords.push(
+        ...(await getProceduresSubgraph(selectedTerms.procedures, session)),
       );
-      allRecords.push(...records);
     }
-
     if (selectedTerms.roles?.length) {
-      const records = await getRolesSubgraph(selectedTerms.roles, session);
-      allRecords.push(...records);
+      allRecords.push(
+        ...(await getRolesSubgraph(selectedTerms.roles, session)),
+      );
     }
 
     for (const record of allRecords) {
-      // Immer vorhanden
       const n = record.get("n") as Node;
+      nodeIds.add(n.identity.toString());
 
-      const id = n.identity.toString();
-      if (!nodesMap.has(id)) {
-        nodesMap.set(id, {
-          id,
-          label: n.properties?.Name ?? n.labels?.[0] ?? "Node",
-          data: {
-            ...n.properties,
-            labels: n.labels,
-            type: n.labels?.[0] ?? null,
-          },
-        });
+      if (record.has("neighbor")) {
+        const neighbor = record.get("neighbor") as Node;
+        nodeIds.add(neighbor.identity.toString());
       }
 
-      // Optional: neighbor und edge
-      if (record.has("neighbor") && record.has("r")) {
-        const neighbor = record.get("neighbor") as Node;
+      if (record.has("r")) {
         const r = record.get("r") as Relationship;
-
-        const neighborId = neighbor.identity.toString();
-        if (!nodesMap.has(neighborId)) {
-          nodesMap.set(neighborId, {
-            id: neighborId,
-            label: neighbor.properties?.Name ?? neighbor.labels?.[0] ?? "Node",
-            data: {
-              ...neighbor.properties,
-              labels: neighbor.labels,
-              type: neighbor.labels?.[0] ?? null,
-            },
-          });
-        }
-
-        edges.push({
-          id: r.identity.toString(),
-          source: r.start.toString(),
-          target: r.end.toString(),
-          label: r.type,
-        });
+        edgeIds.add(r.identity.toString());
       }
     }
 
     return NextResponse.json({
-      nodes: Array.from(nodesMap.values()),
-      edges,
+      nodeIds: Array.from(nodeIds),
+      edgeIds: Array.from(edgeIds),
     });
   } catch (err) {
     console.error("graph join error:", err);
