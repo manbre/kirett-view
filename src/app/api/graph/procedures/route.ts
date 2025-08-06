@@ -1,18 +1,22 @@
-import { Session } from "neo4j-driver";
+import { NextResponse } from "next/server";
+import { getProceduresSubgraph } from "@/lib/subgraphs/procedures";
+import { getNeo4jSession } from "@/lib/neo4j";
 
-export async function getProceduresSubgraph(
-  procedures: string[],
-  session: Session,
-) {
-  const result = await session.run(
-    `
-MATCH (n:SAAProcedureNode)-[r]-(neighbor)
-    WHERE ANY(term IN $procedures WHERE n.Name CONTAINS term)
-    AND neighbor.Name <> "Alle Standardarbeitsanweisungen"
-RETURN n, r, neighbor
-    `,
-    { procedures },
-  );
+export async function POST(req: Request) {
+  const session = getNeo4jSession();
 
-  return result.records;
+  try {
+    const { selectedTerms } = await req.json();
+
+    const records = await getProceduresSubgraph(selectedTerms, session);
+    return NextResponse.json(records);
+  } catch (error) {
+    console.error("error in /api/graph/procedures:", error);
+    return NextResponse.json(
+      { error: "internal server error" },
+      { status: 500 },
+    );
+  } finally {
+    await session.close();
+  }
 }

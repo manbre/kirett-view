@@ -1,36 +1,19 @@
 import { NextResponse } from "next/server";
-import neo4j from "@/lib/neo4j";
-
-// NS wird wie NFS behandelt
-const roleSynonyms: Record<string, string> = {
-  NS: "NFS",
-};
+import { getRoleTerms } from "@/lib/terms/roles";
+import { getNeo4jSession } from "@/lib/neo4j";
 
 export async function GET() {
-  const session = neo4j.session();
+  const session = getNeo4jSession();
+
   try {
-    const result = await session.run(`
-      MATCH (n)
-      UNWIND keys(n) AS prop
-      WITH n, prop
-      WHERE prop CONTAINS "Betrifft" AND exists(n[prop])
-      RETURN DISTINCT n[prop] AS name
-    `);
-
-    const rawNames = result.records.map((r) => r.get("name"));
-    const normalized = Array.from(
-      new Set(rawNames.map((name: string) => roleSynonyms[name] ?? name)),
-    );
-
-    const options = normalized.map((name) => ({
-      value: name,
-      label: name,
-    }));
-
-    return NextResponse.json(options);
+    const terms = await getRoleTerms(session);
+    return NextResponse.json(terms);
   } catch (error) {
-    console.error("Fehler beim Rollenabruf:", error);
-    return NextResponse.json({ error: "Fehler beim Laden" }, { status: 500 });
+    console.error("error in /api/terms/roles:", error);
+    return NextResponse.json(
+      { error: "failed to fetch role terms" },
+      { status: 500 },
+    );
   } finally {
     await session.close();
   }

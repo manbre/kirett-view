@@ -1,19 +1,19 @@
 import { NextResponse } from "next/server";
-import neo4j from "@/lib/neo4j";
+import { getMedicationTerms } from "@/lib/terms/medications";
+import { getNeo4jSession } from "@/lib/neo4j";
 
 export async function GET() {
-  const session = neo4j.session();
+  const session = getNeo4jSession();
+
   try {
-    const result = await session.run(`
-            MATCH (n:SAAMedicationNode)
-            RETURN DISTINCT REPLACE(n.Name, "Standardarbeitsanweisung ", "") AS name
-            ORDER BY name
-            `);
-    const options = result.records.map((record) => ({
-      value: record.get("name"),
-      label: record.get("name"),
-    }));
-    return NextResponse.json(options);
+    const terms = await getMedicationTerms(session);
+    return NextResponse.json(terms);
+  } catch (error) {
+    console.error("error in /api/terms/medications:", error);
+    return NextResponse.json(
+      { error: "failed to fetch medication terms" },
+      { status: 500 },
+    );
   } finally {
     await session.close();
   }

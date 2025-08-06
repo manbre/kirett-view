@@ -1,4 +1,4 @@
-import neo4j, { Driver } from "neo4j-driver";
+import neo4j, { Driver, Session } from "neo4j-driver";
 
 const uri: string = process.env.NEO4J_URI ?? "";
 const user: string = process.env.NEO4J_USER ?? "";
@@ -9,5 +9,9 @@ if (!uri || !user || !password) {
 }
 
 const driver: Driver = neo4j.driver(uri, neo4j.auth.basic(user, password));
+
+export function getNeo4jSession(): Session {
+  return driver.session({ defaultAccessMode: neo4j.session.READ });
+}
 
 export default driver;

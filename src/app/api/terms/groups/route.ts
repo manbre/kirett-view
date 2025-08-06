@@ -1,20 +1,19 @@
 import { NextResponse } from "next/server";
-import neo4j from "@/lib/neo4j";
+import { getGroupTerms } from "@/lib/terms/groups";
+import { getNeo4jSession } from "@/lib/neo4j";
 
 export async function GET() {
-  const session = neo4j.session();
+  const session = getNeo4jSession();
+
   try {
-    const result = await session.run(`
-MATCH (j:JumpNode)
-  WHERE j.BPR = "Disease Groups"
-  AND j.Name <> "Manuelle Selektion"
-RETURN j.Name AS name
-            `);
-    const options = result.records.map((record) => ({
-      value: record.get("name"),
-      label: record.get("name"),
-    }));
-    return NextResponse.json(options);
+    const terms = await getGroupTerms(session);
+    return NextResponse.json(terms);
+  } catch (error) {
+    console.error("error in /api/terms/groups:", error);
+    return NextResponse.json(
+      { error: "failed to fetch group terms" },
+      { status: 500 },
+    );
   } finally {
     await session.close();
   }

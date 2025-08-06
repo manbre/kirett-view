@@ -1,19 +1,22 @@
-// src/hooks/useGraphApi.ts
-import { Category } from "@/constants/category";
+// export const useGraphApi = () => {
+//   const fetchNodeIds = async (selectedTerms: any): Promise<string[]> => {
+//     const res = await fetch("/api/graph", {
+//       method: "POST",
+//       body: JSON.stringify({ selectedTerms }),
+//     });
+//     if (!res.ok) throw new Error("Fehler beim Laden der Knoten-IDs");
+//     const data = await res.json();
+//     return data.nodeIds;
+//   };
 
-type SelectedTerms = Record<Category, string[]>;
+//   const resolveGraphData = async (nodeIds: string[]) => {
+//     const res = await fetch("/api/graph/resolve", {
+//       method: "POST",
+//       body: JSON.stringify({ nodeIds }),
+//     });
+//     if (!res.ok) throw new Error("Fehler beim Laden der Graphdaten");
+//     return res.json(); // { nodes, edges }
+//   };
 
-export const useGraphApi = () => {
-  const fetchGraphDelta = async (selectedTerms: SelectedTerms) => {
-    const res = await fetch("/api/graph", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ selectedTerms }),
-    });
-
-    if (!res.ok) throw new Error("Fehler beim Laden des Graphen");
-    return await res.json();
-  };
-
-  return { fetchGraphDelta };
-};
+//   return { fetchNodeIds, resolveGraphData };
+// };

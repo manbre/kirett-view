@@ -1,82 +1,35 @@
-import { NextRequest, NextResponse } from "next/server";
-import neo4j from "@/lib/neo4j";
+import { NextResponse } from "next/server";
+import { getNeo4jSession } from "@/lib/neo4j";
+import { subgraphFetchers } from "@/lib/subgraphs";
+import { mapRecordsToGraph } from "@/lib/graph/mapRecordsToGraph";
+import type { SubgraphResult } from "@/types/graph";
 
-import { getGroupsSubgraph } from "./groups/route";
-import { getMedicationsSubgraph } from "./medications/route";
-import { getPathwaysSubgraph } from "./pathways/route";
-import { getProceduresSubgraph } from "./procedures/route";
-import { getRolesSubgraph } from "./roles/route";
-
-import { Category } from "@/constants/category";
-import type {
-  Session,
-  Record as Neo4jRecord,
-  Node,
-  Relationship,
-} from "neo4j-driver";
-
-type SelectedTerms = Record<Category, string[]>;
-
-export async function POST(request: NextRequest) {
-  const body = await request.json();
-  const selectedTerms = body.selectedTerms as SelectedTerms;
-  const session: Session = neo4j.session();
-
-  const nodeIds = new Set<string>();
-  const edgeIds = new Set<string>();
+export async function POST(req: Request) {
+  const session = getNeo4jSession();
 
   try {
-    const allRecords: Neo4jRecord[] = [];
+    const { selectedTerms } = await req.json();
 
-    if (selectedTerms.groups?.length) {
-      allRecords.push(
-        ...(await getGroupsSubgraph(selectedTerms.groups, session)),
-      );
-    }
-    if (selectedTerms.medications?.length) {
-      allRecords.push(
-        ...(await getMedicationsSubgraph(selectedTerms.medications, session)),
-      );
-    }
-    if (selectedTerms.pathways?.length) {
-      allRecords.push(
-        ...(await getPathwaysSubgraph(selectedTerms.pathways, session)),
-      );
-    }
-    if (selectedTerms.procedures?.length) {
-      allRecords.push(
-        ...(await getProceduresSubgraph(selectedTerms.procedures, session)),
-      );
-    }
-    if (selectedTerms.roles?.length) {
-      allRecords.push(
-        ...(await getRolesSubgraph(selectedTerms.roles, session)),
-      );
+    if (!selectedTerms || typeof selectedTerms !== "object") {
+      return NextResponse.json({ error: "Invalid input" }, { status: 400 });
     }
 
-    for (const record of allRecords) {
-      const n = record.get("n") as Node;
-      nodeIds.add(n.identity.toString());
+    const allRecords: SubgraphResult[] = [];
 
-      if (record.has("neighbor")) {
-        const neighbor = record.get("neighbor") as Node;
-        nodeIds.add(neighbor.identity.toString());
-      }
-
-      if (record.has("r")) {
-        const r = record.get("r") as Relationship;
-        edgeIds.add(r.identity.toString());
+    for (const [category, fetcher] of Object.entries(subgraphFetchers)) {
+      const terms = selectedTerms[category];
+      if (Array.isArray(terms) && terms.length > 0) {
+        const records = await fetcher(terms, session);
+        allRecords.push(...records);
       }
     }
 
-    return NextResponse.json({
-      nodeIds: Array.from(nodeIds),
-      edgeIds: Array.from(edgeIds),
-    });
-  } catch (err) {
-    console.error("graph join error:", err);
+    const { nodes, edges } = mapRecordsToGraph(allRecords);
+    return NextResponse.json({ nodes, edges });
+  } catch (error) {
+    console.error("Graph merge failed:", error);
     return NextResponse.json(
-      { error: "could not load graph" },
+      { error: "Failed to assemble graph" },
       { status: 500 },
     );
   } finally {

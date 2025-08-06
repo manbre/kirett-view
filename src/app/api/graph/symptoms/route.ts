@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getRolesSubgraph } from "@/lib/subgraphs/roles";
+import { getSymptomsSubgraph } from "@/lib/subgraphs/symptoms";
 import { getNeo4jSession } from "@/lib/neo4j";
 
 export async function POST(req: Request) {
@@ -8,10 +8,10 @@ export async function POST(req: Request) {
   try {
     const { selectedTerms } = await req.json();
 
-    const records = await getRolesSubgraph(selectedTerms, session);
+    const records = await getSymptomsSubgraph(selectedTerms, session);
     return NextResponse.json(records);
   } catch (error) {
-    console.error("error in /api/graph/roles:", error);
+    console.error("error in /api/graph/symptoms:", error);
     return NextResponse.json(
       { error: "internal server error" },
       { status: 500 },

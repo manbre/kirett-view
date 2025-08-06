@@ -15,6 +15,11 @@ export type GraphEdge = {
   label: string;
 };
 
+export type SubgraphResult = {
+  nodes: GraphNode[];
+  edges: GraphEdge[];
+};
+
 // Record aus Neo4j für get("n"), get("neighbor") etc.
 export type GraphRecord = {
   get: (key: "n" | "neighbor" | "r") => Node | Relationship;
