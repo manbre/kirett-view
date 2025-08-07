@@ -1,29 +1,37 @@
 import { create } from "zustand";
-import { CATEGORIES, type Category } from "@/constants/category";
+import { Category } from "@/constants/category";
 
-export type TermStore = {
-  termsByCategory: Record<Category, string[]>;
-  setTermsForCategory: (category: Category, terms: string[]) => void;
-  getSelectedTerms: () => string[];
-};
+interface Store {
+  selectedTerms: Record<Category, string[]>;
 
-const initialState: Record<Category, string[]> = Object.fromEntries(
-  CATEGORIES.map((cat) => [cat, []]),
-) as Record<Category, string[]>;
+  selectTerm: (category: Category, term: string) => void;
+  unselectTerm: (category: Category, term: string) => void;
+}
 
-export const useTermStore = create<TermStore>((set, get) => ({
-  termsByCategory: initialState,
+export const useTermStore = create<Store>((set, get) => ({
+  selectedTerms: {},
 
-  setTermsForCategory: (category, terms) => {
+  selectTerm: (category, term) => {
+    const prev = get().selectedTerms[category] ?? [];
+    if (prev.includes(term)) return;
+
+    const updated = [...prev, term];
     set((state) => ({
-      termsByCategory: {
-        ...state.termsByCategory,
-        [category]: terms,
+      selectedTerms: {
+        ...state.selectedTerms,
+        [category]: updated,
       },
     }));
   },
 
-  getSelectedTerms: () => {
-    return Object.values(get().termsByCategory).flat();
+  unselectTerm: (category, term) => {
+    const prev = get().selectedTerms[category] ?? [];
+    const updated = prev.filter((t) => t !== term);
+    set((state) => ({
+      selectedTerms: {
+        ...state.selectedTerms,
+        [category]: updated,
+      },
+    }));
   },
 }));

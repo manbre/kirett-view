@@ -1,9 +1,9 @@
-import { getGroupsTerms } from "./groups";
-import { getMedicationsTerms } from "./medications";
-import { getPathwaysTerms } from "./pathways";
-import { getProceduresTerms } from "./procedures";
-import { getRolesTerms } from "./roles";
-import { getSymptomsTerms } from "./symptoms";
+import { getGroupTerms } from "./groups";
+import { getMedicationTerms } from "./medications";
+import { getPathwayTerms } from "./pathways";
+import { getProcedureTerms } from "./procedures";
+import { getRoleTerms } from "./roles";
+import { getSymptomTerms } from "./symptoms";
 
 import type { Session } from "neo4j-driver";
 
@@ -16,10 +16,10 @@ export const termFetchers: Record<
   string,
   (session: Session) => Promise<TermItem[]>
 > = {
-  groups: getGroupsTerms,
-  medications: getMedicationsTerms,
-  pathways: getPathwaysTerms,
-  procedures: getProceduresTerms,
-  roles: getRolesTerms,
-  symptoms: getSymptomsTerms,
+  groups: getGroupTerms,
+  medications: getMedicationTerms,
+  pathways: getPathwayTerms,
+  procedures: getProcedureTerms,
+  roles: getRoleTerms,
+  symptoms: getSymptomTerms,
 };

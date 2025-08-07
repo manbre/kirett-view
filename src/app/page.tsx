@@ -23,7 +23,7 @@ export default function Home() {
           )}
 
           {/**query result*/}
-          {/* <GraphViewer /> */}
+          <GraphViewer />
 
           <section>
             {/**map over similarities*/}

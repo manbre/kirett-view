@@ -1,22 +1,22 @@
-// export const useGraphApi = () => {
-//   const fetchNodeIds = async (selectedTerms: any): Promise<string[]> => {
-//     const res = await fetch("/api/graph", {
-//       method: "POST",
-//       body: JSON.stringify({ selectedTerms }),
-//     });
-//     if (!res.ok) throw new Error("Fehler beim Laden der Knoten-IDs");
-//     const data = await res.json();
-//     return data.nodeIds;
-//   };
+import { Category } from "@/constants/category";
+import { GraphNode, GraphEdge } from "@/types/graph";
 
-//   const resolveGraphData = async (nodeIds: string[]) => {
-//     const res = await fetch("/api/graph/resolve", {
-//       method: "POST",
-//       body: JSON.stringify({ nodeIds }),
-//     });
-//     if (!res.ok) throw new Error("Fehler beim Laden der Graphdaten");
-//     return res.json(); // { nodes, edges }
-//   };
+type SelectedTerms = Record<Category, string[]>;
 
-//   return { fetchNodeIds, resolveGraphData };
-// };
+export const useGraphApi = () => {
+  const fetchGraphData = async (
+    selectedTerms: SelectedTerms,
+  ): Promise<{ nodes: GraphNode[]; edges: GraphEdge[] }> => {
+    const res = await fetch("/api/graph", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ selectedTerms }),
+    });
+
+    if (!res.ok) throw new Error("Fehler beim Laden des Graphen");
+
+    return res.json();
+  };
+
+  return { fetchGraphData };
+};

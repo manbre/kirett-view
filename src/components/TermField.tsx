@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useStore } from "@/store/useStore";
+import { useTermStore } from "@/store/useTermStore";
 import { Category } from "@/constants/category";
 
 type Props = {
@@ -11,7 +11,7 @@ type Term = {
 };
 
 export const TermField = ({ selectedCategory }: Props) => {
-  const { selectedTerms, selectTerm, unselectTerm, suggestions } = useStore();
+  const { selectedTerms, selectTerm, unselectTerm } = useTermStore();
 
   const [terms, setTerms] = useState<Term[]>([]);
 
@@ -19,11 +19,11 @@ export const TermField = ({ selectedCategory }: Props) => {
     const fetchTerms = async () => {
       try {
         const res = await fetch(`/api/terms/${selectedCategory}`);
-        if (!res.ok) throw new Error("Network error while loading terms");
+        if (!res.ok) throw new Error("network error while loading terms");
         const data = await res.json();
         setTerms(data);
       } catch (err) {
-        console.error("Fehler beim Laden der Begriffe:", err);
+        console.error("error while loading terms:", err);
         setTerms([]);
       }
     };
@@ -37,7 +37,6 @@ export const TermField = ({ selectedCategory }: Props) => {
     <div className="bg-fore mt-2 ml-2 grid h-[calc(100%_-_2.5rem)] w-65 grid-cols-1 overflow-x-hidden overflow-y-scroll rounded-lg border border-[var(--border)] p-1">
       {terms.map(({ label }, index) => {
         const isSelected = selected.includes(label);
-        const isSuggested = suggestions.includes(label);
 
         return (
           <button
@@ -51,11 +50,7 @@ export const TermField = ({ selectedCategory }: Props) => {
           >
             <span
               className={`hover:cursor-pointer hover:text-[var(--mark)] ${
-                isSelected
-                  ? "text-[var(--mark)]"
-                  : isSuggested
-                    ? "text-green-300"
-                    : "text-[var(--text)]"
+                isSelected ? "text-[var(--mark)]" : "text-[var(--text)]"
               }`}
             >
               {label}

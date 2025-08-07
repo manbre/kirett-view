@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import type { GraphNode, GraphEdge } from "@/types/graph";
-import { persistGraphCache } from "@/plugins/persistCache";
 
 export type GraphStore = {
   nodes: Map<string, GraphNode>;
@@ -55,13 +54,4 @@ export const useGraphStore = create<GraphStore>((set, get) => ({
   },
 
   isExpanded: (id) => get().expandedIds.has(id),
-
-  getCachedGraph: (key) => get().graphCache.get(key),
-
-  setCachedGraph: (key, nodes, edges) => {
-    const newCache = new Map(get().graphCache);
-    newCache.set(key, { nodes, edges });
-    set({ graphCache: newCache });
-    persistGraphCache(newCache); // 💾 Automatisch speichern
-  },
 }));

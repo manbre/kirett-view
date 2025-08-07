@@ -18,8 +18,8 @@ export const CategoryLabels: Record<Category, string> = {
 
 export const createEmptySelectedTerms = (): Record<Category, string[]> => {
   return Object.values(Category).reduce(
-    (acc, category) => {
-      acc[category] = [];
+    (acc, cat) => {
+      acc[cat as Category] = [];
       return acc;
     },
     {} as Record<Category, string[]>,
