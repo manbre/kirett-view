@@ -2,54 +2,34 @@
 
 import { GraphCanvas } from "reagraph";
 import { useEffect } from "react";
-import { useTermStore } from "@/store/useTermStore";
-import { CustomNode } from "@/components/CustomNode";
+import { useStore } from "@/store/useStore";
 import { useGraphApi } from "@/hooks/useGraphApi";
 import { useGraphElements } from "@/hooks/useGraphElements";
+import { CustomNode } from "@/components/CustomNode";
 
 export const GraphViewer = () => {
-  const selectedTermsObj = useTermStore((state) => state.selectedTerms);
-  const selectedTerms = Object.values(selectedTermsObj).flat();
-
+  const selectedTerms = useStore((state) => state.selectedTerms);
   const { fetchGraphData } = useGraphApi();
-  const {
-    nodes,
-    edges,
-    loadedTermsRef,
-    addGraphElements,
-    removeDisconnectedElements,
-  } = useGraphElements();
+  const { nodes, edges, updateGraphElements } = useGraphElements();
 
   useEffect(() => {
-    if (selectedTerms.length === 0) {
-      loadedTermsRef.current = [];
-      removeDisconnectedElements([]);
-      return;
-    }
+    const load = async () => {
+      if (Object.values(selectedTerms).flat().length === 0) {
+        updateGraphElements([], []);
+        return;
+      }
 
-    const prevTerms = loadedTermsRef.current;
-    const added = selectedTerms.filter((t) => !prevTerms.includes(t));
-    const removed = prevTerms.filter((t) => !selectedTerms.includes(t));
-
-    if (removed.length > 0) {
-      removeDisconnectedElements(selectedTerms);
-    }
-
-    if (added.length === 0) {
-      loadedTermsRef.current = selectedTerms;
-      return;
-    }
-
-    // 🧠 Bei Änderungen Begriffe → API aufrufen
-    fetchGraphData(selectedTermsObj)
-      .then((data) => {
-        addGraphElements(data.nodes, data.edges);
-        loadedTermsRef.current = selectedTerms;
-      })
-      .catch((err) => {
+      try {
+        const { nodes: newNodes, edges: newEdges } =
+          await fetchGraphData(selectedTerms);
+        updateGraphElements(newNodes, newEdges);
+      } catch (err) {
         console.error("Graph-Ladefehler:", err);
-      });
-  }, [selectedTerms.join(",")]); // join zur Vergleichbarkeit
+      }
+    };
+
+    load();
+  }, [JSON.stringify(selectedTerms)]);
 
   return (
     <div className="bg-fore relative mt-2 mr-2 ml-2 h-[calc(100%_-_2.5rem)] flex-1 overflow-hidden rounded-lg border border-[var(--border)] p-1">
@@ -60,7 +40,7 @@ export const GraphViewer = () => {
         draggable
         renderNode={({ node }) => <CustomNode node={node} />}
         onNodeClick={(node) => {
-          console.log("Geklickter Knoten:", node);
+          console.log("Knoten geklickt:", node);
         }}
         style={{ width: "100%", height: "100%" }}
       />

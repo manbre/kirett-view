@@ -8,7 +8,7 @@ interface Store {
   unselectTerm: (category: Category, term: string) => void;
 }
 
-export const useTermStore = create<Store>((set, get) => ({
+export const useStore = create<Store>((set, get) => ({
   selectedTerms: {},
 
   selectTerm: (category, term) => {

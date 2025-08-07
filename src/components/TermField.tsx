@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useTermStore } from "@/store/useTermStore";
+import { useStore } from "@/store/useStore";
 import { Category } from "@/constants/category";
 
 type Props = {
@@ -11,7 +11,7 @@ type Term = {
 };
 
 export const TermField = ({ selectedCategory }: Props) => {
-  const { selectedTerms, selectTerm, unselectTerm } = useTermStore();
+  const { selectedTerms, selectTerm, unselectTerm } = useStore();
 
   const [terms, setTerms] = useState<Term[]>([]);
 

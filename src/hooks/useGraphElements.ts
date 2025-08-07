@@ -1,49 +1,39 @@
-import { useState, useRef } from "react";
+import { useRef, useState } from "react";
 import { GraphNode, GraphEdge } from "@/types/graph";
 
 export const useGraphElements = () => {
   const [nodes, setNodes] = useState<GraphNode[]>([]);
   const [edges, setEdges] = useState<GraphEdge[]>([]);
-  const loadedTermsRef = useRef<string[]>([]);
+  const loadedNodeIdsRef = useRef<Set<string>>(new Set());
 
-  const addGraphElements = (newNodes: GraphNode[], newEdges: GraphEdge[]) => {
-    setNodes((prev) => [
-      ...prev,
-      ...newNodes.filter((n) => !prev.some((p) => p.id === n.id)),
-    ]);
+  const updateGraphElements = (
+    newNodes: GraphNode[],
+    newEdges: GraphEdge[],
+  ) => {
+    const nextIds = new Set(newNodes.map((n) => n.id));
 
-    setEdges((prev) => [
-      ...prev,
-      ...newEdges.filter((e) => !prev.some((p) => p.id === e.id)),
-    ]);
-  };
-
-  const removeDisconnectedElements = (terms: string[]) => {
-    const termSet = new Set(terms);
-    const connected = new Set<string>();
-
-    for (const node of nodes) {
-      const term = node.data?.Name ?? node.data?.BPR;
-      if (termSet.has(term)) {
-        connected.add(node.id);
-        for (const edge of edges) {
-          if (edge.source === node.id) connected.add(edge.target);
-          if (edge.target === node.id) connected.add(edge.source);
-        }
+    const uniqueNodesMap = new Map<string, GraphNode>();
+    for (const node of newNodes) {
+      if (!uniqueNodesMap.has(node.id)) {
+        uniqueNodesMap.set(node.id, node);
       }
     }
 
-    setNodes((prev) => prev.filter((n) => connected.has(n.id)));
-    setEdges((prev) =>
-      prev.filter((e) => connected.has(e.source) && connected.has(e.target)),
-    );
+    const uniqueEdgesMap = new Map<string, GraphEdge>();
+    for (const edge of newEdges) {
+      if (!uniqueEdgesMap.has(edge.id)) {
+        uniqueEdgesMap.set(edge.id, edge);
+      }
+    }
+
+    setNodes(Array.from(uniqueNodesMap.values()));
+    setEdges(Array.from(uniqueEdgesMap.values()));
+    loadedNodeIdsRef.current = nextIds;
   };
 
   return {
     nodes,
     edges,
-    loadedTermsRef,
-    addGraphElements,
-    removeDisconnectedElements,
+    updateGraphElements,
   };
 };

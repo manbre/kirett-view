@@ -34,8 +34,9 @@ export async function POST(request: NextRequest) {
 
   try {
     const allRecords: Neo4jRecord[] = [];
+
     for (const [category, fetcher] of Object.entries(subgraphFetchers)) {
-      const terms = selectedTerms[category];
+      const terms = selectedTerms[category as Category];
       if (Array.isArray(terms) && terms.length > 0) {
         const records = await fetcher(terms, session);
         allRecords.push(...records);
@@ -44,8 +45,8 @@ export async function POST(request: NextRequest) {
 
     for (const record of allRecords) {
       const n = record.get("n") as Node;
-
       const nId = n.identity.toString();
+
       if (!nodesMap.has(nId)) {
         nodesMap.set(nId, {
           id: nId,
@@ -61,8 +62,8 @@ export async function POST(request: NextRequest) {
       if (record.has("neighbor") && record.has("r")) {
         const neighbor = record.get("neighbor") as Node;
         const r = record.get("r") as Relationship;
-
         const neighborId = neighbor.identity.toString();
+
         if (!nodesMap.has(neighborId)) {
           nodesMap.set(neighborId, {
             id: neighborId,
@@ -89,9 +90,9 @@ export async function POST(request: NextRequest) {
       edges,
     });
   } catch (err) {
-    console.error("❌ Fehler beim Zusammenführen:", err);
+    console.error("failed ro assemble graph:", err);
     return NextResponse.json(
-      { error: "Graph konnte nicht geladen werden" },
+      { error: "error while loading graph" },
       { status: 500 },
     );
   } finally {
