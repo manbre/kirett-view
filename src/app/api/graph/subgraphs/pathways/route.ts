@@ -11,7 +11,7 @@ export async function POST(req: Request) {
     const records = await getPathwaysSubgraph(selectedTerms, session);
     return NextResponse.json(records);
   } catch (error) {
-    console.error("error in /api/graph/pathways:", error);
+    console.error("error in /api/graph/subgraphs/pathways:", error);
     return NextResponse.json(
       { error: "internal server error" },
       { status: 500 },

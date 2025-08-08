@@ -14,5 +14,15 @@ export const useGraphApi = () => {
     return res.json(); // { nodes, edges }
   };
 
-  return { fetchGraphData };
+  const fetchNeighbors = async (nodeId: string) => {
+    const res = await fetch("/api/graph/expand/neighbors", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nodeId }),
+    });
+    if (!res.ok) throw new Error("Fehler beim Laden der Nachbarn");
+    return res.json(); // { nodes, edges }
+  };
+
+  return { fetchGraphData, fetchNeighbors };
 };

@@ -8,16 +8,18 @@ import { useWhiteSvgTexture } from "@/hooks/useWhiteSvgTexture";
 const TexturedMaterial = ({
   url,
   hovered,
+  isHighlighted,
 }: {
   url: string;
   hovered: boolean;
+  isHighlighted: boolean;
 }) => {
   const texture = useLoader(THREE.TextureLoader, url);
 
   return (
     <meshBasicMaterial
       map={texture}
-      color={hovered ? "cyan" : "gray"}
+      color={isHighlighted ? "blue" : hovered ? "cyan" : "gray"}
       transparent
       depthTest={false}
       toneMapped={false}
@@ -25,7 +27,12 @@ const TexturedMaterial = ({
   );
 };
 
-export function CustomNode({ node }) {
+type CustomNodeProps = {
+  node: any;
+  isHighlighted?: boolean;
+};
+
+export function CustomNode({ node, isHighlighted = false }: CustomNodeProps) {
   const [hovered, setHovered] = useState(false);
 
   const label = node.data?.labels?.[0];
@@ -46,7 +53,11 @@ export function CustomNode({ node }) {
       <mesh position={[0, 0, 0.01]} renderOrder={1}>
         <circleGeometry args={[8, 32]} />
         <Suspense fallback={null}>
-          <TexturedMaterial url={dataUrl} hovered={hovered} />
+          <TexturedMaterial
+            url={dataUrl}
+            hovered={hovered}
+            isHighlighted={isHighlighted}
+          />
         </Suspense>
       </mesh>
       <Text
