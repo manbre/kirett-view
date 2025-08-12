@@ -4,6 +4,7 @@ import { Text } from "@react-three/drei";
 import { useLoader } from "@react-three/fiber";
 import { labelTextureMap } from "@/constants/label";
 import { useWhiteSvgTexture } from "@/hooks/useWhiteSvgTexture";
+import type { GraphNode } from "@/types/graph";
 
 const TexturedMaterial = ({
   url,
@@ -28,7 +29,7 @@ const TexturedMaterial = ({
 };
 
 type CustomNodeProps = {
-  node: any;
+  node: GraphNode;
   isHighlighted?: boolean;
 };
 
@@ -43,34 +44,36 @@ export function CustomNode({ node, isHighlighted = false }: CustomNodeProps) {
 
   if (!dataUrl) return null;
 
-  return dataUrl ? (
-    <group
-      position={[0, 0, 0.1]}
-      renderOrder={10}
-      onPointerOver={() => setHovered(true)}
-      onPointerOut={() => setHovered(false)}
-    >
-      <mesh position={[0, 0, 0.01]} renderOrder={1}>
-        <circleGeometry args={[8, 32]} />
-        <Suspense fallback={null}>
-          <TexturedMaterial
-            url={dataUrl}
-            hovered={hovered}
-            isHighlighted={isHighlighted}
-          />
-        </Suspense>
-      </mesh>
-      <Text
-        position={[0, -8, 0]}
-        fontSize={5}
-        maxWidth={45}
-        textAlign="center"
-        anchorX="center"
-        anchorY="start"
-        color={hovered ? "cyan" : "#333"}
+  return (
+    dataUrl && (
+      <group
+        position={[0, 0, 0.1]}
+        renderOrder={10}
+        onPointerOver={() => setHovered(true)}
+        onPointerOut={() => setHovered(false)}
       >
-        {name}
-      </Text>
-    </group>
-  ) : null;
+        <mesh position={[0, 0, 0.01]} renderOrder={1}>
+          <circleGeometry args={[8, 32]} />
+          <Suspense fallback={null}>
+            <TexturedMaterial
+              url={dataUrl}
+              hovered={hovered}
+              isHighlighted={isHighlighted}
+            />
+          </Suspense>
+        </mesh>
+        <Text
+          position={[0, -8, 0]}
+          fontSize={5}
+          maxWidth={45}
+          textAlign="center"
+          anchorX="center"
+          anchorY="start"
+          color={hovered ? "cyan" : "#333"}
+        >
+          {name}
+        </Text>
+      </group>
+    )
+  );
 }

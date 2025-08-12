@@ -4,7 +4,7 @@ export type SelectedTerms = Record<Category, string[]>;
 
 export const useGraphApi = () => {
   const fetchGraphData = async (selectedTerms: SelectedTerms) => {
-    const res = await fetch("/api/graph", {
+    const res = await fetch("/api/graph/subgraphs", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ selectedTerms }),

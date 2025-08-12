@@ -34,7 +34,7 @@ export const TermField = ({ selectedCategory }: Props) => {
   const selected = selectedTerms[selectedCategory] ?? [];
 
   return (
-    <div className="bg-fore mt-2 ml-2 grid h-[calc(100%_-_2.5rem)] w-65 grid-cols-1 overflow-x-hidden overflow-y-scroll rounded-lg border border-[var(--border)] p-1">
+    <div className="bg-fore mt-2 ml-2 grid h-[calc(100%_-_2.5rem)] w-65 grid-cols-1 overflow-x-hidden overflow-y-scroll rounded-lg border border-[var(--border)] p-1 pb-3">
       {terms.map(({ label }, index) => {
         const isSelected = selected.includes(label);
 

@@ -1,4 +1,4 @@
-// node icons
+// graph node icons
 export const labelTextureMap: Record<string, string> = {
   ActionNode: "/icons/action.svg",
   BPRNode: "/icons/bpr.svg",
