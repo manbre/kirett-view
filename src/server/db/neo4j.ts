@@ -34,3 +34,15 @@ export function getNeo4jReadSession(): Session {
 export async function verifyConnection(): Promise<void> {
   await getDriver().verifyConnectivity();
 }
+
+// v5: executeRead, v4: readTransaction
+export async function withReadTx<T>(
+  fn: (tx: Transaction) => Promise<T>,
+): Promise<T> {
+  const session = getNeo4jReadSession();
+  try {
+    return await session.executeRead(fn);
+  } finally {
+    await session.close();
+  }
+}

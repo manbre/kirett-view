@@ -1,21 +1,19 @@
-import { Session, Record } from "neo4j-driver";
+import type { Transaction, Record as Neo4jRecord } from "neo4j-driver";
 
 export async function getGroupsSubgraph(
   groups: string[],
-  session: Session,
-): Promise<Record[]> {
+  tx: Transaction,
+): Promise<Neo4jRecord[]> {
   if (!Array.isArray(groups) || groups.length === 0) return [];
-  return session.executeRead(async (tx) => {
-    const result = await tx.run(
-      `
+  const result = await tx.run(
+    `
 MATCH (n:JumpNode)-[r]-(neighbor)
   WHERE n.BPR = "Disease Groups"
   AND n.Name IN $groups
 RETURN n AS n, r AS r, neighbor AS neighbor
     `,
-      { groups },
-    );
+    { groups },
+  );
 
-    return result.records;
-  });
+  return result.records;
 }

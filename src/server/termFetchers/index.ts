@@ -1,5 +1,5 @@
 import { Category } from "@/constants/category";
-import type { Session } from "neo4j-driver";
+import type { Transaction } from "neo4j-driver";
 import type { TermItem } from "@/types/terms";
 
 import { getGroupTerms } from "./groups";
@@ -9,12 +9,12 @@ import { getProcedureTerms } from "./procedures";
 import { getRoleTerms } from "./roles";
 import { getSymptomTerms } from "./symptoms";
 
-// each fetcher takes a session and returns TermItem[]
+// each fetcher returns TermItem[]
 export const termFetchers = {
-  [Category.Groups]: (session: Session) => getGroupTerms(session),
-  [Category.Medications]: (session: Session) => getMedicationTerms(session),
-  [Category.Pathways]: (session: Session) => getPathwayTerms(session),
-  [Category.Procedures]: (session: Session) => getProcedureTerms(session),
-  [Category.Roles]: (session: Session) => getRoleTerms(session),
-  [Category.Symptoms]: (session: Session) => getSymptomTerms(session),
-} satisfies Record<Category, (session: Session) => Promise<TermItem[]>>;
+  [Category.Groups]: (tx: Transaction) => getGroupTerms(tx),
+  [Category.Medications]: (tx: Transaction) => getMedicationTerms(tx),
+  [Category.Pathways]: (tx: Transaction) => getPathwayTerms(tx),
+  [Category.Procedures]: (tx: Transaction) => getProcedureTerms(tx),
+  [Category.Roles]: (tx: Transaction) => getRoleTerms(tx),
+  [Category.Symptoms]: (tx: Transaction) => getSymptomTerms(tx),
+} satisfies Record<Category, (tx: Transaction) => Promise<TermItem[]>>;

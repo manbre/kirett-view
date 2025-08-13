@@ -1,5 +1,5 @@
 import { Category } from "@/constants/category";
-import type { Session, Record as Neo4jRecord } from "neo4j-driver";
+import type { Transaction, Record as Neo4jRecord } from "neo4j-driver";
 
 import { getGroupsSubgraph } from "./groups";
 import { getMedicationsSubgraph } from "./medications";
@@ -10,19 +10,19 @@ import { getSymptomsSubgraph } from "./symptoms";
 
 // each fetcher returns neo4j records, the route converts once at the end
 export const subgraphFetchers = {
-  [Category.Groups]: (terms: string[], session: Session) =>
-    getGroupsSubgraph(terms, session),
-  [Category.Medications]: (terms: string[], session: Session) =>
-    getMedicationsSubgraph(terms, session),
-  [Category.Pathways]: (terms: string[], session: Session) =>
-    getPathwaysSubgraph(terms, session),
-  [Category.Procedures]: (terms: string[], session: Session) =>
-    getProceduresSubgraph(terms, session),
-  [Category.Roles]: (terms: string[], session: Session) =>
-    getRolesSubgraph(terms, session),
-  [Category.Symptoms]: (terms: string[], session: Session) =>
-    getSymptomsSubgraph(terms, session),
+  [Category.Groups]: (terms: string[], tx: Transaction) =>
+    getGroupsSubgraph(terms, tx),
+  [Category.Medications]: (terms: string[], tx: Transaction) =>
+    getMedicationsSubgraph(terms, tx),
+  [Category.Pathways]: (terms: string[], tx: Transaction) =>
+    getPathwaysSubgraph(terms, tx),
+  [Category.Procedures]: (terms: string[], tx: Transaction) =>
+    getProceduresSubgraph(terms, tx),
+  [Category.Roles]: (terms: string[], tx: Transaction) =>
+    getRolesSubgraph(terms, tx),
+  [Category.Symptoms]: (terms: string[], tx: Transaction) =>
+    getSymptomsSubgraph(terms, tx),
 } satisfies Record<
   Category,
-  (terms: string[], session: Session) => Promise<Neo4jRecord[]>
+  (terms: string[], tx: Transaction) => Promise<Neo4jRecord[]>
 >;

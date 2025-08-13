@@ -1,17 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getNeo4jReadSession } from "@/server/db/neo4j";
-import { expandFetchers, type ExpandAction } from "@/server/expandFetchers";
+import { withReadTx } from "@/server/db/neo4j";
+import { expandFetchers } from "@/server/expandFetchers";
 import { convertNeo4jRecords } from "@/server/utils/convertNeo4jRecords";
+import type { ExpandAction } from "@/server/expandFetchers";
 
-export const runtime = "nodejs"; // neo4j driver requires node.js runtime, not edge runtime
+export const runtime = "nodejs";
 
 export async function POST(
   request: NextRequest,
-  ctx: { params: Promise<{ action: string }> }, // ctx contains ${action}
+  ctx: { params: Promise<{ action: string }> },
 ) {
   const { action } = await ctx.params;
 
-  // validate the action
+  // validate action
   if (!(action in expandFetchers)) {
     return NextResponse.json(
       { error: `unknown expand action: ${action}` },
@@ -19,7 +20,7 @@ export async function POST(
     );
   }
 
-  // parse and validate the request body
+  // parse body
   const { nodeId } = (await request.json()) as { nodeId?: string };
   if (!nodeId || typeof nodeId !== "string") {
     return NextResponse.json(
@@ -28,21 +29,18 @@ export async function POST(
     );
   }
 
-  const session = getNeo4jReadSession();
-
   try {
-    const fetcher = expandFetchers[action as ExpandAction]; // resolve the correct fetcher
-    const records = await fetcher(nodeId, session);
-    const graph = convertNeo4jRecords(records);
+    // use one read transaction
+    const records = await withReadTx((tx) =>
+      expandFetchers[action as ExpandAction](nodeId, tx),
+    );
 
-    return NextResponse.json(graph, { status: 200 }); // respond with the computed graph
+    return NextResponse.json(convertNeo4jRecords(records), { status: 200 });
   } catch (err) {
     console.error(`error in /api/graph/expand/${action}:`, err);
     return NextResponse.json(
       { error: "internal server error" },
       { status: 500 },
     );
-  } finally {
-    await session.close();
   }
 }

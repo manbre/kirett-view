@@ -1,11 +1,10 @@
-import { Session } from "neo4j-driver";
+import { Transaction } from "neo4j-driver";
 import type { TermItem } from "@/types/terms";
 
-export async function getSymptomTerms(session: Session): Promise<TermItem[]> {
-  return session.executeRead(async (tx) => {
-    // second MATCH only because of "akutes Aortensyndrom"
-    const result = await tx.run(
-      `
+export async function getSymptomTerms(tx: Transaction): Promise<TermItem[]> {
+  // second MATCH only because of "akutes Aortensyndrom"
+  const result = await tx.run(
+    `
 MATCH (d1:DisplayNode)-[]-(d2:DisplayNode)
   WHERE d2.Name CONTAINS "Hinweise"
     AND d1.Name <> "Zusatzinformationen"
@@ -19,11 +18,10 @@ MATCH (d1:DisplayNode)-[]-(w:WarningNode)
     AND d1.Name <> "Zusatzinformationen"
 RETURN DISTINCT d1.Name AS name
             `,
-    );
+  );
 
-    return result.records.map((record) => ({
-      value: record.get("name"),
-      label: record.get("name"),
-    }));
-  });
+  return result.records.map((record) => ({
+    value: record.get("name"),
+    label: record.get("name"),
+  }));
 }
