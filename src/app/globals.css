@@ -16,7 +16,8 @@
 } */
 
 html { 
-  font-size: clamp(14px, calc(14px + 0.5vw), 18px);
+  font-size: clamp(15px, 1.5vw, 42px);
+  line-height: 1.5;
 }
 
 body { 

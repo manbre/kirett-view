@@ -52,18 +52,18 @@ export const TermField = ({ selectedCategory }: Props) => {
             }
             className={[
               "group flex w-full items-center justify-between border-b py-2 text-left",
-              "hover:bg-back border-[var(--border)] last:border-b-0",
+              "hover:bg-back border-[var(--border)] last:border-b-0 hover:cursor-pointer",
             ].join(" ")}
             aria-pressed={isSelected}
           >
             <span
-              className={`hover:cursor-pointer ${
+              className={` ${
                 isSelected ? "text-[var(--mark)]" : "text-[var(--text)]"
               }`}
             >
               {label}
             </span>
-            <span
+            {/* <span
               className={[
                 "ml-3 inline-flex h-4 w-4 items-center justify-center rounded-sm border",
                 isSelected
@@ -71,7 +71,7 @@ export const TermField = ({ selectedCategory }: Props) => {
                   : "bg-fore border-[var(--border)]",
               ].join(" ")}
               aria-hidden="true"
-            />
+            /> */}
           </button>
         );
       })}

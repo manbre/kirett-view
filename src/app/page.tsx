@@ -13,12 +13,12 @@ export default function Home() {
 
   return (
     <div className="bg-back min-h-dvh">
-      <main className="max-w-screen-3xl container flex min-h-dvh flex-col gap-2 overflow-hidden">
+      <main className="3xl:px-8 flex h-dvh w-[100dvw] max-w-none flex-col overflow-hidden px-3 md:px-4">
         <CategoryTabs
           selectedCategory={selectedCategory}
           onChangeCategory={setSelectedCategory}
         />
-        <div className="flex flex-col gap-2 md:flex-row">
+        <div className="mt-2 flex flex-col gap-2 md:flex-row">
           {selectedCategory && (
             <aside
               aria-labelledby="terms-heading"
