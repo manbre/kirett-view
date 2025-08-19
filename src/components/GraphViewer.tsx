@@ -1,13 +1,17 @@
 "use client";
 
 import { GraphCanvas } from "reagraph";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useStore } from "@/store/useStore";
 import { useGraphApi } from "@/hooks/useGraphApi";
 import { useGraphElements } from "@/hooks/useGraphElements";
 import { CustomNode } from "@/components/CustomNode";
 
-export const GraphViewer = () => {
+type Props = {
+  onChangeNode?: (node: any) => void;
+};
+
+export const GraphViewer = ({ onChangeNode }: Props) => {
   const selectedTerms = useStore((state) => state.selectedTerms);
   const { fetchGraphData, fetchNeighbors } = useGraphApi();
   const { nodes, edges, updateGraphElements } = useGraphElements();
@@ -50,6 +54,13 @@ export const GraphViewer = () => {
     }
   };
 
+  const handleNodeClick = useCallback(
+    (node: any) => {
+      onChangeNode?.(node);
+    },
+    [onChangeNode],
+  );
+
   return (
     <div className="bg-fore relative h-[60dvh] w-full overflow-hidden rounded-xl border border-[var(--border)] p-1 md:h-full">
       <GraphCanvas
@@ -61,9 +72,7 @@ export const GraphViewer = () => {
           <CustomNode node={node} isHighlighted={node.id === lastNeighborId} />
         )}
         onNodeDoubleClick={(node) => handleNodeDoubleClick(node.id)}
-        onNodeClick={(node) => {
-          console.log("Knoten geklickt:", node);
-        }}
+        onNodeClick={handleNodeClick}
         style={{ width: "100%", height: "100%" }}
       />
     </div>

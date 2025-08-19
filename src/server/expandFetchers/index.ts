@@ -3,6 +3,7 @@ import { getNeighbors } from "./neighbors";
 
 export const expandFetchers = {
   neighbors: (nodeId: string, tx: Transaction) => getNeighbors(nodeId, tx),
+  attributes: (nodeId: string, tx: Transaction) => getAttributes(nodeId, tx),
 } satisfies Record<
   string,
   (nodeId: string, tx: Transaction) => Promise<Neo4jRecord[]>

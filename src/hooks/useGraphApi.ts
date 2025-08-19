@@ -20,7 +20,7 @@ export const useGraphApi = () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nodeId }),
     });
-    if (!res.ok) throw new Error("Fehler beim Laden der Nachbarn");
+    if (!res.ok) throw new Error("error while loading neighbors");
     return res.json(); // { nodes, edges }
   };
 

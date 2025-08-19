@@ -73,7 +73,7 @@ export const CategoryTabs = ({ selectedCategory, onChangeCategory }: Props) => {
             <span>{label}</span>
             {hasAny && (
               <span
-                className="ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--mark)] px-1 text-[10px] font-semibold text-white"
+                className="ml-1 inline-flex min-w-[1.5em] items-center justify-center rounded-full bg-white px-2 py-1 text-xs leading-none font-medium text-black md:text-sm 2xl:text-[0.8em]"
                 aria-label={`${selectedTerms[category].length} ausgewählt`}
               >
                 {selectedTerms[category].length}

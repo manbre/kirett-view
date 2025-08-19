@@ -5,11 +5,13 @@ import { Category } from "@/constants/category";
 import { CategoryTabs } from "@/components/CategoryTabs";
 import { TermField } from "@/components/TermField";
 import { GraphViewer } from "@/components/GraphViewer";
+import { InfoPanel } from "@/components/InfoPanel";
 
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
     null,
   );
+  const [selectedNode, setSelectedNode] = useState<string | null>(null);
 
   return (
     <div className="bg-back min-h-dvh">
@@ -18,20 +20,30 @@ export default function Home() {
           selectedCategory={selectedCategory}
           onChangeCategory={setSelectedCategory}
         />
-        <div className="mt-2 flex flex-col gap-2 md:flex-row">
+
+        <div className="mt-2 flex min-h-0 grow flex-col gap-2 md:flex-row">
           {selectedCategory && (
             <aside
               aria-labelledby="terms-heading"
-              className="shrink-0 overflow-hidden md:h-[calc(100dvh-4.5rem)] md:w-40 lg:w-60 xl:w-[15rem]"
+              className="/* etwas breiter auf großen Screens */ /* erlaubt kindern korrekt zu wachsen/schrumpfen */ flex min-h-0 shrink-0 flex-col gap-2 overflow-hidden md:h-[calc(100dvh-4.5rem)] md:w-40 lg:w-60 xl:w-[15rem] 2xl:w-[20rem]" /* [LAYOUT] */
             >
               <h2 id="terms-heading" className="sr-only">
                 Begriffe
               </h2>
-              <TermField selectedCategory={selectedCategory} />
+
+              <div className="min-h-0 flex-1">
+                <TermField selectedCategory={selectedCategory} />
+              </div>
+
+              <div className="hidden shrink-0 md:block">
+                <div className="h-40 md:h-50 lg:h-50 xl:h-64">
+                  <InfoPanel selectedNode={selectedNode} />
+                </div>
+              </div>
             </aside>
           )}
-          <section className="min-w-0 flex-1 flex-row md:h-[calc(100dvh-4.5rem)]">
-            <GraphViewer />
+          <section className="min-h-0 min-w-0 flex-1 md:h-[calc(100dvh-4.5rem)]">
+            <GraphViewer onChangeNode={setSelectedNode} />
           </section>
         </div>
       </main>
