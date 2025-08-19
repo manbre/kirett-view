@@ -7,6 +7,7 @@ import { getPathwaysSubgraph } from "./pathways";
 import { getProceduresSubgraph } from "./procedures";
 import { getRolesSubgraph } from "./roles";
 import { getSymptomsSubgraph } from "./symptoms";
+import { getOthersSubgraph } from "./others";
 
 // each fetcher returns neo4j records, the route converts once at the end
 export const subgraphFetchers = {
@@ -22,6 +23,8 @@ export const subgraphFetchers = {
     getRolesSubgraph(terms, tx),
   [Category.Symptoms]: (terms: string[], tx: Transaction) =>
     getSymptomsSubgraph(terms, tx),
+  [Category.Others]: (terms: string[], tx: Transaction) =>
+    getOthersSubgraph(terms, tx),
 } satisfies Record<
   Category,
   (terms: string[], tx: Transaction) => Promise<Neo4jRecord[]>

@@ -8,6 +8,7 @@ import { getPathwayTerms } from "./pathways";
 import { getProcedureTerms } from "./procedures";
 import { getRoleTerms } from "./roles";
 import { getSymptomTerms } from "./symptoms";
+import { getOtherTerms } from "./others";
 
 // each fetcher returns TermItem[]
 export const termFetchers = {
@@ -17,4 +18,5 @@ export const termFetchers = {
   [Category.Procedures]: (tx: Transaction) => getProcedureTerms(tx),
   [Category.Roles]: (tx: Transaction) => getRoleTerms(tx),
   [Category.Symptoms]: (tx: Transaction) => getSymptomTerms(tx),
+  [Category.Others]: (tx: Transaction) => getOtherTerms(tx),
 } satisfies Record<Category, (tx: Transaction) => Promise<TermItem[]>>;

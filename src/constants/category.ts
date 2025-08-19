@@ -5,6 +5,7 @@ export enum Category {
   Procedures = "procedures",
   Roles = "roles",
   Symptoms = "symptoms",
+  Others = "others",
 }
 
 export const CategoryLabels: Record<Category, string> = {
@@ -14,6 +15,7 @@ export const CategoryLabels: Record<Category, string> = {
   [Category.Procedures]: "Standardarbeitsanweisungen",
   [Category.Roles]: "Rollen",
   [Category.Symptoms]: "Symptome",
+  [Category.Others]: "Andere",
 };
 
 export const createEmptySelectedTerms = (): Record<Category, string[]> => {

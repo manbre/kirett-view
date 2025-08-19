@@ -30,30 +30,28 @@ export const GraphViewer = () => {
     };
 
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(selectedTerms)]);
 
   const handleNodeDoubleClick = async (nodeId: string) => {
     try {
       //get all connected edges
-      const connectedEdges = edges.filter(
-        (e) => e.source === nodeId || e.target === nodeId,
-      );
-      //get id of the other node
-      const neighborIds = connectedEdges.map((e) =>
-        e.source === nodeId ? e.target : e.source,
-      );
+      const neighborIds = edges
+        .filter((edge) => edge.source === nodeId || edge.target === nodeId)
+        .map((edge) => (edge.source === nodeId ? edge.target : edge.source));
       const existingNeighborId = neighborIds[0];
       setLastNeighborId(existingNeighborId);
+
       const { nodes: neighborNodes, edges: neighborEdges } =
         await fetchNeighbors(nodeId);
       updateGraphElements(neighborNodes, neighborEdges);
     } catch (err) {
-      console.error("Fehler beim Nachladen der Nachbarn:", err);
+      console.error("error while loading neighbors:", err);
     }
   };
 
   return (
-    <div className="bg-fore relative mt-2 mr-2 ml-2 h-[calc(100%_-_2.5rem)] flex-1 overflow-hidden rounded-lg border border-[var(--border)] p-1">
+    <div className="bg-fore relative h-[60dvh] w-full overflow-hidden rounded-xl border border-[var(--border)] p-1 md:h-full">
       <GraphCanvas
         nodes={nodes}
         edges={edges}
