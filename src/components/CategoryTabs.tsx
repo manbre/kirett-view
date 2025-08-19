@@ -61,6 +61,7 @@ export const CategoryTabs = ({ selectedCategory, onChangeCategory }: Props) => {
             aria-selected={isActive}
             onClick={() => onChangeCategory(category)}
             className={[
+              "hover:cursor-pointer",
               "relative inline-flex snap-start items-center justify-center",
               "h-9 rounded-full border px-3 text-sm",
               "transition-colors",
