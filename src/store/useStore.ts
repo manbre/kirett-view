@@ -9,7 +9,7 @@ interface Store {
 }
 
 export const useStore = create<Store>((set, get) => ({
-  selectedTerms: {},
+  selectedTerms: {}, //  [Category.Others]: ["StartNode"]
 
   selectTerm: (category, term) => {
     const prev = get().selectedTerms[category] ?? [];

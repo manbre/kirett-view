@@ -9,7 +9,7 @@ export async function getGroupsSubgraph(
     `
 MATCH (n:JumpNode)-[r]-(neighbor)
   WHERE n.BPR = "Disease Groups"
-  AND n.Name IN $groups
+  AND ANY(x IN $groups WHERE toLower(n.Name) = toLower(x))
 RETURN n AS n, r AS r, neighbor AS neighbor
     `,
     { groups },

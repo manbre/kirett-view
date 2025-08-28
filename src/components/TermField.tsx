@@ -35,7 +35,7 @@ export const TermField = ({ selectedCategory }: Props) => {
 
   return (
     <div
-      className="bg-fore max-h-[30dvh] overflow-auto rounded-xl border border-[var(--border)] p-2 md:h-full md:max-h-none"
+      className="bg-fore max-h-[18dvh] overflow-auto rounded-xl border border-[var(--border)] p-1.5 md:h-full md:max-h-none"
       role="list"
       aria-label="Begriffe"
     >
@@ -63,15 +63,6 @@ export const TermField = ({ selectedCategory }: Props) => {
             >
               {label}
             </span>
-            {/* <span
-              className={[
-                "ml-3 inline-flex h-4 w-4 items-center justify-center rounded-sm border",
-                isSelected
-                  ? "border-[var(--mark)] bg-[var(--mark)]"
-                  : "bg-fore border-[var(--border)]",
-              ].join(" ")}
-              aria-hidden="true"
-            /> */}
           </button>
         );
       })}

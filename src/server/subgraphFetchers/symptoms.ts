@@ -7,7 +7,7 @@ export async function getSymptomsSubgraph(
   const result = await tx.run(
     `
 MATCH (n:DisplayNode)-[r]-(neighbor)
-    WHERE n.Name IN $symptoms
+    WHERE ANY(s IN $symptoms WHERE toLower(n.Name) = toLower(s))
 RETURN n AS n, r AS r, neighbor AS neighbor
     `,
     { symptoms },

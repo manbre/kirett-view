@@ -7,7 +7,7 @@ export async function getProceduresSubgraph(
   const result = await tx.run(
     `
 MATCH (n:SAAProcedureNode)-[r]-(neighbor)
-    WHERE ANY(term IN $procedures WHERE n.Name CONTAINS term)
+    WHERE ANY(x IN $procedures WHERE toLower(n.Name) CONTAINS toLower(x))
     AND neighbor.Name <> "Alle Standardarbeitsanweisungen"
 RETURN n AS n, r AS r, neighbor AS neighbor
     `,

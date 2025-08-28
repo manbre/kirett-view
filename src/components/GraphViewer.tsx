@@ -1,14 +1,18 @@
 "use client";
 
-import { GraphCanvas } from "reagraph";
-import { useEffect, useState, useCallback } from "react";
+import { GraphCanvas, GraphCanvasRef, lightTheme } from "reagraph";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { useStore } from "@/store/useStore";
 import { useGraphApi } from "@/hooks/useGraphApi";
 import { useGraphElements } from "@/hooks/useGraphElements";
 import { CustomNode } from "@/components/CustomNode";
+import { prepareNodes } from "@/graph/prepareNodes";
+import { useGraphExport } from "@/hooks/useGraphExport";
+import { buildDisplayName } from "@/graph/label-metrics";
+import type { GraphNode, GraphEdge } from "@/types/graph";
 
 type Props = {
-  onChangeNode?: (node: any) => void;
+  onChangeNode?: (node: NodeWithCollision<BaseNode>) => void;
 };
 
 export const GraphViewer = ({ onChangeNode }: Props) => {
@@ -16,14 +20,20 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
   const { fetchGraphData, fetchNeighbors } = useGraphApi();
   const { nodes, edges, updateGraphElements } = useGraphElements();
   const [lastNeighborId, setLastNeighborId] = useState<string | null>(null);
+  const graphRef = useRef<GraphCanvasRef | null>(null);
 
+  const { collectNode, downloadSVG, downloadPNG } = useGraphExport(
+    graphRef,
+    (n) => buildDisplayName(n.data, n.label), // oder: (n) => n.label
+  );
+
+  // Daten laden
   useEffect(() => {
     const load = async () => {
       if (Object.values(selectedTerms).flat().length === 0) {
         updateGraphElements([], []);
         return;
       }
-
       try {
         const { nodes: newNodes, edges: newEdges } =
           await fetchGraphData(selectedTerms);
@@ -32,47 +42,98 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
         console.error("graph loading error:", err);
       }
     };
-
-    load();
+    void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(selectedTerms)]);
 
-  const handleNodeDoubleClick = async (nodeId: string) => {
-    try {
-      //get all connected edges
-      const neighborIds = edges
-        .filter((edge) => edge.source === nodeId || edge.target === nodeId)
-        .map((edge) => (edge.source === nodeId ? edge.target : edge.source));
-      const existingNeighborId = neighborIds[0];
-      setLastNeighborId(existingNeighborId);
+  // Double-Click → Nachbarn
+  const handleNodeDoubleClick = useCallback(
+    async (nodeId: string) => {
+      try {
+        const neighborIds = edges
+          .filter((e: Edge) => e.source === nodeId || e.target === nodeId)
+          .map((e: Edge) => (e.source === nodeId ? e.target : e.source));
 
-      const { nodes: neighborNodes, edges: neighborEdges } =
-        await fetchNeighbors(nodeId);
-      updateGraphElements(neighborNodes, neighborEdges);
-    } catch (err) {
-      console.error("error while loading neighbors:", err);
-    }
-  };
+        setLastNeighborId(neighborIds[0] ?? null);
+
+        const { nodes: neighborNodes, edges: neighborEdges } =
+          await fetchNeighbors(nodeId);
+        updateGraphElements(neighborNodes, neighborEdges);
+
+        // nachladen -> auf den Knoten zentrieren und fitten
+        // graphRef.current?.centerGraph([nodeId]);
+        // graphRef.current?.fitNodesInView([nodeId]);
+      } catch (err) {
+        console.error("error while loading neighbors:", err);
+      }
+    },
+    [edges, fetchNeighbors, updateGraphElements],
+  );
 
   const handleNodeClick = useCallback(
-    (node: any) => {
+    (node: NodeWithCollision<BaseNode>) => {
       onChangeNode?.(node);
     },
     [onChangeNode],
   );
 
+  // Rohknoten -> vorbereitete Knoten (mit collisionRadius + nameForLabel)
+  const preppedNodes = useMemo(() => prepareNodes(nodes), [nodes]);
+
+  const theme = {
+    ...lightTheme,
+    edge: {
+      ...lightTheme.edge,
+      fill: "#8b5cf6", // Linienfarbe
+      activeFill: "#f43f5e", // Farbe, wenn „aktiv“
+    },
+    arrow: {
+      ...lightTheme.arrow,
+      fill: "#8b5cf6", // Pfeilfarbe passend zur Linie
+      activeFill: "#f43f5e",
+    },
+  };
+
+  type EdgeIn = GraphEdge & {
+    source: string | { id: string };
+    target: string | { id: string };
+  };
+  const canvasEdges = useMemo(
+    () =>
+      (edges as readonly EdgeIn[]).map((e) => ({
+        ...e,
+        source: typeof e.source === "string" ? e.source : e.source.id,
+        target: typeof e.target === "string" ? e.target : e.target.id,
+        size: 2,
+      })),
+    [edges],
+  );
+
   return (
-    <div className="bg-fore relative h-[60dvh] w-full overflow-hidden rounded-xl border border-[var(--border)] p-1 md:h-full">
+    <div className="bg-fore relative flex h-[65dvh] w-full overflow-hidden rounded-xl border border-[var(--border)] p-1 md:h-full">
       <GraphCanvas
-        nodes={nodes}
-        edges={edges}
-        labelType="none"
+        ref={graphRef}
+        nodes={preppedNodes}
+        edges={canvasEdges}
+        // theme={theme}
+        layoutType="forceDirected2d"
+        labelType="hidden"
         draggable
-        renderNode={({ node }) => (
-          <CustomNode node={node} isHighlighted={node.id === lastNeighborId} />
-        )}
+        renderNode={({ node }) => {
+          // >>> Position (x/y) mitschneiden – ohne das bleibt SVG leer
+          collectNode(node as GraphNode & { x?: number; y?: number });
+
+          return (
+            <CustomNode
+              node={node as GraphNode}
+              isHighlighted={node.id === lastNeighborId}
+            />
+          );
+        }}
         onNodeDoubleClick={(node) => handleNodeDoubleClick(node.id)}
-        onNodeClick={handleNodeClick}
+        onNodeClick={(node) => {
+          handleNodeClick(node);
+        }}
         style={{ width: "100%", height: "100%" }}
       />
     </div>

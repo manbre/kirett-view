@@ -2,11 +2,24 @@ import React, { useState, Suspense } from "react";
 import * as THREE from "three";
 import { Text } from "@react-three/drei";
 import { useLoader } from "@react-three/fiber";
-import { labelTextureMap } from "@/constants/label";
+import { labelIconMap } from "@/constants/label"; // Record<string, string>
 import { useWhiteSvgTexture } from "@/hooks/useWhiteSvgTexture";
-import type { GraphNode } from "@/types/graph";
+import {
+  NODE_R,
+  FONT_PX,
+  MAX_W,
+  LABEL_Y_OFFSET,
+  buildDisplayName,
+} from "@/graph/label-metrics";
+import type { BaseNode, NodeWithCollision } from "@/graph/prepareNodes";
 
-const TexturedMaterial = ({
+type CustomNodeProps<T extends BaseNode> = {
+  node: NodeWithCollision<T>;
+  isHighlighted?: boolean;
+  debugCollision?: boolean; // optional: zeigt Kollisionskreis
+};
+
+function TexturedMaterial({
   url,
   hovered,
   isHighlighted,
@@ -14,9 +27,8 @@ const TexturedMaterial = ({
   url: string;
   hovered: boolean;
   isHighlighted: boolean;
-}) => {
+}) {
   const texture = useLoader(THREE.TextureLoader, url);
-
   return (
     <meshBasicMaterial
       map={texture}
@@ -26,54 +38,64 @@ const TexturedMaterial = ({
       toneMapped={false}
     />
   );
-};
+}
 
-type CustomNodeProps = {
-  node: GraphNode;
-  isHighlighted?: boolean;
-};
+export function CustomNode<T extends BaseNode>({
+  node,
+  isHighlighted = false,
+  debugCollision = false,
+}: CustomNodeProps<T>) {
+  const [hovered, setHovered] = useState<boolean>(false);
 
-export function CustomNode({ node, isHighlighted = false }: CustomNodeProps) {
-  const [hovered, setHovered] = useState(false);
-
-  const label = node.data?.labels?.[0];
-  const name = node.data?.Name ?? node.data?.BPR ?? "Unnamed";
-  const svgUrl = labelTextureMap[label] || "/icons/default.svg";
-
+  const labelKey = node.data?.labels?.[0] ?? "";
+  const svgUrl = labelIconMap[labelKey] ?? "/icons/default.svg";
   const dataUrl = useWhiteSvgTexture(svgUrl);
-
   if (!dataUrl) return null;
 
+  // exakt derselbe Text wie beim Vorbereiten
+  const name = node.nameForLabel || buildDisplayName(node.data);
+
   return (
-    dataUrl && (
-      <group
-        position={[0, 0, 0.1]}
-        renderOrder={10}
-        onPointerOver={() => setHovered(true)}
-        onPointerOut={() => setHovered(false)}
-      >
-        <mesh position={[0, 0, 0.01]} renderOrder={1}>
-          <circleGeometry args={[8, 32]} />
-          <Suspense fallback={null}>
-            <TexturedMaterial
-              url={dataUrl}
-              hovered={hovered}
-              isHighlighted={isHighlighted}
-            />
-          </Suspense>
+    <group
+      position={[0, 0, 0.1]}
+      renderOrder={10}
+      onPointerOver={() => setHovered(true)}
+      onPointerOut={() => setHovered(false)}
+    >
+      {debugCollision && (
+        <mesh position={[0, 0, 0]}>
+          <circleGeometry args={[node.collisionRadius, 64]} />
+          <meshBasicMaterial
+            color="#000"
+            transparent
+            opacity={0.05}
+            depthTest={false}
+          />
         </mesh>
-        <Text
-          position={[0, -8, 0]}
-          fontSize={5}
-          maxWidth={45}
-          textAlign="center"
-          anchorX="center"
-          anchorY="start"
-          color={hovered ? "cyan" : "#333"}
-        >
-          {name}
-        </Text>
-      </group>
-    )
+      )}
+
+      <mesh position={[0, 0, 0.01]} renderOrder={1}>
+        <circleGeometry args={[NODE_R, 32]} />
+        <Suspense fallback={null}>
+          <TexturedMaterial
+            url={dataUrl}
+            hovered={hovered}
+            isHighlighted={isHighlighted}
+          />
+        </Suspense>
+      </mesh>
+
+      <Text
+        position={[0, -LABEL_Y_OFFSET, 0]}
+        fontSize={FONT_PX}
+        maxWidth={MAX_W}
+        textAlign="center"
+        anchorX="center"
+        anchorY="start"
+        color={hovered ? "cyan" : "#333"}
+      >
+        {name}
+      </Text>
+    </group>
   );
 }

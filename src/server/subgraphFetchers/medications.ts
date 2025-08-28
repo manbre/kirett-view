@@ -7,7 +7,7 @@ export async function getMedicationsSubgraph(
   const result = await tx.run(
     `
 MATCH (n:SAAMedicationNode)-[r]-(neighbor)
-    WHERE ANY(term IN $medications WHERE n.Name CONTAINS term)
+    WHERE ANY(x IN $medications WHERE toLower(n.Name) CONTAINS toLower(x))
     AND neighbor.Name <> "Alle Standardarbeitsanweisungen"
 RETURN n AS n, r AS r, neighbor AS neighbor
     `,

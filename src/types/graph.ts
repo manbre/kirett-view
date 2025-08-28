@@ -1,13 +1,10 @@
-import { Node, Relationship } from "neo4j-driver";
-
-// Struktur eines Knotens für das Frontend
+// ---------------- api types ----------------
 export type GraphNode = {
   id: string;
   label: string;
   data: Record<string, unknown>;
 };
 
-// Struktur einer Kante für das Frontend
 export type GraphEdge = {
   id: string;
   source: string;
@@ -20,7 +17,22 @@ export type SubgraphResult = {
   edges: GraphEdge[];
 };
 
-// Record aus Neo4j für get("n"), get("neighbor") etc.
-export type GraphRecord = {
-  get: (key: "n" | "neighbor" | "r") => Node | Relationship;
+// ---------------- ui types ----------------
+export type UiGraphNode = GraphNode & {
+  x?: number;
+  y?: number;
+  __radius?: number;
+  hovered?: boolean;
+  selected?: boolean;
+  type?: string; // for icon mapping
+};
+
+export type UiGraphEdge = GraphEdge & {
+  source: string | UiGraphNode;
+  target: string | UiGraphNode;
+};
+
+export type UiGraphData = {
+  nodes: UiGraphNode[];
+  links: UiGraphEdge[];
 };

@@ -7,7 +7,7 @@ export async function getOthersSubgraph(
   const result = await tx.run(
     `
 MATCH (n)
-    WHERE any(label IN labels(n) WHERE label IN $others)
+    WHERE ANY(label IN labels(n) WHERE label IN $others)
 RETURN n AS n
   `,
     { others },
