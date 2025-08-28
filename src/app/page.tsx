@@ -14,7 +14,7 @@ export default function Home() {
 
   return (
     <div className="bg-back min-h-dvh">
-      <main className="flex h-dvh w-[100dvw] flex-col overflow-hidden px-2 py-2">
+      <main className="3xl:px-8 flex h-dvh w-[100dvw] max-w-none flex-col overflow-hidden px-3 md:px-4">
         <CategoryTabs
           selectedCategory={selectedCategory}
           onChangeCategory={setSelectedCategory}
@@ -24,7 +24,7 @@ export default function Home() {
           {selectedCategory && (
             <aside
               aria-labelledby="terms-heading"
-              className="flex min-h-0 shrink-0 flex-col gap-2 overflow-hidden md:w-50"
+              className="flex min-h-0 shrink-0 flex-col gap-2 overflow-hidden md:h-[calc(100dvh-4.5rem)] md:w-50 lg:w-60 xl:w-[12rem] 2xl:w-[12rem]"
             >
               <h2 id="terms-heading" className="sr-only">
                 Begriffe
@@ -39,11 +39,11 @@ export default function Home() {
                DESKTOP: Toolbar rechts, kompakt (fixe Breite) */}
             <ToolBar
               onSelectLabel={(label) => setSelectedNode(label)}
-              className="order-first md:order-last md:w-20" /* md:w-40 ≈ 10rem kompakt */
+              className="order-first md:order-last md:w-25" /* md:w-40 ≈ 10rem kompakt */
             />
 
             {/* Graph füllt Rest */}
-            <div className="min-h-[40dvh] flex-1 md:min-h-0">
+            <div className="min-h-0 min-w-0 flex-1 md:h-[calc(100dvh-4.5rem)]">
               <GraphViewer />
             </div>
           </section>

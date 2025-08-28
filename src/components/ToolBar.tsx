@@ -32,7 +32,7 @@ export function ToolBar({ onSelectLabel, className = "" }: Props) {
       aria-label="Node-Icons"
       className={[
         "bg-fore rounded-xl border border-[var(--border)] p-2",
-        "flex flex-row gap-2",
+        "flex flex-row gap-1",
         "md:w-25 md:max-w-[12rem] md:flex-col",
         className,
       ].join(" ")}
