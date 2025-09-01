@@ -2,7 +2,7 @@
 
 import { Category, CategoryLabels } from "@/constants/category";
 import { useStore } from "@/store/useStore";
-import { useMemo, KeyboardEvent } from "react";
+import { useMemo } from "react";
 
 type Props = {
   selectedCategory: Category | null;
@@ -18,33 +18,11 @@ export const CategoryTabs = ({ selectedCategory, onChangeCategory }: Props) => {
     [],
   );
 
-  const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    const target = e.target as HTMLElement;
-    if (target?.role !== "tab") return;
-    const idx = entries.findIndex(([key]) => key === target.dataset.cat);
-    if (idx === -1) return;
-
-    if (e.key === "ArrowRight") {
-      e.preventDefault();
-      const next = entries[(idx + 1) % entries.length]?.[0] as Category;
-      onChangeCategory(next);
-      (document.querySelector(`[data-cat="${next}"]`) as HTMLElement)?.focus();
-    } else if (e.key === "ArrowLeft") {
-      e.preventDefault();
-      const prev = entries[
-        (idx - 1 + entries.length) % entries.length
-      ]?.[0] as Category;
-      onChangeCategory(prev);
-      (document.querySelector(`[data-cat="${prev}"]`) as HTMLElement)?.focus();
-    }
-  };
-
   return (
     <div
       role="tablist"
       aria-label="Kategorien"
       className="no-scrollbar -mx-2 flex h-fit w-full snap-x snap-mandatory flex-row gap-2 overflow-x-auto px-2 pt-2 pb-1 whitespace-nowrap"
-      onKeyDown={onKeyDown}
     >
       {entries.map(([catKey, label]) => {
         const category = catKey as Category;
@@ -66,8 +44,8 @@ export const CategoryTabs = ({ selectedCategory, onChangeCategory }: Props) => {
               "h-9 rounded-full border px-3 text-sm",
               "transition-colors",
               isActive
-                ? "border-[var(--mark)] bg-[var(--mark)] text-white"
-                : "bg-fore border-[var(--border)] text-[var(--text)] hover:border-[var(--mark)] hover:text-[var(--mark)]",
+                ? "border-[var(--color-mark)] bg-[var(--color-mark)] text-white"
+                : "border-[var(--color-border)] text-[var(--color-text)] hover:border-[var(--color-mark)] hover:text-[var(--color-mark)]",
             ].join(" ")}
           >
             <span>{label}</span>

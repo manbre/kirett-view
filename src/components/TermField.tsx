@@ -35,7 +35,7 @@ export const TermField = ({ selectedCategory }: Props) => {
 
   return (
     <div
-      className="bg-fore max-h-[18dvh] overflow-auto rounded-xl border border-[var(--border)] p-1.5 md:h-full md:max-h-none"
+      className="max-h-[18dvh] overflow-auto rounded-xl border border-[var(--color-border)] p-1.5 md:h-full md:max-h-none"
       role="list"
       aria-label="Begriffe"
     >
@@ -52,13 +52,15 @@ export const TermField = ({ selectedCategory }: Props) => {
             }
             className={[
               "group flex w-full items-center justify-between border-b py-2 text-left",
-              "hover:bg-back border-[var(--border)] last:border-b-0 hover:cursor-pointer",
+              "border-[var(--color-border)] last:border-b-0 hover:cursor-pointer",
             ].join(" ")}
             aria-pressed={isSelected}
           >
             <span
-              className={` ${
-                isSelected ? "text-[var(--mark)]" : "text-[var(--text)]"
+              className={`group-hover:text-[var(--color-mark)] ${
+                isSelected
+                  ? "text-[var(--color-mark)]"
+                  : "text-[var(--color-text)]"
               }`}
             >
               {label}

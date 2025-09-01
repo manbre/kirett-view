@@ -9,6 +9,7 @@ import { CustomNode } from "@/components/CustomNode";
 import { prepareNodes } from "@/graph/prepareNodes";
 import { useGraphExport } from "@/hooks/useGraphExport";
 import { buildDisplayName } from "@/graph/label-metrics";
+import { tokens } from "@/theme/tokens";
 import type { GraphNode, GraphEdge } from "@/types/graph";
 
 type Props = {
@@ -84,13 +85,8 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
     ...lightTheme,
     edge: {
       ...lightTheme.edge,
-      fill: "#8b5cf6", // Linienfarbe
-      activeFill: "#f43f5e", // Farbe, wenn „aktiv“
-    },
-    arrow: {
-      ...lightTheme.arrow,
-      fill: "#8b5cf6", // Pfeilfarbe passend zur Linie
-      activeFill: "#f43f5e",
+      fill: tokens.edge,
+      activeFill: tokens.edge,
     },
   };
 
@@ -110,13 +106,14 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
   );
 
   return (
-    <div className="bg-fore relative flex h-[65dvh] w-full overflow-hidden rounded-xl border border-[var(--border)] p-1 md:h-full">
+    <div className="relative flex h-[65dvh] w-full overflow-hidden rounded-xl border border-[var(--color-border)] bg-white p-1 md:h-full">
       <GraphCanvas
         ref={graphRef}
         nodes={preppedNodes}
         edges={canvasEdges}
-        // theme={theme}
-        layoutType="forceDirected2d"
+        theme={theme}
+        edgeArrowPosition="none"
+        // layoutType="force"
         labelType="hidden"
         draggable
         renderNode={({ node }) => {

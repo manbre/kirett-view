@@ -4,6 +4,7 @@ import { Text } from "@react-three/drei";
 import { useLoader } from "@react-three/fiber";
 import { labelIconMap } from "@/constants/label"; // Record<string, string>
 import { useWhiteSvgTexture } from "@/hooks/useWhiteSvgTexture";
+import { tokens } from "@/theme/tokens";
 import {
   NODE_R,
   FONT_PX,
@@ -32,7 +33,7 @@ function TexturedMaterial({
   return (
     <meshBasicMaterial
       map={texture}
-      color={isHighlighted ? "blue" : hovered ? "cyan" : "gray"}
+      color={isHighlighted ? tokens.edge : hovered ? tokens.mark : "grey"}
       transparent
       depthTest={false}
       toneMapped={false}
@@ -92,7 +93,7 @@ export function CustomNode<T extends BaseNode>({
         textAlign="center"
         anchorX="center"
         anchorY="start"
-        color={hovered ? "cyan" : "#333"}
+        color={hovered ? tokens.mark : tokens.node}
       >
         {name}
       </Text>

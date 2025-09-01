@@ -14,36 +14,46 @@ export default function Home() {
 
   return (
     <div className="bg-back min-h-dvh">
-      <main className="3xl:px-8 flex h-dvh w-[100dvw] max-w-none flex-col overflow-hidden px-3 md:px-4">
-        <CategoryTabs
-          selectedCategory={selectedCategory}
-          onChangeCategory={setSelectedCategory}
-        />
+      <main className="flex h-dvh w-[100dvw] flex-col overflow-hidden px-3 md:px-4">
+        {/* Tabs dürfen nie schrumpfen */}
+        <header className="relative z-10 shrink-0 overflow-visible">
+          <CategoryTabs
+            selectedCategory={selectedCategory}
+            onChangeCategory={setSelectedCategory}
+          />
+        </header>
 
-        <div className="mt-2 flex min-h-0 grow flex-col gap-2 md:flex-row">
+        {/* Content unterhalb der Tabs verteilt die Höhe exakt */}
+        <div
+          className={[
+            "mt-2 min-h-0 grow",
+            "flex flex-col items-stretch gap-2 md:flex-row",
+            "overflow-hidden", // globales Scrollen aus; nur Terms dürfen scrollen
+          ].join(" ")}
+        >
           {selectedCategory && (
-            <aside
-              aria-labelledby="terms-heading"
-              className="flex min-h-0 shrink-0 flex-col gap-2 overflow-hidden md:h-[calc(100dvh-4.5rem)] md:w-50 lg:w-60 xl:w-[12rem] 2xl:w-[12rem]"
-            >
-              <h2 id="terms-heading" className="sr-only">
-                Begriffe
-              </h2>
-              <TermField selectedCategory={selectedCategory} />
+            <aside className="flex min-h-0 shrink-0 flex-col gap-2 md:w-60">
+              <h2 className="sr-only">Begriffe</h2>
+              {/* Nur Terms scrollen */}
+              <div className="min-h-0 flex-1 overflow-auto">
+                <TermField selectedCategory={selectedCategory} />
+              </div>
             </aside>
           )}
 
-          {/* Rechts: Toolbar + Graph */}
-          <section className="flex min-h-0 min-w-0 flex-1 flex-col gap-2 md:flex-row">
-            {/* MOBIL: Toolbar oben, Bereiche nebeneinander & wachsen nach unten
-               DESKTOP: Toolbar rechts, kompakt (fixe Breite) */}
-            <ToolBar
-              onSelectLabel={(label) => setSelectedNode(label)}
-              className="order-first md:order-last md:w-25" /* md:w-40 ≈ 10rem kompakt */
-            />
+          {/* Graph + Toolbar nebeneinander, gleiche Höhe */}
+          <section
+            className={[
+              "min-h-0 min-w-0 flex-1",
+              "flex flex-col items-stretch gap-2 md:flex-row",
+              "overflow-visible", // <— WICHTIG: NICHT hidden, damit Toolbar nach rechts wachsen darf
+            ].join(" ")}
+          >
+            {/* Toolbar: mobil oben; desktop rechts. Keine feste Breite. Volle Höhe. */}
+            <ToolBar className="order-first w-full md:order-last md:h-full md:w-auto md:flex-none md:shrink-0" />
 
-            {/* Graph füllt Rest */}
-            <div className="min-h-0 min-w-0 flex-1 md:h-[calc(100dvh-4.5rem)]">
+            {/* Graph gibt Platz ab, wenn Toolbar wächst */}
+            <div className="min-h-0 min-w-0 flex-1 overflow-hidden">
               <GraphViewer />
             </div>
           </section>

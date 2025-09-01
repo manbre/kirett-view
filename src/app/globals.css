@@ -1,20 +1,5 @@
 @import "tailwindcss";
 
-:root {
-  --back: #f4f4f4;
-  --fore: #fcfdfc;
-  --border: #dfe0e2;
-  --text: #0b0a0a;
-  --mark: #5c76b4;
-}
-
-/* @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-} */
-
 html { 
   font-size: clamp(15px, 1.5vw + 0px, 42px);
   line-height: 1.5;
