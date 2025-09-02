@@ -15,15 +15,26 @@ export const labelIconMap = {
   StartNode: "/icons/start.svg",
   StopNode: "/icons/stop.svg",
   WarningNode: "/icons/warning.svg",
+  //
 } as const;
 
 export type NodeLabel = keyof typeof labelIconMap;
 
-// action icons
-export const actionIconMap = {
-  PngAction: "/icons/png.svg",
-  SvgAction: "/icons/svg.svg",
-  EdgeAction: "/icons/polygon.svg",
+//============================================================
+//
+export const filterIconMap = {
+  HopOne: "/icons/hop1.svg",
+  HopTwo: "/icons/hop2.svg",
+  OnlyEdges: "/icons/polygon.svg",
 } as const;
 
-export type ActionLabel = keyof typeof actionIconMap;
+export type FilterLabel = keyof typeof filterIconMap;
+
+//============================================================
+//
+export const exportIconMap = {
+  PngExport: "/icons/png.svg",
+  SvgExport: "/icons/svg.svg",
+} as const;
+
+export type exportLabel = keyof typeof exportIconMap;

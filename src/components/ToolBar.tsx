@@ -1,63 +1,88 @@
 "use client";
 
-import { type NodeLabel } from "@/constants/label";
+import {
+  labelIconMap,
+  type NodeLabel,
+  filterIconMap,
+  type FilterLabel,
+} from "@/constants/label";
 import { Section } from "@/components/Section";
+import { useStore, selectors } from "@/store/useStore";
+import type { HopKey } from "@/store/slices/topologySlice";
 
-type Props = { onSelectLabel?: (label: NodeLabel) => void; className?: string };
-
-// Beispiel-Gruppen – passe an
-const group1: NodeLabel[] = [
-  "StartNode",
-  "DecisionNode",
-  "DecisionNodeOR",
-  "DecisionNodeYN",
-  "ActionNode",
-  "DisplayNode",
-  "MedicationNode",
-  "SAAMedicationNode",
-  "ProcedureNode",
-  "SAAProcedureNode",
-  "InvasiveProcedureNode",
-];
-const group2: NodeLabel[] = ["MedicationNode", "StartNode"];
+const group1 = Object.keys(labelIconMap) as NodeLabel[];
+const group2 = Object.keys(filterIconMap) as FilterLabel[];
 const group3: NodeLabel[] = ["BPRNode", "StopNode"];
 
-export function ToolBar({ onSelectLabel, className = "" }: Props) {
+const isHop = (k: FilterLabel): k is HopKey => k === "HopOne" || k === "HopTwo";
+
+type Props = { className?: string };
+
+export function ToolBar({ className = "" }: Props) {
+  const selectedTypes = useStore(selectors.selectedTypes);
+  const toggleType = useStore(selectors.toggleType);
+  const hops = useStore(selectors.hops);
+  const toggleHop = useStore(selectors.toggleHop);
+  const showOnlyEdges = useStore(selectors.showOnlyEdges);
+  const toggleOnlyEdges = useStore(selectors.toggleShowOnlyEdges);
+
   return (
     <aside
       role="toolbar"
-      aria-label="Node-Icons"
+      aria-label="Graph-Filter"
       className={[
         "bg-fore rounded-xl border border-[var(--color-border)] p-2",
+        "overflow-visible",
+        // Desktop: Box schrumpft auf Inhalt
+        "md:inline-block md:[width:max-content] md:min-w-0",
         className,
       ].join(" ")}
     >
-      <div className="flex flex-col gap-2 md:h-full md:min-h-0">
-        {/* Section 1 */}
-        <Section
+      <div
+        className="flex flex-col gap-2 md:h-full md:min-h-0 md:[width:max-content]" // [FIX] Toolbar-intern feste Gesamthöhe
+      >
+        {/* ===== Section 1: 5/8 ===== */}
+        <Section<NodeLabel>
           keys={group1}
-          className="w-full md:h-0 md:min-h-0 md:flex-[8]"
-          onSelect={onSelectLabel}
+          map={labelIconMap}
+          className={[
+            // mobil egal
+            "w-full",
+            // [FIX] wirklich feste Höheanteile: 5/8
+            // flex-[grow shrink basis] → 5 0 0  (keine Schrumpfung, Basis 0)
+            "md:h-0 md:min-h-0 md:flex-[5_0_0]",
+          ].join(" ")}
+          isActive={(k) => selectedTypes.includes(k)}
+          onToggle={toggleType}
         />
 
-        {/* Trenner nach Section 1 (nur Desktop sichtbar) */}
-        <div className="border-t border-[var(--color-border)] md:mb-5" />
+        <div className="hidden border-t border-[var(--color-border)] md:block" />
 
-        {/* Section 2 + 3 nebeneinander mobil, untereinander desktop */}
-        <div className="flex flex-row gap-2 md:h-0 md:min-h-0 md:flex-[4] md:flex-col md:gap-0">
-          <Section
+        {/* ===== Section 2 (2/8) + Section 3 (1/8) ===== */}
+        <div
+          className={[
+            "flex flex-row gap-2 md:flex-col md:gap-0",
+            "md:h-0 md:min-h-0 md:flex-[3_0_0]", // zusammen 3/8
+          ].join(" ")}
+        >
+          {/* 2/8 */}
+          <Section<FilterLabel>
             keys={group2}
-            className="flex-1 md:h-0 md:min-h-0 md:flex-[1]"
-            onSelect={onSelectLabel}
+            map={filterIconMap}
+            className="flex-1 md:h-0 md:min-h-0 md:flex-[2_0_0]"
+            isActive={(k) => (isHop(k) ? hops.includes(k) : showOnlyEdges)}
+            onToggle={(k) => (isHop(k) ? toggleHop(k) : toggleOnlyEdges())}
           />
 
-          {/* Trenner zwischen 2 und 3 nur auf Desktop */}
-          <div className="hidden border-t border-[var(--color-border)] md:mb-5 md:block" />
+          <div className="hidden border-t border-[var(--color-border)] md:block" />
 
-          <Section
+          {/* 1/8 */}
+          <Section<NodeLabel>
             keys={group3}
-            className="flex-1 md:h-0 md:min-h-0 md:flex-[1]"
-            onSelect={onSelectLabel}
+            map={labelIconMap}
+            className="flex-1 md:h-0 md:min-h-0 md:flex-[1_0_0]"
+            isActive={(k) => selectedTypes.includes(k)}
+            onToggle={toggleType}
           />
         </div>
       </div>

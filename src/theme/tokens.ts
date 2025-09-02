@@ -6,5 +6,5 @@ export const tokens = {
   border: "#dfe0e2",
   mark: "#5c76b4",
   edge: "#93c5fd",
-  node: "grey",
+  node: "#343a40",
 } as const;

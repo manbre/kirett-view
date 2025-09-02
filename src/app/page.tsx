@@ -15,7 +15,7 @@ export default function Home() {
   return (
     <div className="bg-back min-h-dvh">
       <main className="flex h-dvh w-[100dvw] flex-col overflow-hidden px-3 md:px-4">
-        {/* Tabs: nie abschneiden */}
+        {/* Tabs dürfen nie schrumpfen */}
         <header className="relative z-10 shrink-0 overflow-visible">
           <CategoryTabs
             selectedCategory={selectedCategory}
@@ -23,27 +23,46 @@ export default function Home() {
           />
         </header>
 
-        {/* Bereich unter Tabs: verteilt Höhe exakt */}
+        {/* Bereich unterhalb der Tabs */}
         <div className="mt-2 flex min-h-0 grow flex-col items-stretch gap-2 overflow-hidden md:flex-row">
           {selectedCategory && (
-            <aside className="flex min-h-0 shrink-0 flex-col gap-2 md:w-55">
-              <h2 className="sr-only">Begriffe</h2>
-              {/* Nur Term-Liste scrollt */}
+            <aside
+              aria-labelledby="terms-heading"
+              className="flex min-h-0 shrink-0 flex-col gap-2 md:w-60"
+            >
+              <h2 id="terms-heading" className="sr-only">
+                Begriffe
+              </h2>
               <div className="min-h-0 flex-1 overflow-auto">
                 <TermField selectedCategory={selectedCategory} />
               </div>
             </aside>
           )}
 
-          {/* Graph + Toolbar */}
-          <section className="flex min-h-0 min-w-0 flex-1 flex-col items-stretch gap-2 overflow-hidden md:grid md:grid-cols-[1fr_auto] md:gap-2">
-            {/* Graph nimmt REST */}
-            <div className="min-h-0 min-w-0 flex-1 basis-0 overflow-hidden md:col-[1] md:row-[1]">
+          {/* === Graph + Toolbar als Grid ================================== */}
+          <section
+            className={[
+              "grid gap-2",
+              // Erste Spalte: minmax(24rem, 1fr) → Graph
+              // Zweite Spalte: fit-content(70vw) → Toolbar
+              "md:[grid-template-columns:minmax(24rem,1fr)_max-content]",
+            ].join(" ")}
+          >
+            {/* Graph nimmt IMMER den Rest; bekommt echte Höhe */}
+            <div className="h-full min-h-0 min-w-0 md:col-[1] md:row-[1]">
+              {/* [WICHTIG] Parent hat min-h-0 + Grid → h-full wirkt */}
               <GraphViewer />
             </div>
 
-            {/* Toolbar: mobil oben (volle Breite), desktop rechts (Spalte auto) */}
-            <ToolBar className="order-first w-full md:order-none md:col-[2] md:row-[1] md:h-full md:w-auto md:flex-none md:shrink-0" />
+            {/* Toolbar rechts; Breite bestimmt sich durch Spalten der Sections */}
+            <ToolBar
+              className={[
+                "order-first w-full", // mobil
+                "md:order-none md:col-[2] md:row-[1] md:h-full",
+                "md:[align-self:start] md:[justify-self:start]",
+                "md:inline-block md:[width:max-content] md:min-w-0 md:flex-none md:shrink-0",
+              ].join(" ")}
+            />
           </section>
         </div>
       </main>
