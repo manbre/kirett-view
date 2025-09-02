@@ -6,65 +6,67 @@ import { MaskedIcon } from "@/components/MaskedIcon";
 
 type Props = {
   keys?: NodeLabel[];
-  className?: string; // bekommt md:h-full + md:flex-[x] vom Parent
+  className?: string; // auf Desktop bekommt die Section Höhe via md:h-0 + md:flex-[…]
   onSelect?: (l: NodeLabel) => void;
 };
 
 /**
- * Section:
- * - Desktop: flex-col + flex-wrap + h-full  → füllt zuerst vertikal,
- *   dann entstehen Spalten nach rechts (Toolbar wächst horizontal).
- * - Keine Scrollbars in der Section.
+ * Desktop:
+ *  - Zweispaltiges Grid (grid-cols-2)
+ *  - Section hat feste (zugeteilte) Höhe und scrollt VERTIKAL (overflow-auto)
+ *  - Icons feste Größe -> sauberes Raster
+ *
+ * Mobile:
+ *  - Zeilenweises Wrappen (flex-row flex-wrap), keine Scrollbar in Section
  */
 export function Section({ keys = [], onSelect, className = "" }: Props) {
-  const selectedIcons = useStore((s) => s.selectedIcons); // Array -> robust
+  const selectedIcons = useStore((s) => s.selectedIcons); // Array ist robust (persist)
   const toggleIcon = useStore((s) => s.toggleIcon);
 
   const btn =
     "group inline-flex items-center justify-center rounded-md border border-[var(--color-border)] " +
     "bg-fore hover:bg-[var(--mark)]/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--mark)]";
 
+  const items = (keys || []).filter((k) => k in labelIconMap);
+
   return (
     <div
       className={[
+        // 📱 Mobil: volle Breite, Zeilenweise, KEIN Scroll
+        "flex w-full flex-row flex-wrap content-start justify-start gap-2",
+        // 💻 Desktop: zweispaltiges Grid mit eigenem Scroll
+        "md:grid md:auto-rows-[2rem] md:grid-cols-2 md:overflow-auto",
+        // Höhe kommt von außen: md:h-0 + md:flex-[x]
         "min-h-0",
-        // Mobil: Zeilen + Wrap
-        "flex flex-row flex-wrap content-start justify-start gap-1",
-        // Desktop: SPALTEN via Flex → erst vertikal füllen, dann nach rechts wachsen
-        "md:flex md:h-full md:flex-col md:flex-wrap md:content-start",
-        "overflow-visible", // <— nie hidden; Toolbar/Parent schneiden nicht ab
         className,
       ].join(" ")}
     >
-      {(keys || [])
-        .filter((k) => k in labelIconMap)
-        .map((label) => {
-          const src = labelIconMap[label];
-          const active = false;
-
-          return (
-            <button
-              key={label}
-              type="button"
-              title={label}
-              aria-label={label}
-              aria-pressed={active}
-              onClick={() => {
-                toggleIcon(label);
-                onSelect?.(label);
-              }}
-              className={[
-                btn,
-                "h-9 w-9 shrink-0", // feste Kachelgröße -> sauberes Wrap-Verhalten
-                active
-                  ? "text-[var(--mark)] ring-1 ring-[var(--mark)]"
-                  : "text-[var(--text)]",
-              ].join(" ")}
-            >
-              <MaskedIcon src={src} className="h-5 w-5" />
-            </button>
-          );
-        })}
+      {items.map((label) => {
+        const src = labelIconMap[label];
+        const active = false;
+        return (
+          <button
+            key={label}
+            type="button"
+            aria-label={label}
+            aria-pressed={active}
+            title={label}
+            onClick={() => {
+              toggleIcon(label);
+              onSelect?.(label);
+            }}
+            className={[
+              btn,
+              "h-9 w-9 shrink-0", // quadratisch
+              active
+                ? "text-[var(--mark)] ring-1 ring-[var(--mark)]"
+                : "text-[var(--text)]",
+            ].join(" ")}
+          >
+            <MaskedIcon src={src} className="h-5 w-5" />
+          </button>
+        );
+      })}
     </div>
   );
 }
