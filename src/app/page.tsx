@@ -12,6 +12,10 @@ export default function Home() {
     null,
   );
 
+  function handleGraphAction() {
+    console.log("Graph action clicked");
+  }
+
   return (
     <div className="bg-back min-h-dvh">
       <main className="flex h-dvh w-[100dvw] flex-col overflow-hidden px-3 md:px-4">
@@ -44,15 +48,29 @@ export default function Home() {
             className={[
               "min-h-0 min-w-0 grow",
               "flex flex-col gap-2",
-              "items-stretch md:flex-row", // A und B gleiche Höhe
+              "items-stretch md:flex-row",
             ].join(" ")}
           >
-            {/* A: GraphViewer füllt immer den Rest */}
-            <div className="min-h-0 min-w-0 flex-1 overflow-hidden">
+            {/* A: GraphViewer füllt den Rest */}
+            <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
+              {/* Overlay-Button in der oberen rechten Ecke */}
+              <div className="pointer-events-none absolute inset-0 z-20">
+                <button
+                  type="button"
+                  onClick={handleGraphAction}
+                  className="hover: pointer-events-auto absolute top-2 right-2 inline-flex cursor-pointer items-center justify-center rounded-md border border-[var(--color-border)] px-2 py-1 text-sm shadow hover:bg-[var(--color-mark)]/10 focus-visible:ring-2 focus-visible:ring-[var(--color-mark)]"
+                  aria-label="Graph Aktion"
+                  title="Graph Aktion"
+                >
+                  ✦
+                </button>
+              </div>
+
+              {/* Graph selbst bleibt unter dem Button */}
               <GraphViewer />
             </div>
 
-            {/* B: ToolBar rechts, Breite = Inhalt, volle Höhe */}
+            {/* B: Toolbar */}
             <ToolBar className="order-first w-full md:order-last md:[width:max-content] md:flex-none md:self-stretch" />
           </section>
         </div>

@@ -15,20 +15,6 @@ export const labelIconMap = {
   StartNode: "/icons/start.svg",
   StopNode: "/icons/stop.svg",
   WarningNode: "/icons/warning.svg",
-  //
-  DecisinNodeOR: "/icons/descisionOR.svg",
-  DecisioNodeYN: "/icons/descisionYN.svg",
-  Displayode: "/icons/display.svg",
-  InvasieProcedureNode: "/icons/invasive.svg",
-  JumNode: "/icons/jump.svg",
-  MediationNode: "/icons/dosage.svg",
-  ProcdureNode: "/icons/procedure.svg",
-  SAAMdicationNode: "/icons/medication.svg",
-  SAAPrcedureNode: "/icons/saa.svg",
-  Startode: "/icons/start.svg",
-  StopNde: "/icons/stop.svg",
-  WarnigNode: "/icons/warning.svg",
-  //
 } as const;
 
 export type NodeLabel = keyof typeof labelIconMap;

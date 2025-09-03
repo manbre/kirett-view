@@ -2,24 +2,22 @@
 
 import { useWhiteSvgTexture } from "@/hooks/useWhiteSvgTexture";
 
-type Props = {
-  src: string;
-  className?: string; // z.B. w-5 h-5
-};
+type Props = { src: string; className?: string };
 
 export function MaskedIcon({ src, className = "w-5 h-5" }: Props) {
-  const dataUrl = useWhiteSvgTexture(src);
+  const maskUrl = useWhiteSvgTexture(src);
+  if (!maskUrl) return <span className={`inline-block ${className}`} />;
 
   return (
     <span
       aria-hidden="true"
       className={`inline-block bg-current ${className}`}
       style={{
-        WebkitMaskImage: `url(${dataUrl})`,
+        WebkitMaskImage: `url(${maskUrl})`,
         WebkitMaskRepeat: "no-repeat",
         WebkitMaskPosition: "center",
         WebkitMaskSize: "contain",
-        maskImage: `url(${dataUrl})`,
+        maskImage: `url(${maskUrl})`,
         maskRepeat: "no-repeat",
         maskPosition: "center",
         maskSize: "contain",

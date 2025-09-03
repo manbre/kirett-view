@@ -3,25 +3,25 @@
 import type { StoreApi } from "zustand";
 import type { Store } from "../useStore";
 
-// [API] Hops-Keys aus deiner Filter-Gruppe
+// Hops-Keys (Section 2)
 export type HopKey = "HopOne" | "HopTwo";
 
-// [API] Topologische Filter (Reichweite & Konnektivität)
 export interface TopologySlice {
-  hops: HopKey[]; // Mehrfachauswahl (z. B. ["HopOne","HopTwo"])
+  hops: HopKey[]; // Mehrfachauswahl
   toggleHop: (k: HopKey) => void;
 
-  showOnlyEdges: boolean; // z. B. „Nur Knoten mit Kanten anzeigen“ (dein OnlyEdges)
+  showOnlyEdges: boolean;
   setShowOnlyEdges: (v: boolean) => void;
   toggleShowOnlyEdges: () => void;
 }
 
-// [FACTORY] Slice-Fabrik für Topologie-Filter
 export const createTopologySlice = (
   set: StoreApi<Store>["setState"],
   get: StoreApi<Store>["getState"],
 ): TopologySlice => ({
-  hops: ["HopOne", "HopTwo"], // [NOTE] Default: beide aktiv
+  // ✅ Default: nur HopOne aktiv
+  hops: ["HopOne"],
+
   toggleHop: (k) =>
     set((s) => ({
       hops: s.hops.includes(k) ? s.hops.filter((x) => x !== k) : [...s.hops, k],

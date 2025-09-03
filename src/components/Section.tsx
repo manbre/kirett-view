@@ -155,13 +155,13 @@ export function Section<K extends string>({
             className={[
               // exakt eine Zelle groß
               "inline-grid h-[var(--cell)] w-[var(--cell)] place-items-center",
-              "bg-fore rounded-md border border-[var(--color-border)]",
-              "hover:bg-[var(--mark)]/10",
+              "rounded-md border border-[var(--color-border)]",
+              "hover: cursor-pointer hover:bg-[var(--color-mark)]/10",
               // Fokus: Ring statt Outline
-              "focus-visible:ring-2 focus-visible:ring-[var(--mark)]",
+              "focus-visible:ring-2 focus-visible:ring-[var(--color-mark)]",
               active
-                ? "text-[var(--mark)] ring-1 ring-[var(--mark)]"
-                : "text-[var(--text)]",
+                ? "text-[var(--color-mark)] ring-1 ring-[var(--color-mark)]"
+                : "text-[var(--color-node)]",
             ].join(" ")}
           >
             <MaskedIcon src={map[k]} className="h-5 w-5" />

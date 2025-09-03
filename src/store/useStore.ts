@@ -1,7 +1,6 @@
 "use client";
 
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 
 // [SLICE IMPORTS]
 import { createTermSlice, type TermSlice } from "./slices/termSlice";
@@ -14,30 +13,17 @@ import {
 // [ROOT TYPE]
 export type Store = TermSlice & TypeSlice & TopologySlice;
 
-// [STORE] Kombiniert alle Slices, inkl. persist
-export const useStore = create<Store>()(
-  persist(
-    (set, get) => ({
-      ...createTermSlice(set, get), // [ATTACH] termSlice
-      ...createTypeSlice(set, get), // [ATTACH] typeSlice
-      ...createTopologySlice(set, get), // [ATTACH] topologySlice
-    }),
-    {
-      name: "kirett-store",
-      // [PERSIST] Nur serialisierbare Teile herauspicken
-      partialize: (s) => ({
-        selectedTerms: s.selectedTerms,
-        selectedTypes: s.selectedTypes,
-        hops: s.hops,
-        showOnlyEdges: s.showOnlyEdges,
-      }),
-    },
-  ),
-);
+// [STORE FACTORY] — keine Persistenz
+export const useStore = create<Store>()((set, get) => ({
+  ...createTermSlice(set, get),
+  ...createTypeSlice(set, get),
+  ...createTopologySlice(set, get),
+}));
 
-// [OPTIONAL] Leichte Wiederverwendung / Autocomplete
+// [SELECTORS]
 export const selectors = {
   // terms
+  terms: (s: Store) => s.terms,
   selectedTerms: (s: Store) => s.selectedTerms,
   selectTerm: (s: Store) => s.selectTerm,
   unselectTerm: (s: Store) => s.unselectTerm,
