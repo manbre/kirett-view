@@ -33,7 +33,7 @@ export const selectors = {
   selectAllTypes: (s: Store) => s.selectAllTypes,
   clearTypes: (s: Store) => s.clearTypes,
   // topology
-  hops: (s: Store) => s.hops,
+  selectedHops: (s: Store) => s.selectedHops,
   toggleHop: (s: Store) => s.toggleHop,
   showOnlyEdges: (s: Store) => s.showOnlyEdges,
   toggleShowOnlyEdges: (s: Store) => s.toggleShowOnlyEdges,

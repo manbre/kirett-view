@@ -1,13 +1,19 @@
 import { Category } from "@/constants/category";
 
 export type SelectedTerms = Record<Category, string[]>;
+export type SelectedTypes = Record<Category, string[]>;
+export type SelectedHops = Record<Category, string[]>;
 
 export const useGraphApi = () => {
-  const fetchGraphData = async (selectedTerms: SelectedTerms) => {
+  const fetchGraphData = async (
+    selectedTerms: SelectedTerms,
+    selectedTypes: SelectedTypes,
+    selectedHops: SelectedHops,
+  ) => {
     const res = await fetch("/api/graph/subgraphs", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ selectedTerms }),
+      body: JSON.stringify({ selectedTerms, selectedTypes, selectedHops }),
     });
 
     if (!res.ok) throw new Error("Fehler beim Laden des Graphen");

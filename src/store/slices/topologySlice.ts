@@ -20,11 +20,13 @@ export const createTopologySlice = (
   get: StoreApi<Store>["getState"],
 ): TopologySlice => ({
   // ✅ Default: nur HopOne aktiv
-  hops: ["HopOne"],
+  selectedHops: ["HopOne"],
 
   toggleHop: (k) =>
     set((s) => ({
-      hops: s.hops.includes(k) ? s.hops.filter((x) => x !== k) : [...s.hops, k],
+      selectedHops: s.selectedHops.includes(k)
+        ? s.selectedHops.filter((x) => x !== k)
+        : [...s.selectedHops, k],
     })),
 
   showOnlyEdges: false,

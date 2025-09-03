@@ -26,7 +26,7 @@ type Props = { className?: string };
 export function ToolBar({ className = "" }: Props) {
   const selectedTypes = useStore(selectors.selectedTypes);
   const toggleType = useStore(selectors.toggleType);
-  const hops = useStore(selectors.hops);
+  const selectedHops = useStore(selectors.selectedHops);
   const toggleHop = useStore(selectors.toggleHop);
   const showOnlyEdges = useStore(selectors.showOnlyEdges);
   const toggleOnlyEdges = useStore(selectors.toggleShowOnlyEdges);
@@ -82,7 +82,9 @@ export function ToolBar({ className = "" }: Props) {
             keys={group2}
             map={filterIconMap}
             className="flex-1 md:min-h-0 md:flex-[2_0_0]"
-            isActive={(k) => (isHop(k) ? hops.includes(k) : showOnlyEdges)}
+            isActive={(k) =>
+              isHop(k) ? selectedHops.includes(k) : showOnlyEdges
+            }
             onToggle={(k) => (isHop(k) ? toggleHop(k) : toggleOnlyEdges())}
             onReady={onSectionReady}
           />

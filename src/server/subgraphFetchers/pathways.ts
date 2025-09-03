@@ -3,45 +3,53 @@ import type { Transaction, Record as Neo4jRecord } from "neo4j-driver";
 export async function getPathwaysSubgraph(
   pathways: string[],
   tx: Transaction,
-  depth: 1 | 2 | 3 = 2,
-  exclude: string[] = ["JumpNode", "ActionNode", "DisplayNode", "BPRNode"],
+  depth: string[],
+  include: string[],
 ): Promise<Neo4jRecord[]> {
-  const q0 = `
-MATCH (n:BPRNode)-[r1]-(m)
-WHERE ANY(x IN $pathways WHERE toLower(n.BPR) = toLower(x))
-  AND m.Name <> "Alle Behandlungspfade"
-  AND m.Name <> "Andere Krankheiten"
-AND NONE(l IN labels(m) WHERE l IN $exclude)
-RETURN n, r1 AS r, m AS neighbor
-`;
+  const key = Array.from(new Set(depth)).sort().join(",");
 
-  const q1 = `
-MATCH (n:BPRNode)-[r1]-(m)-[r2]-(nbr2)
-WHERE ANY(x IN $pathways WHERE toLower(n.BPR) = toLower(x))
-  AND nbr2.Name <> "Alle Behandlungspfade"
-  AND nbr2.Name <> "Andere Krankheiten"
-RETURN n, r2 AS r, nbr2 AS neighbor
-`;
+  let query = "";
 
-  const q2 = `
-MATCH (n:BPRNode)-[r1]-(m)-[r2]-(nbr2)
-WHERE ANY(x IN $pathways WHERE toLower(n.BPR) = toLower(x))
-  AND nbr2.Name <> "Alle Behandlungspfade"
-  AND nbr2.Name <> "Andere Krankheiten"
-  UNWIND [r1,r2] AS r 
-  UNWIND [m, nbr2] AS neighbor
-RETURN n, r AS r, neighbor AS neighbor
-`;
+  switch (key) {
+    case "1": // hop1
+      query = `
+  MATCH (n:BPRNode)-[r1]-(nbr1)
+    WHERE ANY(x IN $pathways WHERE toLower(n.BPR) = toLower(x))
+    AND ANY (l IN labels(nbr1) WHERE l IN $include)
+  RETURN n, r1 AS r, nbr1 AS neighbor
+    `;
+      break;
 
-  //   const q2 = `
-  // MATCH (n:BPRNode)-[r1]-(m)-[r2]-(nbr2)
-  // WHERE ANY(x IN $pathways WHERE toLower(n.BPR) = toLower(x))
-  //   AND nbr2.Name <> "Alle Behandlungspfade"
-  //   AND nbr2.Name <> "Andere Krankheiten"
-  //   UNWIND [r1,r2] AS r
-  // RETURN n, r AS r, nbr2 AS neighbor
-  // `;
+    case "2": // hop2
+      query = `
+  MATCH (n:BPRNode)-[r1]-(nbr1)-[r2]-(nbr2)
+    WHERE ANY(x IN $pathways WHERE toLower(n.BPR) = toLower(x))
+    AND ANY (l IN labels(nbr2) WHERE l IN $include)
+  RETURN n, r2 AS r, nbr2 AS neighbor
+    `;
+      break;
 
-  const result = await tx.run(depth === 1 ? q1 : q2, { pathways, exclude });
+    case "1,2": // hop1 & hop2
+      query = `
+  MATCH (n:BPRNode)-[r1]-(nbr1)-[r2]-(nbr2)
+    WHERE ANY(x IN $pathways WHERE toLower(n.BPR) = toLower(x))
+  WITH n, r1, r2, nbr1, nbr2
+    UNWIND [[nbr1, r1], [nbr2, r2]] AS pair
+  WITH n, pair[0] AS nbr, pair[1] AS r
+    WHERE ANY(l IN labels(nbr) WHERE l IN $include)
+  RETURN DISTINCT n, r, nbr AS neighbor
+    `;
+      break;
+
+    default: // fallback: hop1 without label restriction
+      query = `
+  MATCH (n:BPRNode)-[r1]-(nbr1)
+    WHERE ANY(x IN $pathways WHERE toLower(n.BPR) = toLower(x))
+  RETURN n, r1 AS r, nbr1 AS neighbor
+    `;
+      break;
+  }
+
+  const result = await tx.run(query, { pathways, include });
   return result.records;
 }

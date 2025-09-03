@@ -18,6 +18,8 @@ type Props = {
 
 export const GraphViewer = ({ onChangeNode }: Props) => {
   const selectedTerms = useStore((state) => state.selectedTerms);
+  const selectedTypes = useStore((state) => state.selectedTypes);
+  const selectedHops = useStore((state) => state.selectedHops);
   const { fetchGraphData, fetchNeighbors } = useGraphApi();
   const { nodes, edges, updateGraphElements } = useGraphElements();
   const [lastNeighborId, setLastNeighborId] = useState<string | null>(null);
@@ -36,16 +38,20 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
         return;
       }
       try {
-        const { nodes: newNodes, edges: newEdges } =
-          await fetchGraphData(selectedTerms);
+        const { nodes: newNodes, edges: newEdges } = await fetchGraphData(
+          selectedTerms,
+          selectedTypes,
+          selectedHops,
+        );
         updateGraphElements(newNodes, newEdges);
       } catch (err) {
         console.error("graph loading error:", err);
       }
     };
     void load();
+    console.log(selectedTypes);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(selectedTerms)]);
+  }, [JSON.stringify({ selectedTerms, selectedTypes, selectedHops })]);
 
   // Double-Click → Nachbarn
   const handleNodeDoubleClick = useCallback(

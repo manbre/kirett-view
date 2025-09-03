@@ -58,11 +58,11 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={handleGraphAction}
-                  className="hover: pointer-events-auto absolute top-2 right-2 inline-flex cursor-pointer items-center justify-center rounded-md border border-[var(--color-border)] px-2 py-1 text-sm shadow hover:bg-[var(--color-mark)]/10 focus-visible:ring-2 focus-visible:ring-[var(--color-mark)]"
+                  className="hover: pointer-events-auto absolute top-2 left-2 inline-flex cursor-pointer items-center justify-center rounded-md border border-[var(--color-border)] px-2 py-1 text-sm shadow hover:bg-[var(--color-mark)]/10 focus-visible:ring-2 focus-visible:ring-[var(--color-mark)]"
                   aria-label="Graph Aktion"
                   title="Graph Aktion"
                 >
-                  ✦
+                  ⟳
                 </button>
               </div>
 
