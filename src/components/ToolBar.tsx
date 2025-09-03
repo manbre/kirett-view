@@ -33,24 +33,19 @@ export function ToolBar({ className = "" }: Props) {
       className={[
         "bg-fore rounded-xl border border-[var(--color-border)] p-2",
         "overflow-visible",
-        // Desktop: Box schrumpft auf Inhalt
-        "md:inline-block md:[width:max-content] md:min-w-0",
+        "w-full md:[width:max-content] md:min-w-0",
+        "md:h-full", // ⬅️ Toolbar bekommt die volle Zeilenhöhe
         className,
       ].join(" ")}
     >
-      <div
-        className="flex flex-col gap-2 md:h-full md:min-h-0 md:[width:max-content]" // [FIX] Toolbar-intern feste Gesamthöhe
-      >
+      <div className="flex h-full flex-col gap-2 md:min-h-0 md:[width:max-content]">
         {/* ===== Section 1: 5/8 ===== */}
         <Section<NodeLabel>
           keys={group1}
           map={labelIconMap}
           className={[
-            // mobil egal
             "w-full",
-            // [FIX] wirklich feste Höheanteile: 5/8
-            // flex-[grow shrink basis] → 5 0 0  (keine Schrumpfung, Basis 0)
-            "md:h-0 md:min-h-0 md:flex-[5_0_0]",
+            "md:h-0 md:min-h-0 md:flex-[5_0_0]", // 5/8
           ].join(" ")}
           isActive={(k) => selectedTypes.includes(k)}
           onToggle={toggleType}

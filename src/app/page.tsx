@@ -39,30 +39,21 @@ export default function Home() {
             </aside>
           )}
 
-          {/* === Graph + Toolbar als Grid ================================== */}
+          {/* === Graph (A) + Toolbar (B) ================================== */}
           <section
             className={[
-              "grid gap-2",
-              // Erste Spalte: minmax(24rem, 1fr) → Graph
-              // Zweite Spalte: fit-content(70vw) → Toolbar
-              "md:[grid-template-columns:minmax(24rem,1fr)_max-content]",
+              "min-h-0 min-w-0 grow",
+              "flex flex-col gap-2", // mobil: untereinander
+              "items-stretch md:flex-row", // ab md: nebeneinander + gleiche Höhe
             ].join(" ")}
           >
-            {/* Graph nimmt IMMER den Rest; bekommt echte Höhe */}
-            <div className="h-full min-h-0 min-w-0 md:col-[1] md:row-[1]">
-              {/* [WICHTIG] Parent hat min-h-0 + Grid → h-full wirkt */}
+            {/* GraphViewer = A → nimmt IMMER den Rest, echte Höhe */}
+            <div className="min-h-0 min-w-0 flex-1 overflow-hidden">
               <GraphViewer />
             </div>
 
-            {/* Toolbar rechts; Breite bestimmt sich durch Spalten der Sections */}
-            <ToolBar
-              className={[
-                "order-first w-full", // mobil
-                "md:order-none md:col-[2] md:row-[1] md:h-full",
-                "md:[align-self:start] md:[justify-self:start]",
-                "md:inline-block md:[width:max-content] md:min-w-0 md:flex-none md:shrink-0",
-              ].join(" ")}
-            />
+            {/* ToolBar = B → liegt RECHTS von A (ab md), Breite durch Spalten bestimmt */}
+            <ToolBar className="order-first w-full md:order-last md:w-fit md:flex-none md:self-stretch" />
           </section>
         </div>
       </main>

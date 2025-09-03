@@ -14,10 +14,9 @@ type Props<K extends string = string> = {
 
 /**
  * 📱 Mobile: Flex-Row + Wrap
- * 💻 Desktop: Multi-Column (spaltet horizontal, wenn vertikal voll)
- *      – WICHTIG: Die Section muss eine feste Höhe haben (vom Parent),
- *        daher hier md:h-full, damit der Column-Container wirklich die
- *        verteilte Höhe (5/8, 2/8, 1/8) annimmt und NICHT nach unten wächst.
+ * 💻 Desktop: CSS Multi-Column – füllt zunächst vertikal, dann neue Spalten rechts.
+ * Voraussetzung: Die Section hat im Desktop eine feste Höhe (vom Parent),
+ * daher hier md:h-full. Dadurch funktioniert column-fill:auto sequentiell.
  */
 export function Section<K extends string>({
   keys,
@@ -28,18 +27,15 @@ export function Section<K extends string>({
 }: Props<K>) {
   const items = (keys || []).filter((k) => k in map);
 
-  const btnBase =
-    "inline-flex items-center justify-center rounded-md border border-[var(--color-border)] " +
-    "bg-fore hover:bg-[var(--mark)]/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--mark)]";
-
   return (
     <div
       className={[
-        // 📱 mobil: Wrap
+        // 📱 mobil: Wrap-Gitter
         "flex w-full flex-row flex-wrap content-start justify-start gap-1",
-        // 💻 desktop: Multi-Column, keine Stretch-Breite
+        // 💻 desktop: Multi-Column; feste Höhe nötig
         "md:block md:h-full md:[width:max-content] md:overflow-visible",
-        "md:[column-gap:0.25rem] md:[column-fill:auto] md:[column-width:2.9rem]",
+        // WICHTIG: Spaltenbreite + Gap passend zu Button-Maßen (w-9/h-9)
+        "md:[column-gap:theme(spacing.1)] md:[column-fill:auto] md:[column-width:theme(spacing.9)]",
         "min-h-0",
         className,
       ].join(" ")}
@@ -55,10 +51,10 @@ export function Section<K extends string>({
             title={k}
             onClick={() => onToggle?.(k)}
             className={[
-              "inline-flex items-center justify-center",
-              "bg-fore h-9 w-9 rounded-md border border-[var(--color-border)]",
-              "hover:bg-[var(--mark)]/10 focus-visible:outline focus-visible:outline-[var(--mark)]",
-              // Column-Item:
+              // Kachel: quadratisch 9x9 (2.25rem), konsistent mit column-width
+              "inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--color-border)]",
+              "bg-fore hover:bg-[var(--mark)]/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--mark)]",
+              // Multi-Column Item-Eigenschaften
               "mb-1 inline-block break-inside-avoid align-top",
               active
                 ? "text-[var(--mark)] ring-1 ring-[var(--mark)]"
