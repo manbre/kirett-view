@@ -17,7 +17,7 @@ export default function Home() {
   }
 
   return (
-    <div className="bg-back min-h-dvh">
+    <div className="min-h-dvh">
       <main className="flex h-dvh w-[100dvw] flex-col overflow-hidden px-3 md:px-4">
         {/* Tabs dürfen nie schrumpfen */}
         <header className="relative z-10 shrink-0 overflow-visible">
@@ -28,11 +28,11 @@ export default function Home() {
         </header>
 
         {/* Bereich unterhalb der Tabs */}
-        <div className="mt-2 flex min-h-0 grow flex-col items-stretch gap-2 overflow-hidden md:flex-row">
+        <div className="mt-1.5 mb-2 flex min-h-0 grow flex-col items-stretch gap-2 overflow-hidden md:flex-row">
           {selectedCategory && (
             <aside
               aria-labelledby="terms-heading"
-              className="flex min-h-0 shrink-0 flex-col gap-2 md:w-60"
+              className="flex min-h-0 shrink-0 flex-col gap-2 md:w-55"
             >
               <h2 id="terms-heading" className="sr-only">
                 Begriffe

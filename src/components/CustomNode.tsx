@@ -33,7 +33,7 @@ function TexturedMaterial({
   return (
     <meshBasicMaterial
       map={texture}
-      color={isHighlighted ? tokens.edge : hovered ? tokens.mark : "grey"}
+      color={isHighlighted ? "blue" : hovered ? tokens.mark : "grey"}
       transparent
       depthTest={false}
       toneMapped={false}

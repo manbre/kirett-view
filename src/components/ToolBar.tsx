@@ -6,14 +6,18 @@ import {
   type NodeLabel,
   filterIconMap,
   type FilterLabel,
+  exportIconMap,
+  type ExportLabel,
 } from "@/constants/label";
 import { Section } from "@/components/Section";
 import { useStore, selectors } from "@/store/useStore";
 import type { HopKey } from "@/store/slices/topologySlice";
 
-const group1 = Object.keys(labelIconMap) as NodeLabel[];
+const excluded: NodeLabel[] = ["StartNode", "StopNode"];
+const group = Object.keys(labelIconMap) as NodeLabel[];
+const group1 = group.filter((k) => !excluded.includes(k));
 const group2 = Object.keys(filterIconMap) as FilterLabel[];
-const group3: NodeLabel[] = ["BPRNode", "StopNode"];
+const group3 = Object.keys(exportIconMap) as ExportLabel[];
 
 const isHop = (k: FilterLabel): k is HopKey => k === "HopOne" || k === "HopTwo";
 
@@ -86,9 +90,9 @@ export function ToolBar({ className = "" }: Props) {
           <div className="hidden border-t border-[var(--color-border)] md:block md:pb-2" />
 
           {/* 1/8 */}
-          <Section<NodeLabel>
+          <Section<ExportLabel>
             keys={group3}
-            map={labelIconMap}
+            map={exportIconMap}
             className="flex-1 md:min-h-0 md:flex-[1_0_0]"
             onReady={onSectionReady}
           />
