@@ -43,17 +43,17 @@ export default function Home() {
           <section
             className={[
               "min-h-0 min-w-0 grow",
-              "flex flex-col gap-2", // mobil: untereinander
-              "items-stretch md:flex-row", // ab md: nebeneinander + gleiche Höhe
+              "flex flex-col gap-2",
+              "items-stretch md:flex-row", // A und B gleiche Höhe
             ].join(" ")}
           >
-            {/* GraphViewer = A → nimmt IMMER den Rest, echte Höhe */}
+            {/* A: GraphViewer füllt immer den Rest */}
             <div className="min-h-0 min-w-0 flex-1 overflow-hidden">
               <GraphViewer />
             </div>
 
-            {/* ToolBar = B → liegt RECHTS von A (ab md), Breite durch Spalten bestimmt */}
-            <ToolBar className="order-first w-full md:order-last md:w-fit md:flex-none md:self-stretch" />
+            {/* B: ToolBar rechts, Breite = Inhalt, volle Höhe */}
+            <ToolBar className="order-first w-full md:order-last md:[width:max-content] md:flex-none md:self-stretch" />
           </section>
         </div>
       </main>

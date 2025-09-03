@@ -1,5 +1,12 @@
 "use client";
 
+import React, {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { MaskedIcon } from "@/components/MaskedIcon";
 
 type IconMap<K extends string = string> = Record<K, string>;
@@ -10,13 +17,23 @@ type Props<K extends string = string> = {
   className?: string;
   isActive?: (key: K) => boolean;
   onToggle?: (key: K) => void;
+  /** Optional feste Zellgröße; Standard ist responsive clamp(...) */
+  cell?: string;
+  /** Meldet dem Parent, dass diese Section ihre Rows berechnet hat (ab md) */
+  onReady?: () => void;
 };
 
+// Isomorphic Layout Effect: auf dem Client useLayoutEffect (vor Paint),
+// auf dem Server (SSR) fallback auf useEffect.
+const useIsomorphicLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
+
 /**
- * 📱 Mobile: Flex-Row + Wrap
- * 💻 Desktop: CSS Multi-Column – füllt zunächst vertikal, dann neue Spalten rechts.
- * Voraussetzung: Die Section hat im Desktop eine feste Höhe (vom Parent),
- * daher hier md:h-full. Dadurch funktioniert column-fill:auto sequentiell.
+ * Verhalten:
+ * - 📱 Mobil (default): Flex + Wrap → Buttons laufen in ZEILEN um.
+ * - 💻 Ab md: CSS Grid mit vertikalem Füllen und Spalten nach rechts.
+ *   Die Zeilenanzahl (--rows) wird *vor dem Paint* berechnet.
+ *   Bis dahin bleibt die Section ab md unsichtbar (kein Flash).
  */
 export function Section<K extends string>({
   keys,
@@ -24,21 +41,106 @@ export function Section<K extends string>({
   className = "",
   isActive,
   onToggle,
+  cell = "clamp(36px, 3.2vw, 72px)",
+  onReady,
 }: Props<K>) {
-  const items = (keys || []).filter((k) => k in map);
+  const items = useMemo(
+    () => (keys || []).filter((k) => k in map),
+    [keys, map],
+  );
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [rows, setRows] = useState<number>(1);
+  const [ready, setReady] = useState(false); // ⬅️ steuert Sichtbarkeit ab md
+
+  // Hilfsfunktionen
+  const measureCellPx = (host: HTMLElement) => {
+    const firstChild = host.firstElementChild as HTMLElement | null;
+    if (firstChild) {
+      const h = Math.round(firstChild.getBoundingClientRect().height);
+      if (h > 0) return h;
+    }
+    // Fallback: Probe-Element misst var(--cell)
+    const probe = document.createElement("div");
+    probe.style.position = "absolute";
+    probe.style.visibility = "hidden";
+    probe.style.height = `var(--cell)`;
+    probe.style.width = `var(--cell)`;
+    host.appendChild(probe);
+    const h = probe.getBoundingClientRect().height || 0;
+    host.removeChild(probe);
+    return h;
+  };
+
+  const computeRows = (host: HTMLElement) => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    if (!mq.matches) {
+      // mobil: keine Grid-Zeilenberechnung nötig
+      return 1;
+    }
+    const cs = getComputedStyle(host);
+    const cellPx = measureCellPx(host);
+    const rowGap = parseFloat(cs.rowGap || cs.gap || "0") || 0;
+    const h = host.clientHeight;
+    if (cellPx <= 0 || h <= 0) return 1;
+    // floor((h + rowGap) / (cellPx + rowGap))
+    return Math.max(1, Math.floor((h + rowGap) / (cellPx + rowGap)));
+  };
+
+  // Vor dem ersten Paint rows berechnen und danach sichtbar schalten
+  useIsomorphicLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const setAll = () => {
+      setRows(computeRows(el));
+      if (!ready) {
+        setReady(true);
+        onReady?.(); // ⬅️ Parent informieren: diese Section ist bereit
+      }
+    };
+
+    setAll();
+
+    const ro = new ResizeObserver(setAll);
+    ro.observe(el);
+
+    const mq = window.matchMedia("(min-width: 768px)");
+    const mqListener = () => setAll();
+    mq.addEventListener("change", mqListener);
+
+    return () => {
+      ro.disconnect();
+      mq.removeEventListener("change", mqListener);
+    };
+  }, [onReady, ready]);
 
   return (
     <div
+      ref={ref}
+      data-ready={ready ? "1" : "0"}
+      aria-hidden={ready ? undefined : true}
       className={[
-        // 📱 mobil: Wrap-Gitter
+        // 📱 Mobil: Flex + Wrap in Zeilen (immer sichtbar auf Mobil)
         "flex w-full flex-row flex-wrap content-start justify-start gap-1",
-        // 💻 desktop: Multi-Column; feste Höhe nötig
-        "md:block md:h-full md:[width:max-content] md:overflow-visible",
-        // WICHTIG: Spaltenbreite + Gap passend zu Button-Maßen (w-9/h-9)
-        "md:[column-gap:theme(spacing.1)] md:[column-fill:auto] md:[column-width:theme(spacing.9)]",
+        // 💻 Ab md: Grid, das vertikal füllt und dann neue Spalten anlegt
+        "md:grid md:content-start md:gap-1",
+        "md:[grid-auto-columns:var(--cell)] md:[grid-auto-flow:column] md:[grid-auto-rows:var(--cell)]",
+        "md:[grid-template-rows:repeat(var(--rows),var(--cell))]",
+        // Desktop: feste Höhe vom Parent, Breite folgt dem Inhalt
+        "md:h-full md:[width:max-content] md:overflow-visible",
+        // 💡 WICHTIG: Kein Flash – bis ready unsichtbar (nur ab md)
+        ready ? "md:visible md:opacity-100" : "md:invisible md:opacity-0",
+        "transition-opacity",
         "min-h-0",
         className,
       ].join(" ")}
+      style={
+        {
+          // @ts-expect-error CSS custom props
+          "--cell": cell,
+          "--rows": rows,
+        } as React.CSSProperties
+      }
     >
       {items.map((k) => {
         const active = isActive?.(k) ?? false;
@@ -51,11 +153,12 @@ export function Section<K extends string>({
             title={k}
             onClick={() => onToggle?.(k)}
             className={[
-              // Kachel: quadratisch 9x9 (2.25rem), konsistent mit column-width
-              "inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--color-border)]",
-              "bg-fore hover:bg-[var(--mark)]/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--mark)]",
-              // Multi-Column Item-Eigenschaften
-              "mb-1 inline-block break-inside-avoid align-top",
+              // exakt eine Zelle groß
+              "inline-grid h-[var(--cell)] w-[var(--cell)] place-items-center",
+              "bg-fore rounded-md border border-[var(--color-border)]",
+              "hover:bg-[var(--mark)]/10",
+              // Fokus: Ring statt Outline
+              "focus-visible:ring-2 focus-visible:ring-[var(--mark)]",
               active
                 ? "text-[var(--mark)] ring-1 ring-[var(--mark)]"
                 : "text-[var(--text)]",

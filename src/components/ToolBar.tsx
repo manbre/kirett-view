@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useCallback, useMemo, useState } from "react";
 import {
   labelIconMap,
   type NodeLabel,
@@ -26,15 +27,39 @@ export function ToolBar({ className = "" }: Props) {
   const showOnlyEdges = useStore(selectors.showOnlyEdges);
   const toggleOnlyEdges = useStore(selectors.toggleShowOnlyEdges);
 
+  // Tracke Readiness aller drei Sektionen
+  const totalSections = 3;
+  const [readyCount, setReadyCount] = useState(0);
+  const ready = readyCount >= totalSections;
+
+  const onSectionReady = useCallback(() => {
+    setReadyCount((c) => Math.min(totalSections, c + 1));
+  }, []);
+
+  // Klassen abhängig von readiness:
+  // - Mobil: immer w-full
+  // - Desktop: solange !ready => w-0 + invisible (kein Vollbreiten-Frame),
+  //            danach width:max-content + sichtbar
+  const desktopWidthClass = ready ? "md:[width:max-content]" : "md:w-0";
+  const desktopVisibilityClass = ready
+    ? "md:visible md:opacity-100"
+    : "md:invisible md:opacity-0";
+
   return (
     <aside
       role="toolbar"
       aria-label="Graph-Filter"
+      aria-busy={!ready}
       className={[
         "bg-fore rounded-xl border border-[var(--color-border)] p-2",
-        "overflow-visible",
-        "w-full md:[width:max-content] md:min-w-0",
-        "md:h-full", // ⬅️ Toolbar bekommt die volle Zeilenhöhe
+        // mobil vollbreit, ab md: dynamisch
+        "w-full md:min-w-0",
+        desktopWidthClass,
+        desktopVisibilityClass,
+        // volle Höhe innerhalb der Row, damit 5/8–2/8–1/8 funktionieren
+        "md:h-full",
+        // Clipping: falls minimaler Zwischenframe, nichts „quillt“ heraus
+        "md:overflow-hidden",
         className,
       ].join(" ")}
     >
@@ -43,30 +68,24 @@ export function ToolBar({ className = "" }: Props) {
         <Section<NodeLabel>
           keys={group1}
           map={labelIconMap}
-          className={[
-            "w-full",
-            "md:h-0 md:min-h-0 md:flex-[5_0_0]", // 5/8
-          ].join(" ")}
+          className="w-full md:min-h-0 md:flex-[5_0_0]" // 5/8
           isActive={(k) => selectedTypes.includes(k)}
           onToggle={toggleType}
+          onReady={onSectionReady}
         />
 
         <div className="hidden border-t border-[var(--color-border)] md:block" />
 
         {/* ===== Section 2 (2/8) + Section 3 (1/8) ===== */}
-        <div
-          className={[
-            "flex flex-row gap-2 md:flex-col md:gap-0",
-            "md:h-0 md:min-h-0 md:flex-[3_0_0]", // zusammen 3/8
-          ].join(" ")}
-        >
+        <div className="flex flex-row gap-2 md:min-h-0 md:flex-[3_0_0] md:flex-col md:gap-0">
           {/* 2/8 */}
           <Section<FilterLabel>
             keys={group2}
             map={filterIconMap}
-            className="flex-1 md:h-0 md:min-h-0 md:flex-[2_0_0]"
+            className="flex-1 md:min-h-0 md:flex-[2_0_0]"
             isActive={(k) => (isHop(k) ? hops.includes(k) : showOnlyEdges)}
             onToggle={(k) => (isHop(k) ? toggleHop(k) : toggleOnlyEdges())}
+            onReady={onSectionReady}
           />
 
           <div className="hidden border-t border-[var(--color-border)] md:block" />
@@ -75,9 +94,10 @@ export function ToolBar({ className = "" }: Props) {
           <Section<NodeLabel>
             keys={group3}
             map={labelIconMap}
-            className="flex-1 md:h-0 md:min-h-0 md:flex-[1_0_0]"
+            className="flex-1 md:min-h-0 md:flex-[1_0_0]"
             isActive={(k) => selectedTypes.includes(k)}
             onToggle={toggleType}
+            onReady={onSectionReady}
           />
         </div>
       </div>
