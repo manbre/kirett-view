@@ -37,3 +37,11 @@ export const exportIconMap = {
 } as const;
 
 export type exportLabel = keyof typeof exportIconMap;
+
+//============================================================
+//
+export const uiIconMap = {
+  Rewind: "/icons/rewind.svg",
+} as const;
+
+export type uiLabel = keyof typeof uiIconMap;

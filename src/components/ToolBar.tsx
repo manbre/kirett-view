@@ -50,7 +50,7 @@ export function ToolBar({ className = "" }: Props) {
       aria-label="Graph-Filter"
       aria-busy={!ready}
       className={[
-        "bg-fore rounded-xl border border-[var(--color-border)] p-2",
+        "rounded-xl border border-[var(--color-border)] p-2",
         // mobil vollbreit, ab md: von 0 → max-content, sobald ready
         "w-full md:min-w-0",
         desktopWidthClass,

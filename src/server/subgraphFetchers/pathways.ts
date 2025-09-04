@@ -3,7 +3,7 @@ import type { Transaction, Record as Neo4jRecord } from "neo4j-driver";
 export async function getPathwaysSubgraph(
   pathways: string[],
   tx: Transaction,
-  depth: string[],
+  depth: ("1" | "2")[],
   include: string[],
 ): Promise<Neo4jRecord[]> {
   const key = Array.from(new Set(depth)).sort().join(",");

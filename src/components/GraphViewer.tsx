@@ -20,6 +20,7 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
   const selectedTerms = useStore((state) => state.selectedTerms);
   const selectedTypes = useStore((state) => state.selectedTypes);
   const selectedHops = useStore((state) => state.selectedHops);
+  const showOnlyEdges = useStore((state) => state.showOnlyEdges);
   const { fetchGraphData, fetchNeighbors } = useGraphApi();
   const { nodes, edges, updateGraphElements } = useGraphElements();
   const [lastNeighborId, setLastNeighborId] = useState<string | null>(null);
@@ -33,7 +34,8 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
   // Daten laden
   useEffect(() => {
     const load = async () => {
-      if (Object.values(selectedTerms).flat().length === 0) {
+      const hasTerms = Object.values(selectedTerms).flat().length > 0;
+      if (!hasTerms) {
         updateGraphElements([], []);
         return;
       }
@@ -42,6 +44,7 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
           selectedTerms,
           selectedTypes,
           selectedHops,
+          showOnlyEdges,
         );
         updateGraphElements(newNodes, newEdges);
       } catch (err) {
@@ -49,9 +52,17 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
       }
     };
     void load();
-    console.log(selectedTypes);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify({ selectedTerms, selectedTypes, selectedHops })]);
+  }, [
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(selectedTerms),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(selectedTypes),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(selectedHops),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(showOnlyEdges),
+  ]);
 
   // Double-Click → Nachbarn
   const handleNodeDoubleClick = useCallback(

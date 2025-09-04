@@ -6,6 +6,9 @@ import { CategoryTabs } from "@/components/CategoryTabs";
 import { TermField } from "@/components/TermField";
 import { ToolBar } from "@/components/ToolBar";
 import { GraphViewer } from "@/components/GraphViewer";
+import Image from "next/image";
+import { tokens } from "@/theme/tokens";
+import { uiIconMap } from "@/constants/label";
 
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
@@ -54,17 +57,22 @@ export default function Home() {
             {/* A: GraphViewer füllt den Rest */}
             <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
               {/* Overlay-Button in der oberen rechten Ecke */}
-              <div className="pointer-events-none absolute inset-0 z-20">
-                <button
-                  type="button"
-                  onClick={handleGraphAction}
-                  className="hover: pointer-events-auto absolute top-2 left-2 inline-flex cursor-pointer items-center justify-center rounded-md border border-[var(--color-border)] px-2 py-1 text-sm shadow hover:bg-[var(--color-mark)]/10 focus-visible:ring-2 focus-visible:ring-[var(--color-mark)]"
-                  aria-label="Graph Aktion"
-                  title="Graph Aktion"
-                >
-                  ⟳
-                </button>
-              </div>
+
+              <button
+                className="absolute top-2 left-2 z-20 inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--color-border)] hover:cursor-pointer hover:bg-[var(--color-mark)]/10 focus-visible:outline-2 focus-visible:outline-[var(--color-mark)]"
+                aria-hidden
+              >
+                <span className="relative block h-6 w-6">
+                  <Image
+                    src={uiIconMap.Rewind} // "/icons/rewind.svg"
+                    alt="zurück"
+                    fill
+                    color={tokens.node}
+                    className="pointer-events-none object-contain"
+                    priority
+                  />
+                </span>
+              </button>
 
               {/* Graph selbst bleibt unter dem Button */}
               <GraphViewer />

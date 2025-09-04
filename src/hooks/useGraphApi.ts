@@ -1,19 +1,31 @@
 import { Category } from "@/constants/category";
 
 export type SelectedTerms = Record<Category, string[]>;
-export type SelectedTypes = Record<Category, string[]>;
-export type SelectedHops = Record<Category, string[]>;
+export type SelectedTypes = string[];
+export type SelectedHops = string[]; // "HopOne" | "HopTwo"
 
 export const useGraphApi = () => {
   const fetchGraphData = async (
     selectedTerms: SelectedTerms,
     selectedTypes: SelectedTypes,
     selectedHops: SelectedHops,
+    showOnlyEdges: boolean,
   ) => {
+    // Labels übernehmen
+    const include = selectedTypes;
+
+    // Hops mappen auf "1"/"2"
+    const depth: ("1" | "2")[] = [];
+    if (selectedHops.includes("HopOne")) depth.push("1");
+    if (selectedHops.includes("HopTwo")) depth.push("2");
+    if (depth.length === 0) depth.push("1"); // Default: immer mindestens 1-Hop
+
+    console.log("api:", { showOnlyEdges });
+
     const res = await fetch("/api/graph/subgraphs", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ selectedTerms, selectedTypes, selectedHops }),
+      body: JSON.stringify({ selectedTerms, include, depth, showOnlyEdges }),
     });
 
     if (!res.ok) throw new Error("Fehler beim Laden des Graphen");
@@ -27,7 +39,7 @@ export const useGraphApi = () => {
       body: JSON.stringify({ nodeId }),
     });
     if (!res.ok) throw new Error("error while loading neighbors");
-    return res.json(); // { nodes, edges }
+    return res.json();
   };
 
   return { fetchGraphData, fetchNeighbors };

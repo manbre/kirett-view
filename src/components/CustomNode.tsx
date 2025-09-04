@@ -67,7 +67,7 @@ export function CustomNode<T extends BaseNode>({
         <mesh position={[0, 0, 0]}>
           <circleGeometry args={[node.collisionRadius, 64]} />
           <meshBasicMaterial
-            color="#000"
+            color={tokens.node}
             transparent
             opacity={0.05}
             depthTest={false}

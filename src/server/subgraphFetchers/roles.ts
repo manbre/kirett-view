@@ -8,10 +8,12 @@ const roleSynonyms: Record<string, string> = {
 export async function getRolesSubgraph(
   roles: string[],
   tx: Transaction,
+  include: string[],
 ): Promise<Neo4jRecord[]> {
   const normalizedRoles = Array.from(
     new Set(roles.map((r) => roleSynonyms[r] ?? r)),
   );
+
   // attributes "Betrifft1", "Betrifft2" store role names (e.g. "NFS", "RA")
   const result = await tx.run(
     `
@@ -19,9 +21,10 @@ export async function getRolesSubgraph(
     UNWIND keys(n) AS prop
     WITH n, prop
     WHERE prop CONTAINS "Betrifft" AND n[prop] IN $roles
+     AND ANY (l IN labels(n) WHERE l IN $include)
   RETURN n AS n
     `,
-    { roles: normalizedRoles },
+    { roles: normalizedRoles, include },
   );
 
   return result.records;
