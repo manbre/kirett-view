@@ -58,7 +58,8 @@ export async function POST(req: NextRequest) {
       return results.flat();
     });
 
-    return NextResponse.json(convertNeo4jRecords(records), {
+    console.log(body.showOnlyEdges);
+    return NextResponse.json(convertNeo4jRecords(records, body.showOnlyEdges), {
       status: 200,
     });
   } catch (err) {

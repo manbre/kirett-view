@@ -20,15 +20,13 @@ export const useGraphApi = () => {
     if (selectedHops.includes("HopTwo")) depth.push("2");
     if (depth.length === 0) depth.push("1"); // Default: immer mindestens 1-Hop
 
-    console.log("api:", { showOnlyEdges });
-
     const res = await fetch("/api/graph/subgraphs", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ selectedTerms, include, depth, showOnlyEdges }),
+      body: JSON.stringify({ selectedTerms, depth, include, showOnlyEdges }),
     });
 
-    if (!res.ok) throw new Error("Fehler beim Laden des Graphen");
+    if (!res.ok) throw new Error("error while loading graph");
     return res.json(); // { nodes, edges }
   };
 
@@ -36,7 +34,7 @@ export const useGraphApi = () => {
     const res = await fetch("/api/graph/expand/neighbors", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nodeId }),
+      body: JSON.stringify({ nodeId, depth, include, showOnlyEdges }),
     });
     if (!res.ok) throw new Error("error while loading neighbors");
     return res.json();

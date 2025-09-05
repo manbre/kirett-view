@@ -32,10 +32,17 @@ export async function POST(
   try {
     // use one read transaction
     const records = await withReadTx((tx) =>
-      expandFetchers[action as ExpandAction](nodeId, tx),
+      expandFetchers[action as ExpandAction](
+        nodeId,
+        body.depth,
+        body.include,
+        tx,
+      ),
     );
 
-    return NextResponse.json(convertNeo4jRecords(records), { status: 200 });
+    return NextResponse.json(convertNeo4jRecords(records, body.showOnlyEdges), {
+      status: 200,
+    });
   } catch (err) {
     console.error(`error in /api/graph/expand/${action}:`, err);
     return NextResponse.json(

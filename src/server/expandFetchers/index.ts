@@ -3,6 +3,8 @@ import { getNeighbors } from "./neighbors";
 
 export type ExpandFetcher = (
   nodeId: string[],
+  depth: ("1" | "2")[], // hop selection
+  include: string[], // type selection
   tx: Transaction,
 ) => Promise<Neo4jRecord[]>;
 

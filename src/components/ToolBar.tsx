@@ -21,9 +21,7 @@ const group3 = Object.keys(exportIconMap) as ExportLabel[];
 
 const isHop = (k: FilterLabel): k is HopKey => k === "HopOne" || k === "HopTwo";
 
-type Props = { className?: string };
-
-export function ToolBar({ className = "" }: Props) {
+export function ToolBar() {
   const selectedTypes = useStore(selectors.selectedTypes);
   const toggleType = useStore(selectors.toggleType);
   const selectedHops = useStore(selectors.selectedHops);
@@ -59,7 +57,6 @@ export function ToolBar({ className = "" }: Props) {
         "md:h-full",
         // Clipping für eventuelle Zwischenframes
         "md:overflow-hidden",
-        className,
       ].join(" ")}
     >
       <div className="flex h-full flex-col gap-2 md:min-h-0 md:[width:max-content]">

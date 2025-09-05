@@ -32,7 +32,6 @@ export type FilterLabel = keyof typeof filterIconMap;
 //============================================================
 //
 export const exportIconMap = {
-  PngExport: "/icons/png.svg",
   SvgExport: "/icons/svg.svg",
 } as const;
 

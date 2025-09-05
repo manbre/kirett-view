@@ -19,9 +19,9 @@ export async function getRolesSubgraph(
     `
   MATCH (n)
     UNWIND keys(n) AS prop
-    WITH n, prop
+  WITH n, prop
     WHERE prop CONTAINS "Betrifft" AND n[prop] IN $roles
-     AND ANY (l IN labels(n) WHERE l IN $include)
+    AND ANY (l IN labels(n) WHERE l IN $include)
   RETURN n AS n
     `,
     { roles: normalizedRoles, include },

@@ -7,9 +7,10 @@ import { useGraphApi } from "@/hooks/useGraphApi";
 import { useGraphElements } from "@/hooks/useGraphElements";
 import { CustomNode } from "@/components/CustomNode";
 import { prepareNodes } from "@/graph/prepareNodes";
-import { useGraphExport } from "@/hooks/useGraphExport";
 import { buildDisplayName } from "@/graph/label-metrics";
 import { tokens } from "@/theme/tokens";
+import Image from "next/image";
+import { uiIconMap } from "@/constants/label";
 import type { GraphNode, GraphEdge } from "@/types/graph";
 
 type Props = {
@@ -25,11 +26,6 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
   const { nodes, edges, updateGraphElements } = useGraphElements();
   const [lastNeighborId, setLastNeighborId] = useState<string | null>(null);
   const graphRef = useRef<GraphCanvasRef | null>(null);
-
-  const { collectNode, downloadSVG, downloadPNG } = useGraphExport(
-    graphRef,
-    (n) => buildDisplayName(n.data, n.label), // oder: (n) => n.label
-  );
 
   // Daten laden
   useEffect(() => {
@@ -75,7 +71,12 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
         setLastNeighborId(neighborIds[0] ?? null);
 
         const { nodes: neighborNodes, edges: neighborEdges } =
-          await fetchNeighbors(nodeId);
+          await fetchNeighbors(
+            nodeId,
+            selectedHops,
+            selectedTypes,
+            showOnlyEdges,
+          );
         updateGraphElements(neighborNodes, neighborEdges);
 
         // nachladen -> auf den Knoten zentrieren und fitten
@@ -124,6 +125,29 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
 
   return (
     <div className="relative flex h-[65dvh] w-full overflow-hidden rounded-xl border border-[var(--color-border)] bg-white p-1 md:h-full">
+      <button
+        className="absolute top-2 left-2 z-20 inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--color-border)] hover:cursor-pointer hover:bg-[var(--color-mark)]/10 focus-visible:outline-2 focus-visible:outline-[var(--color-mark)]"
+        aria-hidden
+        onClick={() =>
+          fetchGraphData(
+            selectedTerms,
+            selectedTypes,
+            selectedHops,
+            showOnlyEdges,
+          )
+        }
+      >
+        <span className="relative block h-6 w-6">
+          <Image
+            src={uiIconMap.Rewind} // "/icons/rewind.svg"
+            alt="zurück"
+            fill
+            color={tokens.node}
+            className="pointer-events-none object-contain"
+            priority
+          />
+        </span>
+      </button>
       <GraphCanvas
         ref={graphRef}
         nodes={preppedNodes}
@@ -134,9 +158,6 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
         labelType="hidden"
         draggable
         renderNode={({ node }) => {
-          // >>> Position (x/y) mitschneiden – ohne das bleibt SVG leer
-          collectNode(node as GraphNode & { x?: number; y?: number });
-
           return (
             <CustomNode
               node={node as GraphNode}
