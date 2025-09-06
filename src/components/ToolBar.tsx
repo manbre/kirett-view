@@ -111,7 +111,7 @@ export function ToolBar() {
               iconColor: "#111", // oder "#fff" + background:"white" für White-Tint-Optik
               edgeColor: "#9bbcff",
               edgeWidth: 1.25,
-              labelBg: true,
+              labelBg: false,
               // arrow: true,
               fileName: "subgraph.svg",
             })
