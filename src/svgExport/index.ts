@@ -1,31 +1,32 @@
+// src/svgExport/index.ts
 "use client";
 
-// EN: Build final SVG: raw coordinates + viewBox=minX minY width height.
-// DE: Finale SVG-Erzeugung: Rohkoordinaten + viewBox=minX minY width height.
-
 import type { GraphNode, GraphEdge } from "@/types/graph";
-import type { Pos } from "./graphUtils";
-import { loadIconsFor } from "./icons";
+import type { Pos } from "./layout";
 import { resolvePositions } from "./layout";
 import { computeBBox } from "./bbox";
 import { edgesToSvg, nodesToSvg } from "./serialize";
+import { loadIconsFor } from "./icons";
+import { MAX_W as VIEWER_MAX_W } from "@/graph/label-metrics";
 
 export type Bg = "transparent" | "white";
 
 export interface SvgExportOptions {
-  background?: Bg; // "transparent" | "white"
-  padding?: number; // default 24
-  fontFamily?: string; // default system UI
-  fontSize?: number; // default 12
-  iconSize?: number; // default 24
-  nodeRadius?: number; // default iconSize/2
-  iconColor?: string; // default "#111"
-  edgeColor?: string; // default "#7aa7ff"
-  edgeWidth?: number; // default 1.25
-  arrow?: boolean; // default false
-  labelBg?: boolean; // default true
-  fileName?: string; // used by hook
-  debug?: boolean; // default false
+  background?: Bg;
+  padding?: number;
+  fontFamily?: string;
+  fontSize?: number;
+  iconSize?: number;
+  nodeRadius?: number;
+  iconColor?: string;
+  edgeColor?: string;
+  edgeWidth?: number;
+  arrow?: boolean;
+  labelBg?: boolean;
+  fileName?: string;
+  debug?: boolean;
+  /** exakt wie im Viewer; wenn nicht gesetzt, wird Viewer-Standard genutzt */
+  maxTextWidth?: number;
 }
 
 export async function buildSvgFromGraph(
@@ -36,7 +37,6 @@ export async function buildSvgFromGraph(
 ): Promise<string | null> {
   if (!nodes || nodes.length === 0) return null;
 
-  // -------- options (tiny + explicit) --------
   const padding = opts?.padding ?? 24;
   const fontSize = opts?.fontSize ?? 12;
   const iconSize = opts?.iconSize ?? 24;
@@ -51,34 +51,32 @@ export async function buildSvgFromGraph(
   const withArrow = opts?.arrow ?? false;
   const labelBg = opts?.labelBg ?? true;
   const debug = opts?.debug ?? false;
+  const maxTextWidth = opts?.maxTextWidth ?? VIEWER_MAX_W;
 
-  // 1) positions + icons (raw positions, as reported by viewer or fallback)
-  //    EN: Erst Roh-Positionen bestimmen (keine Spiegelung).
-  //    DE: Zuerst Roh-Positionen bestimmen (noch ohne Flip).
+  // 1) Positionen gemäß Priorität
   const posRaw = resolvePositions(nodes, posMap);
 
-  // 2) bbox aus Rohkoordinaten ermitteln (damit width/height stimmen)
-  //    EN: Compute bbox from *raw* coords so width/height are correct.
-  const { minX, minY, maxY, width, height } = (() => {
-    const b = computeBBox(nodes, posRaw, iconSize, fontSize, padding);
-    // wir brauchen zusätzlich maxY für den Flip; height = maxY - minY (+padding)
-    return { ...b, maxY: b.minY + b.height };
-  })();
+  // 2) BBox aus Rohkoordinaten – liefert minY/maxY für flip
+  const bbox = computeBBox(
+    nodes,
+    posRaw,
+    iconSize,
+    fontSize,
+    padding,
+    maxTextWidth,
+  );
+  const { minX, minY, width, height } = bbox;
+  const maxY = minY + height;
 
-  // 3) Y-Achse spiegeln (Canvas: y↑ / SVG: y↓)
-  //    EN: Flip Y so exported SVG matches what you see in the viewer.
-  //    DE: Y so spiegeln, dass der Export so aussieht wie im Viewer.
-  //    Formel: y' = minY + (maxY - y)  <=>  y' = (minY + maxY) - y
-  const flippedPos = new Map<string, Pos>();
-  const yFlip = (y: number) => minY + (maxY - y);
-  for (const [id, p] of posRaw) {
-    flippedPos.set(id, { x: p.x, y: yFlip(p.y) });
-  }
+  // 3) Y an SVG anpassen (immer flippen, keine Flag)
+  const flipped = new Map<string, Pos>();
+  const flipY = (y: number) => minY + (maxY - y);
+  for (const [id, p] of posRaw) flipped.set(id, { x: p.x, y: flipY(p.y) });
 
-  // 4) Icons laden, die im aktuellen Graph tatsächlich gebraucht werden
+  // 4) Icons laden
   const icons = await loadIconsFor(nodes);
 
-  // 5) optional <defs> (Pfeilspitzen)
+  // 5) defs (Pfeile optional)
   const defs = withArrow
     ? `<defs>
          <marker id="arrow" markerUnits="strokeWidth" markerWidth="8" markerHeight="8" orient="auto" refX="8" refY="4">
@@ -87,8 +85,8 @@ export async function buildSvgFromGraph(
        </defs>`
     : "";
 
-  // 6) Edges & Nodes serialisieren — jetzt mit **geflippten** Positionen
-  const edgesSvg = edgesToSvg(edges, flippedPos, {
+  // 6) serialize
+  const edgesSvg = edgesToSvg(edges, flipped, {
     edgeColor,
     edgeWidth,
     trimAtNode: true,
@@ -96,7 +94,7 @@ export async function buildSvgFromGraph(
     arrowMarker: withArrow ? "url(#arrow)" : undefined,
   });
 
-  const nodesSvg = nodesToSvg(nodes, flippedPos, icons, {
+  const nodesSvg = nodesToSvg(nodes, flipped, icons, {
     iconSize,
     nodeRadius,
     fontSize,
@@ -104,9 +102,10 @@ export async function buildSvgFromGraph(
     iconColor,
     labelBg,
     textColor: "#111",
+    maxTextWidth, // wichtig für identischen Wrap
   });
 
-  // 7) Hintergrund + Debug
+  // 7) optionaler Hintergrund / Debugrahmen
   const bg =
     background === "white"
       ? `<rect x="${minX}" y="${minY}" width="${width}" height="${height}" fill="#ffffff" />`
@@ -114,17 +113,15 @@ export async function buildSvgFromGraph(
 
   const dbg = debug
     ? `<rect x="${minX}" y="${minY}" width="${width}" height="${height}"
-              fill="none" stroke="#f36" stroke-dasharray="4 3" stroke-width="1"/>`
+              fill="none" stroke="#f36" stroke-dasharray="4 3" stroke-width="1" />`
     : "";
 
-  // 8) Finale SVG (viewBox deckt exakt den Inhalt → nichts abgeschnitten)
+  // 8) Finale SVG
   return `<svg xmlns="http://www.w3.org/2000/svg"
                width="${width}" height="${height}"
                viewBox="${minX} ${minY} ${width} ${height}"
                role="img" aria-label="Exported subgraph">
-            ${defs}
-            ${bg}
-            ${dbg}
+            ${defs}${bg}${dbg}
             <g id="edges">${edgesSvg}</g>
             <g id="nodes">${nodesSvg}</g>
           </svg>`

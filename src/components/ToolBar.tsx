@@ -13,7 +13,7 @@ import { Section } from "@/components/Section";
 import { useStore, selectors } from "@/store/useStore";
 import type { HopKey } from "@/store/slices/topologySlice";
 import { useSvgExport } from "@/hooks/useSvgExport";
-import { NODE_R, FONT_PX } from "@/graph/label-metrics";
+import { NODE_R, FONT_PX, MAX_W } from "@/graph/label-metrics";
 
 const excluded: NodeLabel[] = ["StartNode", "StopNode"];
 const group = Object.keys(labelIconMap) as NodeLabel[];
@@ -103,17 +103,18 @@ export function ToolBar() {
         <button
           type="button"
           onClick={() =>
-            void exportSvg({
+            exportSvg({
               background: "transparent",
-              iconSize: NODE_R * 2, // gleiche Knotenfläche wie im Viewer
-              nodeRadius: NODE_R, // falls der Node ohne Icon gerendert wird
+              iconSize: NODE_R * 2,
+              nodeRadius: NODE_R,
               fontSize: FONT_PX,
-              iconColor: "#111", // oder "#fff" + background:"white" für White-Tint-Optik
+              maxTextWidth: MAX_W, // <- wichtig, damit Wrap exakt wie im Viewer ist
+              iconColor: "#111",
               edgeColor: "#9bbcff",
               edgeWidth: 1.25,
-              labelBg: false,
-              // arrow: true,
+              labelBg: true,
               fileName: "subgraph.svg",
+              debug: true, // optionaler Rahmen
             })
           }
           title="Export SVG"

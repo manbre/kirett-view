@@ -1,13 +1,14 @@
+// src/components/CustomNode.tsx
+"use client";
+
 import React, { useState, Suspense } from "react";
 import * as THREE from "three";
 import { Text } from "@react-three/drei";
 import { useLoader } from "@react-three/fiber";
-import { labelIconMap } from "@/constants/label"; // Record<string, string>
+import { labelIconMap, type NodeLabel } from "@/constants/label";
 import { useWhiteSvgTexture } from "@/hooks/useWhiteSvgTexture";
 import { tokens } from "@/theme/tokens";
-
 import { useReportNodePosition } from "@/hooks/useReportNodePosition";
-
 import {
   NODE_R,
   FONT_PX,
@@ -21,9 +22,9 @@ type CustomNodeProps<T extends BaseNode> = {
   node: NodeWithCollision<T>;
   isHighlighted?: boolean;
   debugCollision?: boolean;
-  id: string; // <- bei dir ggf. props.node.id
-  x: number; // <- ggf. props.x oder props.node.x
-  y: number; // <- ggf. props.y oder props.node.y
+  id?: string;
+  x?: number;
+  y?: number;
 };
 
 function TexturedMaterial({
@@ -39,7 +40,7 @@ function TexturedMaterial({
   return (
     <meshBasicMaterial
       map={texture}
-      color={isHighlighted ? "blue" : hovered ? tokens.mark : "black"}
+      color={isHighlighted ? "blue" : hovered ? tokens.mark : "grey"}
       transparent
       depthTest={false}
       toneMapped={false}
@@ -55,18 +56,43 @@ export function CustomNode<T extends BaseNode>({
   x,
   y,
 }: CustomNodeProps<T>) {
-  const [hovered, setHovered] = useState<boolean>(false);
-  // DE: Sorgt dafür, dass der Store immer die exakte Render-Position kennt.
-  // EN: Keeps the store in sync with actual on-screen coordinates.
-  useReportNodePosition(id, x, y);
+  const [hovered, setHovered] = useState(false);
 
-  const labelKey = node.data?.labels?.[0] ?? "";
-  const svgUrl = labelIconMap[labelKey] ?? "/icons/default.svg";
+  // PRIO der Quellen:
+  // 1) node.position.x/y (reagraph interner Zustand)
+  // 2) node.x/y (falls von lib gesetzt)
+  // 3) Props x/y (Fallback)
+  const raw: any = node as any;
+  const nx =
+    (raw?.position?.x as number | undefined) ??
+    (raw?.x as number | undefined) ??
+    x;
+  const ny =
+    (raw?.position?.y as number | undefined) ??
+    (raw?.y as number | undefined) ??
+    y;
+
+  const nodeId = (id ?? node.id) as string;
+
+  // An den Store melden, sobald endlich → Export kann posMap nutzen
+  useReportNodePosition(nodeId, nx, ny, { maxFrames: 90 });
+
+  // Icon-Key wie im Export
+  const dataLabels = Array.isArray((node.data as any)?.labels)
+    ? ((node.data as any).labels as string[])
+    : [];
+  const iconKey =
+    (dataLabels[0] as NodeLabel | undefined) ??
+    (node.label as NodeLabel | undefined);
+  const svgUrl =
+    iconKey && labelIconMap[iconKey]
+      ? labelIconMap[iconKey]
+      : "/icons/default.svg";
+
   const dataUrl = useWhiteSvgTexture(svgUrl);
   if (!dataUrl) return null;
 
-  // exakt derselbe Text wie beim Vorbereiten
-  const name = node.nameForLabel || buildDisplayName(node.data);
+  const name = (node as any).nameForLabel || buildDisplayName(node.data);
 
   return (
     <group
@@ -79,7 +105,7 @@ export function CustomNode<T extends BaseNode>({
         <mesh position={[0, 0, 0]}>
           <circleGeometry args={[node.collisionRadius, 64]} />
           <meshBasicMaterial
-            color={"tokens.node"}
+            color={tokens.node}
             transparent
             opacity={0.05}
             depthTest={false}
