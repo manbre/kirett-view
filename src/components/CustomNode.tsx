@@ -5,6 +5,9 @@ import { useLoader } from "@react-three/fiber";
 import { labelIconMap } from "@/constants/label"; // Record<string, string>
 import { useWhiteSvgTexture } from "@/hooks/useWhiteSvgTexture";
 import { tokens } from "@/theme/tokens";
+
+import { useReportNodePosition } from "@/hooks/useReportNodePosition";
+
 import {
   NODE_R,
   FONT_PX,
@@ -17,7 +20,10 @@ import type { BaseNode, NodeWithCollision } from "@/graph/prepareNodes";
 type CustomNodeProps<T extends BaseNode> = {
   node: NodeWithCollision<T>;
   isHighlighted?: boolean;
-  debugCollision?: boolean; // optional: zeigt Kollisionskreis
+  debugCollision?: boolean;
+  id: string; // <- bei dir ggf. props.node.id
+  x: number; // <- ggf. props.x oder props.node.x
+  y: number; // <- ggf. props.y oder props.node.y
 };
 
 function TexturedMaterial({
@@ -33,7 +39,7 @@ function TexturedMaterial({
   return (
     <meshBasicMaterial
       map={texture}
-      color={isHighlighted ? "blue" : hovered ? tokens.mark : "grey"}
+      color={isHighlighted ? "blue" : hovered ? tokens.mark : "black"}
       transparent
       depthTest={false}
       toneMapped={false}
@@ -45,8 +51,14 @@ export function CustomNode<T extends BaseNode>({
   node,
   isHighlighted = false,
   debugCollision = false,
+  id,
+  x,
+  y,
 }: CustomNodeProps<T>) {
   const [hovered, setHovered] = useState<boolean>(false);
+  // DE: Sorgt dafür, dass der Store immer die exakte Render-Position kennt.
+  // EN: Keeps the store in sync with actual on-screen coordinates.
+  useReportNodePosition(id, x, y);
 
   const labelKey = node.data?.labels?.[0] ?? "";
   const svgUrl = labelIconMap[labelKey] ?? "/icons/default.svg";
@@ -67,7 +79,7 @@ export function CustomNode<T extends BaseNode>({
         <mesh position={[0, 0, 0]}>
           <circleGeometry args={[node.collisionRadius, 64]} />
           <meshBasicMaterial
-            color={tokens.node}
+            color={"tokens.node"}
             transparent
             opacity={0.05}
             depthTest={false}

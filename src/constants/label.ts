@@ -1,3 +1,5 @@
+// paths relative to /public
+//============================================================
 // graph node icons
 export const labelIconMap = {
   ActionNode: "/icons/action.svg",

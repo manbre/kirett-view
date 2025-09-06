@@ -1,38 +1,59 @@
 "use client";
 
-import { GraphCanvas, GraphCanvasRef, lightTheme } from "reagraph";
+import {
+  GraphCanvas,
+  GraphCanvasRef,
+  lightTheme,
+  type InternalGraphNode,
+  type NodeWithCollision,
+  type BaseNode,
+} from "reagraph";
 import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { useStore } from "@/store/useStore";
 import { useGraphApi } from "@/hooks/useGraphApi";
-import { useGraphElements } from "@/hooks/useGraphElements";
 import { CustomNode } from "@/components/CustomNode";
 import { prepareNodes } from "@/graph/prepareNodes";
-import { buildDisplayName } from "@/graph/label-metrics";
 import { tokens } from "@/theme/tokens";
 import Image from "next/image";
 import { uiIconMap } from "@/constants/label";
 import type { GraphNode, GraphEdge } from "@/types/graph";
+
+// EN: Optional helper to normalize edges if some carry {id} objects.
+// DE: Optionaler Helfer, falls Kanten teilweise {id}-Objekte enthalten.
+type EdgeIn = GraphEdge & {
+  source: string | { id: string };
+  target: string | { id: string };
+};
 
 type Props = {
   onChangeNode?: (node: NodeWithCollision<BaseNode>) => void;
 };
 
 export const GraphViewer = ({ onChangeNode }: Props) => {
-  const selectedTerms = useStore((state) => state.selectedTerms);
-  const selectedTypes = useStore((state) => state.selectedTypes);
-  const selectedHops = useStore((state) => state.selectedHops);
-  const showOnlyEdges = useStore((state) => state.showOnlyEdges);
+  // -------- filters/topology from other slices --------
+  const selectedTerms = useStore((s) => s.selectedTerms);
+  const selectedTypes = useStore((s) => s.selectedTypes);
+  const selectedHops = useStore((s) => s.selectedHops);
+  const showOnlyEdges = useStore((s) => s.showOnlyEdges);
+
+  // -------- graph slice (FLAT on root) --------
+  const nodes = useStore((s) => s.nodes); // GraphNode[]
+  const edges = useStore((s) => s.edges); // GraphEdge[]
+  const setGraph = useStore((s) => s.setGraph); // (nodes,edges) -> void
+  const mergeGraph = useStore((s) => s.mergeGraph); // (nodes,edges) -> void
+  const setNodePos = useStore((s) => s.setNodePos); // (id,x,y) -> void
+
   const { fetchGraphData, fetchNeighbors } = useGraphApi();
-  const { nodes, edges, updateGraphElements } = useGraphElements();
+
   const [lastNeighborId, setLastNeighborId] = useState<string | null>(null);
   const graphRef = useRef<GraphCanvasRef | null>(null);
 
-  // Daten laden
+  // -------- load graph data on filter changes --------
   useEffect(() => {
     const load = async () => {
       const hasTerms = Object.values(selectedTerms).flat().length > 0;
       if (!hasTerms) {
-        updateGraphElements([], []);
+        setGraph([], []); // DE: zentral leeren; EN: clear graph
         return;
       }
       try {
@@ -42,7 +63,7 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
           selectedHops,
           showOnlyEdges,
         );
-        updateGraphElements(newNodes, newEdges);
+        setGraph(newNodes, newEdges); // DE: zentral speichern; EN: write to store
       } catch (err) {
         console.error("graph loading error:", err);
       }
@@ -50,23 +71,29 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
     void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify(selectedTerms),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify(selectedTypes),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify(selectedHops),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify(showOnlyEdges),
   ]);
 
-  // Double-Click → Nachbarn
+  // -------- double click: expand neighbors --------
   const handleNodeDoubleClick = useCallback(
     async (nodeId: string) => {
       try {
-        const neighborIds = edges
-          .filter((e: Edge) => e.source === nodeId || e.target === nodeId)
-          .map((e: Edge) => (e.source === nodeId ? e.target : e.source));
+        const neighborIds = (edges as readonly EdgeIn[])
+          .filter(
+            (e) =>
+              (typeof e.source === "string" ? e.source : e.source.id) ===
+                nodeId ||
+              (typeof e.target === "string" ? e.target : e.target.id) ===
+                nodeId,
+          )
+          .map((e) => {
+            const s = typeof e.source === "string" ? e.source : e.source.id;
+            const t = typeof e.target === "string" ? e.target : e.target.id;
+            return s === nodeId ? t : s;
+          });
 
         setLastNeighborId(neighborIds[0] ?? null);
 
@@ -77,16 +104,25 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
             selectedTypes,
             showOnlyEdges,
           );
-        updateGraphElements(neighborNodes, neighborEdges);
+        // EN: merge result into central graph (union by id)
+        // DE: Ergebnis in zentralen Graph mergen (Vereinigung per ID)
+        mergeGraph(neighborNodes, neighborEdges);
 
-        // nachladen -> auf den Knoten zentrieren und fitten
+        // Optional: auf den Knoten zoomen/fokussieren
         // graphRef.current?.centerGraph([nodeId]);
         // graphRef.current?.fitNodesInView([nodeId]);
       } catch (err) {
         console.error("error while loading neighbors:", err);
       }
     },
-    [edges, fetchNeighbors, updateGraphElements],
+    [
+      edges,
+      fetchNeighbors,
+      mergeGraph,
+      selectedHops,
+      selectedTypes,
+      showOnlyEdges,
+    ],
   );
 
   const handleNodeClick = useCallback(
@@ -96,22 +132,10 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
     [onChangeNode],
   );
 
-  // Rohknoten -> vorbereitete Knoten (mit collisionRadius + nameForLabel)
+  // -------- compute prepared nodes for rendering (collision radius / display name etc.) --------
   const preppedNodes = useMemo(() => prepareNodes(nodes), [nodes]);
 
-  const theme = {
-    ...lightTheme,
-    edge: {
-      ...lightTheme.edge,
-      fill: tokens.edge,
-      activeFill: tokens.edge,
-    },
-  };
-
-  type EdgeIn = GraphEdge & {
-    source: string | { id: string };
-    target: string | { id: string };
-  };
+  // -------- normalize edges for the canvas --------
   const canvasEdges = useMemo(
     () =>
       (edges as readonly EdgeIn[]).map((e) => ({
@@ -123,23 +147,37 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
     [edges],
   );
 
+  const theme = {
+    ...lightTheme,
+    edge: { ...lightTheme.edge, fill: tokens.edge, activeFill: tokens.edge },
+  };
+
+  // -------- report dragging to store (so export has exact positions) --------
+  const handleNodeDragged = (n: InternalGraphNode) => {
+    setNodePos(n.id, n.position.x, n.position.y);
+  };
+
   return (
     <div className="relative flex h-[65dvh] w-full overflow-hidden rounded-xl border border-[var(--color-border)] bg-white p-1 md:h-full">
       <button
         className="absolute top-2 left-2 z-20 inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--color-border)] hover:cursor-pointer hover:bg-[var(--color-mark)]/10 focus-visible:outline-2 focus-visible:outline-[var(--color-mark)]"
         aria-hidden
-        onClick={() =>
-          fetchGraphData(
+        onClick={() => {
+          // EN: simple reload with same filters into store
+          // DE: einfacher Reload mit denselben Filtern in den Store
+          void fetchGraphData(
             selectedTerms,
             selectedTypes,
             selectedHops,
             showOnlyEdges,
           )
-        }
+            .then(({ nodes: n, edges: e }) => setGraph(n, e))
+            .catch((err) => console.error("reload error:", err));
+        }}
       >
         <span className="relative block h-6 w-6">
           <Image
-            src={uiIconMap.Rewind} // "/icons/rewind.svg"
+            src={uiIconMap.Rewind}
             alt="zurück"
             fill
             color={tokens.node}
@@ -148,23 +186,33 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
           />
         </span>
       </button>
+
       <GraphCanvas
         ref={graphRef}
         nodes={preppedNodes}
         edges={canvasEdges}
         theme={theme}
         edgeArrowPosition="none"
-        // layoutType="force"
+        layoutType="forceDirected2d" // EN: supported by reagraph; DE: wird unterstützt
         labelType="hidden"
         draggable
-        renderNode={({ node }) => {
-          return (
+        onNodeDragged={(node) =>
+          useStore
+            .getState()
+            .setNodePos(node.id, node.position.x, node.position.y)
+        }
+        renderNode={({ node }) => (
+          console.log(node.position.x + ", " + node.position.y),
+          (
             <CustomNode
-              node={node as GraphNode}
+              node={node as unknown as GraphNode} // EN: pass raw data for label/icon mapping
               isHighlighted={node.id === lastNeighborId}
+              id={node.id}
+              x={node.position.x}
+              y={node.position.y}
             />
-          );
-        }}
+          )
+        )}
         onNodeDoubleClick={(node) => handleNodeDoubleClick(node.id)}
         onNodeClick={(node) => {
           handleNodeClick(node);

@@ -12,6 +12,8 @@ import {
 import { Section } from "@/components/Section";
 import { useStore, selectors } from "@/store/useStore";
 import type { HopKey } from "@/store/slices/topologySlice";
+import { useSvgExport } from "@/hooks/useSvgExport";
+import { NODE_R, FONT_PX } from "@/graph/label-metrics";
 
 const excluded: NodeLabel[] = ["StartNode", "StopNode"];
 const group = Object.keys(labelIconMap) as NodeLabel[];
@@ -28,6 +30,8 @@ export function ToolBar() {
   const toggleHop = useStore(selectors.toggleHop);
   const showOnlyEdges = useStore(selectors.showOnlyEdges);
   const toggleOnlyEdges = useStore(selectors.toggleShowOnlyEdges);
+
+  const { exportSvg } = useSvgExport();
 
   // Readiness aller drei Sektionen: verhindert Vollbreiten-Sprung beim Paint
   const totalSections = 3;
@@ -96,6 +100,27 @@ export function ToolBar() {
             onReady={onSectionReady}
           />
         </div>
+        <button
+          type="button"
+          onClick={() =>
+            void exportSvg({
+              background: "transparent",
+              iconSize: NODE_R * 2, // gleiche Knotenfläche wie im Viewer
+              nodeRadius: NODE_R, // falls der Node ohne Icon gerendert wird
+              fontSize: FONT_PX,
+              iconColor: "#111", // oder "#fff" + background:"white" für White-Tint-Optik
+              edgeColor: "#9bbcff",
+              edgeWidth: 1.25,
+              labelBg: true,
+              // arrow: true,
+              fileName: "subgraph.svg",
+            })
+          }
+          title="Export SVG"
+          aria-label="Export SVG"
+        >
+          SVG {/* dein Export-Icon */}
+        </button>
       </div>
     </aside>
   );
