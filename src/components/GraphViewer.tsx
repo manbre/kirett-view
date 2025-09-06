@@ -4,7 +4,6 @@ import {
   GraphCanvas,
   GraphCanvasRef,
   lightTheme,
-  type InternalGraphNode,
   type NodeWithCollision,
   type BaseNode,
 } from "reagraph";
@@ -152,11 +151,6 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
     edge: { ...lightTheme.edge, fill: tokens.edge, activeFill: tokens.edge },
   };
 
-  // -------- report dragging to store (so export has exact positions) --------
-  const handleNodeDragged = (n: InternalGraphNode) => {
-    setNodePos(n.id, n.position.x, n.position.y);
-  };
-
   return (
     <div className="relative flex h-[65dvh] w-full overflow-hidden rounded-xl border border-[var(--color-border)] bg-white p-1 md:h-full">
       <button
@@ -197,21 +191,16 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
         labelType="hidden"
         draggable
         onNodeDragged={(node) =>
-          useStore
-            .getState()
-            .setNodePos(node.id, node.position.x, node.position.y)
+          setNodePos(node.id, node.position.x, node.position.y)
         }
         renderNode={({ node }) => (
-          console.log(node.position.x + ", " + node.position.y),
-          (
-            <CustomNode
-              node={node as unknown as GraphNode} // EN: pass raw data for label/icon mapping
-              isHighlighted={node.id === lastNeighborId}
-              id={node.id}
-              x={node.position.x}
-              y={node.position.y}
-            />
-          )
+          <CustomNode
+            node={node as unknown as GraphNode} // EN: pass raw data for label/icon mapping
+            isHighlighted={node.id === lastNeighborId}
+            id={node.id}
+            x={node.position.x}
+            y={node.position.y}
+          />
         )}
         onNodeDoubleClick={(node) => handleNodeDoubleClick(node.id)}
         onNodeClick={(node) => {
