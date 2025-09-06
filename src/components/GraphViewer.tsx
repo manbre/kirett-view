@@ -4,6 +4,7 @@ import {
   GraphCanvas,
   GraphCanvasRef,
   lightTheme,
+  type InternalGraphNode,
   type NodeWithCollision,
   type BaseNode,
 } from "reagraph";
@@ -28,6 +29,10 @@ type Props = {
   onChangeNode?: (node: NodeWithCollision<BaseNode>) => void;
 };
 
+// EN: Local view mode — no store change needed.
+// DE: Lokaler View-Modus — keine Store-Änderung nötig.
+type ViewMode = "subgraph" | "expand";
+
 export const GraphViewer = ({ onChangeNode }: Props) => {
   // -------- filters/topology from other slices --------
   const selectedTerms = useStore((s) => s.selectedTerms);
@@ -35,24 +40,29 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
   const selectedHops = useStore((s) => s.selectedHops);
   const showOnlyEdges = useStore((s) => s.showOnlyEdges);
 
-  // -------- graph slice (FLAT on root) --------
+  // -------- graph slice (flat on root) --------
   const nodes = useStore((s) => s.nodes); // GraphNode[]
   const edges = useStore((s) => s.edges); // GraphEdge[]
-  const setGraph = useStore((s) => s.setGraph); // (nodes,edges) -> void
-  const mergeGraph = useStore((s) => s.mergeGraph); // (nodes,edges) -> void
-  const setNodePos = useStore((s) => s.setNodePos); // (id,x,y) -> void
+  const setGraph = useStore((s) => s.setGraph);
+  const mergeGraph = useStore((s) => s.mergeGraph);
+  const setNodePos = useStore((s) => s.setNodePos);
 
   const { fetchGraphData, fetchNeighbors } = useGraphApi();
 
+  const [viewMode, setViewMode] = useState<ViewMode>("subgraph"); // DE: aktueller Modus
   const [lastNeighborId, setLastNeighborId] = useState<string | null>(null);
   const graphRef = useRef<GraphCanvasRef | null>(null);
 
-  // -------- load graph data on filter changes --------
+  // -------- load subgraph on filter changes (only in "subgraph" mode) --------
   useEffect(() => {
+    // EN: When filters change and we are in subgraph mode, (re)load the subgraph.
+    // DE: Wenn Filter wechseln und wir im Subgraph-Modus sind, (neu) laden.
+    if (viewMode !== "subgraph") return;
+
     const load = async () => {
       const hasTerms = Object.values(selectedTerms).flat().length > 0;
       if (!hasTerms) {
-        setGraph([], []); // DE: zentral leeren; EN: clear graph
+        setGraph([], []);
         return;
       }
       try {
@@ -62,7 +72,7 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
           selectedHops,
           showOnlyEdges,
         );
-        setGraph(newNodes, newEdges); // DE: zentral speichern; EN: write to store
+        setGraph(newNodes, newEdges);
       } catch (err) {
         console.error("graph loading error:", err);
       }
@@ -70,31 +80,19 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
     void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
+    viewMode, // nur wenn wir im Subgraph-Modus sind
     JSON.stringify(selectedTerms),
     JSON.stringify(selectedTypes),
     JSON.stringify(selectedHops),
     JSON.stringify(showOnlyEdges),
   ]);
 
-  // -------- double click: expand neighbors --------
+  // -------- double click: switch to "expand" and only use neighbors --------
   const handleNodeDoubleClick = useCallback(
     async (nodeId: string) => {
       try {
-        const neighborIds = (edges as readonly EdgeIn[])
-          .filter(
-            (e) =>
-              (typeof e.source === "string" ? e.source : e.source.id) ===
-                nodeId ||
-              (typeof e.target === "string" ? e.target : e.target.id) ===
-                nodeId,
-          )
-          .map((e) => {
-            const s = typeof e.source === "string" ? e.source : e.source.id;
-            const t = typeof e.target === "string" ? e.target : e.target.id;
-            return s === nodeId ? t : s;
-          });
-
-        setLastNeighborId(neighborIds[0] ?? null);
+        setViewMode("expand"); // EN: from now on, neighbor route only
+        setLastNeighborId(nodeId);
 
         const { nodes: neighborNodes, edges: neighborEdges } =
           await fetchNeighbors(
@@ -103,25 +101,19 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
             selectedTypes,
             showOnlyEdges,
           );
-        // EN: merge result into central graph (union by id)
-        // DE: Ergebnis in zentralen Graph mergen (Vereinigung per ID)
-        mergeGraph(neighborNodes, neighborEdges);
 
-        // Optional: auf den Knoten zoomen/fokussieren
+        // EN: Replace the view with the expanded neighborhood (no merge).
+        // DE: Ansicht durch den expandierten Teilgraphen ERSETZEN (kein Merge).
+        setGraph(neighborNodes, neighborEdges);
+
+        // Optional zoom to the node (falls gewünscht)
         // graphRef.current?.centerGraph([nodeId]);
         // graphRef.current?.fitNodesInView([nodeId]);
       } catch (err) {
         console.error("error while loading neighbors:", err);
       }
     },
-    [
-      edges,
-      fetchNeighbors,
-      mergeGraph,
-      selectedHops,
-      selectedTypes,
-      showOnlyEdges,
-    ],
+    [fetchNeighbors, selectedHops, selectedTypes, showOnlyEdges, setGraph],
   );
 
   const handleNodeClick = useCallback(
@@ -131,7 +123,7 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
     [onChangeNode],
   );
 
-  // -------- compute prepared nodes for rendering (collision radius / display name etc.) --------
+  // -------- prepared nodes (collision radius / display name etc.) --------
   const preppedNodes = useMemo(() => prepareNodes(nodes), [nodes]);
 
   // -------- normalize edges for the canvas --------
@@ -151,35 +143,59 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
     edge: { ...lightTheme.edge, fill: tokens.edge, activeFill: tokens.edge },
   };
 
+  // -------- dragging → keep positions for SVG export --------
+  const handleNodeDragged = (n: InternalGraphNode) => {
+    setNodePos(n.id, n.position.x, n.position.y);
+  };
+
+  // -------- UI: overlay button to go back to subgraph route --------
+  const handleBackToSubgraph = useCallback(async () => {
+    try {
+      const { nodes: newNodes, edges: newEdges } = await fetchGraphData(
+        selectedTerms,
+        selectedTypes,
+        selectedHops,
+        showOnlyEdges,
+      );
+      setGraph(newNodes, newEdges);
+      setViewMode("subgraph");
+      setLastNeighborId(null);
+    } catch (err) {
+      console.error("reload subgraph error:", err);
+    }
+  }, [
+    fetchGraphData,
+    selectedTerms,
+    selectedTypes,
+    selectedHops,
+    showOnlyEdges,
+    setGraph,
+  ]);
+
   return (
     <div className="relative flex h-[65dvh] w-full overflow-hidden rounded-xl border border-[var(--color-border)] bg-white p-1 md:h-full">
-      <button
-        className="absolute top-2 left-2 z-20 inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--color-border)] hover:cursor-pointer hover:bg-[var(--color-mark)]/10 focus-visible:outline-2 focus-visible:outline-[var(--color-mark)]"
-        aria-hidden
-        onClick={() => {
-          // EN: simple reload with same filters into store
-          // DE: einfacher Reload mit denselben Filtern in den Store
-          void fetchGraphData(
-            selectedTerms,
-            selectedTypes,
-            selectedHops,
-            showOnlyEdges,
-          )
-            .then(({ nodes: n, edges: e }) => setGraph(n, e))
-            .catch((err) => console.error("reload error:", err));
-        }}
-      >
-        <span className="relative block h-6 w-6">
-          <Image
-            src={uiIconMap.Rewind}
-            alt="zurück"
-            fill
-            color={tokens.node}
-            className="pointer-events-none object-contain"
-            priority
-          />
-        </span>
-      </button>
+      {/* EN: Only show the back button in "expand" mode.
+          DE: Zurück-Button nur im Expand-Modus anzeigen. */}
+      {viewMode === "expand" ? (
+        <button
+          className="absolute top-2 left-2 z-20 inline-flex h-9 items-center gap-2 rounded-md border border-[var(--color-border)] bg-white px-3 shadow-sm hover:bg-[var(--color-mark)]/10 focus-visible:outline-2 focus-visible:outline-[var(--color-mark)]"
+          onClick={handleBackToSubgraph}
+          title="Zurück zur Subgraph-Ansicht"
+          aria-label="Zurück zur Subgraph-Ansicht"
+          type="button"
+        >
+          <span className="relative block h-5 w-5">
+            <Image
+              src={uiIconMap.Rewind}
+              alt="zurück"
+              fill
+              className="pointer-events-none object-contain"
+              priority
+            />
+          </span>
+          <span className="text-sm">Subgraph</span>
+        </button>
+      ) : null}
 
       <GraphCanvas
         ref={graphRef}
@@ -187,15 +203,13 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
         edges={canvasEdges}
         theme={theme}
         edgeArrowPosition="none"
-        layoutType="forceDirected2d" // EN: supported by reagraph; DE: wird unterstützt
+        layoutType="forceDirected2d" // EN: supported; DE: von reagraph unterstützt
         labelType="hidden"
         draggable
-        onNodeDragged={(node) =>
-          setNodePos(node.id, node.position.x, node.position.y)
-        }
+        onNodeDragged={handleNodeDragged}
         renderNode={({ node }) => (
           <CustomNode
-            node={node as unknown as GraphNode} // EN: pass raw data for label/icon mapping
+            node={node as unknown as GraphNode}
             isHighlighted={node.id === lastNeighborId}
             id={node.id}
             x={node.position.x}
