@@ -81,7 +81,6 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
   const handleNodeDoubleClick = useCallback(
     async (nodeId: string) => {
       try {
-        setViewMode("expand"); // EN: from now on, neighbor route only
         setLastNeighborId(nodeId);
 
         const { nodes: neighborNodes, edges: neighborEdges } =
