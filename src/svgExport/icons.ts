@@ -1,44 +1,32 @@
-// EN: Load only icons used by the current graph (inline, sanitized, cached).
-// DE: Nur die im aktuellen Graph verwendeten Icons laden (inline, saniert, gecacht).
+// EN: Load inline SVG icons per node id.
+// DE: Lädt Inline-SVG-Icons pro Knoten-ID.
 
-import { labelIconMap, type NodeLabel } from "@/constants/label";
-import { parseInlineSvg, toAbsoluteUrl, type ParsedIcon } from "./svgUtils";
 import type { GraphNode } from "@/types/graph";
+import { labelIconMap } from "@/constants/label";
+import { parseInlineSvg, toAbsoluteUrl, type ParsedIcon } from "./svgUtils";
 import { resolveIconKey } from "./graphUtils";
-
-const ICON_CACHE = new Map<NodeLabel, ParsedIcon>();
 
 export async function loadIconsFor(
   nodes: GraphNode[],
-): Promise<Map<NodeLabel, ParsedIcon>> {
-  // EN: collect unique label keys we actually need
-  // DE: nur die tatsächlich benötigten Label-Keys sammeln
-  const labels = new Set<NodeLabel>();
-  for (const n of nodes) {
-    const key = resolveIconKey(n);
-    if (key && labelIconMap[key]) labels.add(key);
-  }
+): Promise<Map<string, ParsedIcon>> {
+  const out = new Map<string, ParsedIcon>();
 
-  const out = new Map<NodeLabel, ParsedIcon>();
   await Promise.all(
-    Array.from(labels).map(async (k) => {
-      const cached = ICON_CACHE.get(k);
-      if (cached) {
-        out.set(k, cached);
-        return;
-      }
+    nodes.map(async (n) => {
+      const key = resolveIconKey(n);
+      const url = key ? labelIconMap[key] : "/icons/default.svg";
+      if (!url) return;
+
       try {
-        const res = await fetch(toAbsoluteUrl(labelIconMap[k]));
-        if (!res.ok) return;
-        const txt = await res.text();
-        const parsed = parseInlineSvg(txt); // sanitized + normalized
-        ICON_CACHE.set(k, parsed);
-        out.set(k, parsed);
+        const abs = toAbsoluteUrl(url);
+        const txt = await fetch(abs).then((r) => r.text());
+        const parsed = parseInlineSvg(txt);
+        out.set(n.id, parsed);
       } catch {
-        // EN: ignore; caller will draw a circle fallback
-        // DE: ignorieren; Aufrufer zeichnet Kreis-Fallback
+        // ignore: fallback drawing will kick in
       }
     }),
   );
+
   return out;
 }

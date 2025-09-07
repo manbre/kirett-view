@@ -104,17 +104,20 @@ export function ToolBar() {
           type="button"
           onClick={() =>
             exportSvg({
-              background: "transparent",
-              iconSize: NODE_R * 2,
-              nodeRadius: NODE_R,
-              fontSize: FONT_PX,
-              maxTextWidth: MAX_W, // <- wichtig, damit Wrap exakt wie im Viewer ist
-              iconColor: "#111",
+              background: "white",
+              iconSize: 50,
+              nodeRadius: 25,
+              fontSize: 20,
+              maxTextWidth: 80,
               edgeColor: "#9bbcff",
-              edgeWidth: 1.25,
-              labelBg: true,
+              edgeWidth: 1.5,
+              //
+              overscan: 4,
+              padding: 300,
+              extraBottom: 300,
+              //
+              debug: false,
               fileName: "subgraph.svg",
-              debug: true, // optionaler Rahmen
             })
           }
           title="Export SVG"

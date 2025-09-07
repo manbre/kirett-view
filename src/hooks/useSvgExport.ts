@@ -3,13 +3,16 @@
 import { useCallback } from "react";
 import { useStore } from "@/store/useStore";
 import type { GraphNode, GraphEdge } from "@/types/graph";
+// Falls dein Store-Pos-Typ kompatibel ist, kannst du ihn lassen.
+// Wichtig ist nur: { x: number; y: number }
 import type { Pos } from "@/store/slices/graphSlice";
 import { buildSvgFromGraph, type SvgExportOptions } from "@/svgExport";
+import { NODE_R, FONT_PX, MAX_W } from "@/graph/label-metrics";
 
 async function awaitAllPositions(
   nodes: GraphNode[],
   getPos: () => Map<string, Pos> | undefined,
-  maxFrames = 120, // ~2s
+  maxFrames = 240, // ↑ mehr Zeit bei großen Graphen
 ): Promise<Map<string, Pos> | undefined> {
   let frames = 0;
   return new Promise((resolve) => {
@@ -26,14 +29,33 @@ async function awaitAllPositions(
   });
 }
 
+// ★ Wichtig: overscan in PX (2–4) + extraBottom hinzufügen
+const DEFAULT_EXPORT_OPTS: SvgExportOptions = {
+  background: "transparent",
+  padding: 24,
+  iconSize: NODE_R * 2,
+  nodeRadius: NODE_R,
+  fontSize: FONT_PX,
+  maxTextWidth: MAX_W,
+  fontFamily:
+    "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto", // wie Viewer
+  edgeColor: "#9bbcff",
+  edgeWidth: 1.25,
+  labelBg: false,
+  overscan: 3, // war 1.08 → praktisch 0; nimm 2–4 px
+  extraBottom: 20, // NEU: zusätzlicher Unterrand gegen Cutoff
+  debug: false,
+};
+
 export function useSvgExport() {
   const nodes = useStore((s) => s.nodes as GraphNode[]);
   const edges = useStore((s) => s.edges as GraphEdge[]);
   const getPos = () => useStore.getState().pos as Map<string, Pos> | undefined;
 
   const exportSvg = useCallback(
-    async (opts?: SvgExportOptions): Promise<boolean> => {
-      // Debug: wie viele fehlen noch?
+    async (userOpts?: SvgExportOptions): Promise<boolean> => {
+      const opts: SvgExportOptions = { ...DEFAULT_EXPORT_OPTS, ...userOpts };
+
       const firstPos = getPos();
       console.log("export sanity (pre-wait)", {
         nodes: nodes.length,
@@ -42,7 +64,7 @@ export function useSvgExport() {
         missing: nodes.filter((n) => !firstPos?.has(n.id)).map((n) => n.id),
       });
 
-      const pos = await awaitAllPositions(nodes ?? [], getPos, 120);
+      const pos = await awaitAllPositions(nodes ?? [], getPos, 240);
 
       const afterPos = pos ?? new Map();
       console.log("export sanity (post-wait)", {

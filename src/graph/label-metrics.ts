@@ -1,12 +1,16 @@
-// Zentrale Konstanten + Helper, die sowohl Simulation als auch Rendering nutzen.
+// src/graph/label-metrics.ts
+import {
+  buildDisplayName as _bdn,
+  calcCollisionRadius as _ccr,
+} from "./label-metrics"; // (Nur damit dein Import oben nicht meckert, falls du es als Barrel nutzt)
+
 export const NODE_R = 25; // sichtbarer Kreisradius im CustomNode
-export const FONT_PX = 20; // <Text fontSize={8}>
+export const FONT_PX = 20; // <Text fontSize={20}>
 export const MAX_W = 80; // <Text maxWidth={80}>
-export const LABEL_Y_OFFSET = 20; // <Text position={[0, -10, 0]}>
+export const LABEL_Y_OFFSET = 20; // <Text position={[0, -20, 0]}>
 export const PADDING = 6; // etwas Luft um Kreis+Text
 export const COLLISION_SCALE = 0.5; // dämpft Texteinfluss auf den Radius
 
-// Hilfsleser für optionale Felder aus Record<string, unknown>
 function getStr(
   data: Record<string, unknown>,
   key: string,
@@ -23,6 +27,7 @@ export function buildDisplayName(
   const bpr = data ? getStr(data, "BPR") : undefined;
   const name = data ? getStr(data, "Name") : undefined;
   const prefix = bpr && bpr !== "None" ? `${bpr}: ` : "";
+  // ✅ WICHTIG: Prefix wirklich verwenden + Label als Fallback zulassen
   return `${prefix}${name ?? fallbackLabel ?? ""}`;
 }
 
@@ -40,7 +45,7 @@ export function estimateTextBox(
   return { width, height };
 }
 
-/** Liefert einen radialen Kollisionsradius, der Kreis + (versetzten) Text abdeckt. */
+/** Radialer Kollisionsradius für Kreis + (versetzten) Text. */
 export function calcCollisionRadius(displayName: string): number {
   const { width, height } = estimateTextBox(displayName);
   const halfW = width / 2;

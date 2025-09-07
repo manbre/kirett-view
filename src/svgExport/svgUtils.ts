@@ -1,10 +1,12 @@
-// EN: Low-level SVG helpers: escaping, sanitizing, parsing inline SVGs.
-// DE: Low-Level SVG-Helfer: Escapen, Sanitisieren, Inline-SVGs parsen.
+// EN: Low-level SVG helpers: escaping, sanitizing, parsing inline SVGs,
+//     and simple text width/line estimation used by bbox & labels.
+// DE: Low-Level SVG-Helfer: Escapen, Sanitizing, Inline-SVG parsen,
+//     plus einfache Textbreiten-/Zeilenabschätzung für BBox & Labels.
 
 export type ParsedIcon = { viewBox: string; inner: string };
 
-// EN: Escape XML text content.
-// DE: XML-Text-Inhalt escapen.
+// ---------- XML text escaping ----------
+
 export function esc(s: string): string {
   return s.replace(
     /[<>&"']/g,
@@ -19,17 +21,54 @@ export function esc(s: string): string {
   );
 }
 
-// EN: Estimate text width for bbox calc (≈0.6em per char, clamped).
-// DE: Textbreite für BBox schätzen (≈0,6em pro Zeichen, begrenzt).
+// ---------- text metrics (approx) ----------
+
+// EN: Approximate text width in px for a given font size.
+//     0.5em per char is a robust compromise for UI fonts.
+// DE: Grobe Textbreite in px (für gegebene Fontgröße).
+//     0,5em pro Zeichen ist ein robuster Kompromiss für UI-Fonts.
 export function estimateTextWidth(text: string, fontSize: number): number {
-  const w = fontSize * 0.6 * text.length;
-  const min = fontSize * 2;
-  const max = fontSize * 20;
-  return Math.max(min, Math.min(max, w));
+  const t = (text ?? "").trim();
+  const approx = 0.5 * fontSize * t.length;
+  const min = 2 * fontSize;
+  const max = 20 * fontSize;
+  return Math.max(min, Math.min(max, approx));
 }
 
-// EN: Basic sanitization to prevent XSS in embedded SVG fragments.
-// DE: Grundlegende Sanitization gegen XSS in eingebetteten SVG-Snippets.
+// EN: Wrap text to lines using the same width constraint we pass to the viewer.
+//     Returns lines and the widest measured line width.
+// DE: Text anhand einer Maximalbreite umbrechen – wie im Viewer.
+//     Liefert Zeilen + Breite der breitesten Zeile.
+export function wrapTextToLines(
+  text: string,
+  fontSize: number,
+  maxWidth: number,
+): { lines: string[]; widest: number } {
+  const words = (text ?? "").split(/\s+/).filter(Boolean);
+  if (words.length === 0) return { lines: [""], widest: 0 };
+
+  const lines: string[] = [];
+  let current = words[0];
+  let widest = estimateTextWidth(current, fontSize);
+
+  for (let i = 1; i < words.length; i++) {
+    const candidate = `${current} ${words[i]}`;
+    const w = estimateTextWidth(candidate, fontSize);
+    if (w <= maxWidth) {
+      current = candidate;
+      widest = Math.max(widest, w);
+    } else {
+      lines.push(current);
+      current = words[i];
+      widest = Math.max(widest, estimateTextWidth(current, fontSize));
+    }
+  }
+  lines.push(current);
+  return { lines, widest };
+}
+
+// ---------- sanitize & parse inline svg ----------
+
 export function sanitizeSvgInner(inner: string): string {
   let s = inner;
   s = s.replace(/<script[\s\S]*?<\/script>/gi, "");
@@ -40,8 +79,6 @@ export function sanitizeSvgInner(inner: string): string {
   return s;
 }
 
-// EN: Normalize common dark fills/strokes to 'currentColor' (optional visual parity).
-// DE: Gängige dunkle Fills/Strokes zu 'currentColor' normalisieren (optional für Optik).
 export function normalizeToCurrentColor(inner: string): string {
   return inner
     .replace(
@@ -54,8 +91,6 @@ export function normalizeToCurrentColor(inner: string): string {
     );
 }
 
-// EN: Remove outer <svg>, keep viewBox + sanitized (and normalized) inner markup.
-// DE: Äußeres <svg> entfernen, viewBox + saniertes (und normalisiertes) Inneres behalten.
 export function parseInlineSvg(text: string): ParsedIcon {
   const cleaned = text
     .replace(/<\?xml[^>]*>/g, "")
@@ -66,12 +101,12 @@ export function parseInlineSvg(text: string): ParsedIcon {
     cleaned.match(/viewBox\s*=\s*["']([^"']+)["']/i)?.[1] ?? "0 0 24 24";
   const innerRaw = cleaned.replace(/<\/?svg[^>]*>/g, "").trim();
   const innerSan = sanitizeSvgInner(innerRaw);
-  const inner = normalizeToCurrentColor(innerSan); // helps tint via 'currentColor'
+  const inner = normalizeToCurrentColor(innerSan);
   return { viewBox: vb, inner };
 }
 
-// EN: Resolve absolute URL for /public assets.
-// DE: Absolute URL für /public-Assets bilden.
+// ---------- url helper for public assets ----------
+
 export function toAbsoluteUrl(path: string): string {
   try {
     return new URL(path, window.location.origin).toString();

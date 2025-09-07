@@ -1,32 +1,31 @@
-// src/svgExport/index.ts
-"use client";
+// EN: Build final SVG (viewer-parity: same wrap width & font size).
+// DE: Finales SVG bauen (Viewer-Parität: gleiche Umbruchbreite & Fontgröße).
 
 import type { GraphNode, GraphEdge } from "@/types/graph";
-import type { Pos } from "./layout";
+import type { Pos } from "./graphUtils";
 import { resolvePositions } from "./layout";
 import { computeBBox } from "./bbox";
-import { edgesToSvg, nodesToSvg } from "./serialize";
 import { loadIconsFor } from "./icons";
-import { MAX_W as VIEWER_MAX_W } from "@/graph/label-metrics";
+import { edgesToSvg, nodesToSvg } from "./serialize";
 
 export type Bg = "transparent" | "white";
 
 export interface SvgExportOptions {
-  background?: Bg;
-  padding?: number;
-  fontFamily?: string;
-  fontSize?: number;
-  iconSize?: number;
-  nodeRadius?: number;
-  iconColor?: string;
-  edgeColor?: string;
-  edgeWidth?: number;
-  arrow?: boolean;
-  labelBg?: boolean;
-  fileName?: string;
-  debug?: boolean;
-  /** exakt wie im Viewer; wenn nicht gesetzt, wird Viewer-Standard genutzt */
-  maxTextWidth?: number;
+  background?: Bg; // "transparent" | "white"
+  padding?: number; // Außenrand (default 24)
+  fontFamily?: string; // Default System-UI
+  fontSize?: number; // MUSS dem Viewer entsprechen
+  iconSize?: number; // 24..50
+  nodeRadius?: number; // default iconSize/2
+  iconColor?: string; // "#111"
+  edgeColor?: string; // "#7aa7ff"
+  edgeWidth?: number; // 1.25
+  arrow?: boolean; // Pfeilspitzen
+  labelBg?: boolean; // Hintergrund für Label-Box
+  debug?: boolean; // Debug-Rahmen
+  maxTextWidth?: number; // exakt wie im Viewer (z.B. MAX_W)
+  overscan?: number; // kleiner Sicherheits-Puffer (default 2)
+  extraBottom?: number; // zusätzlicher Bodenabstand in px (default 8)
 }
 
 export async function buildSvgFromGraph(
@@ -37,6 +36,7 @@ export async function buildSvgFromGraph(
 ): Promise<string | null> {
   if (!nodes || nodes.length === 0) return null;
 
+  // ---- Options (mit stabilen Defaults) ----
   const padding = opts?.padding ?? 24;
   const fontSize = opts?.fontSize ?? 12;
   const iconSize = opts?.iconSize ?? 24;
@@ -51,12 +51,16 @@ export async function buildSvgFromGraph(
   const withArrow = opts?.arrow ?? false;
   const labelBg = opts?.labelBg ?? true;
   const debug = opts?.debug ?? false;
-  const maxTextWidth = opts?.maxTextWidth ?? VIEWER_MAX_W;
 
-  // 1) Positionen gemäß Priorität
+  // WICHTIG: identisch zum Viewer übergeben
+  const maxTextWidth = opts?.maxTextWidth ?? 200;
+  const overscan = opts?.overscan ?? 2;
+  const extraBottom = opts?.extraBottom ?? 8;
+
+  // ---- 1) Positionen (roh) ----
   const posRaw = resolvePositions(nodes, posMap);
 
-  // 2) BBox aus Rohkoordinaten – liefert minY/maxY für flip
+  // ---- 2) BBox aus Roh-Koordinaten (inkl. Padding/Overscan/Bottom) ----
   const bbox = computeBBox(
     nodes,
     posRaw,
@@ -64,19 +68,21 @@ export async function buildSvgFromGraph(
     fontSize,
     padding,
     maxTextWidth,
+    overscan,
+    extraBottom,
   );
-  const { minX, minY, width, height } = bbox;
-  const maxY = minY + height;
 
-  // 3) Y an SVG anpassen (immer flippen, keine Flag)
-  const flipped = new Map<string, Pos>();
-  const flipY = (y: number) => minY + (maxY - y);
-  for (const [id, p] of posRaw) flipped.set(id, { x: p.x, y: flipY(p.y) });
+  // ---- 3) Y-Flip (Canvas ↑ vs. SVG ↓) relativ zur BBox ----
+  const maxY = bbox.minY + bbox.height;
+  const flipY = (y: number) => bbox.minY + (maxY - y);
 
-  // 4) Icons laden
+  const pos = new Map<string, Pos>();
+  for (const [id, p] of posRaw) pos.set(id, { x: p.x, y: flipY(p.y) });
+
+  // ---- 4) Icons laden ----
   const icons = await loadIconsFor(nodes);
 
-  // 5) defs (Pfeile optional)
+  // ---- 5) Optionale Marker ----
   const defs = withArrow
     ? `<defs>
          <marker id="arrow" markerUnits="strokeWidth" markerWidth="8" markerHeight="8" orient="auto" refX="8" refY="4">
@@ -85,8 +91,8 @@ export async function buildSvgFromGraph(
        </defs>`
     : "";
 
-  // 6) serialize
-  const edgesSvg = edgesToSvg(edges, flipped, {
+  // ---- 6) Primitives (mit identischem Wrap) ----
+  const edgesSvg = edgesToSvg(edges, pos, {
     edgeColor,
     edgeWidth,
     trimAtNode: true,
@@ -94,7 +100,7 @@ export async function buildSvgFromGraph(
     arrowMarker: withArrow ? "url(#arrow)" : undefined,
   });
 
-  const nodesSvg = nodesToSvg(nodes, flipped, icons, {
+  const nodesSvg = nodesToSvg(nodes, pos, icons, {
     iconSize,
     nodeRadius,
     fontSize,
@@ -102,26 +108,32 @@ export async function buildSvgFromGraph(
     iconColor,
     labelBg,
     textColor: "#111",
-    maxTextWidth, // wichtig für identischen Wrap
+    maxTextWidth,
   });
 
-  // 7) optionaler Hintergrund / Debugrahmen
+  // ---- 7) Background + Debug ----
   const bg =
     background === "white"
-      ? `<rect x="${minX}" y="${minY}" width="${width}" height="${height}" fill="#ffffff" />`
+      ? `<rect x="${bbox.minX}" y="${bbox.minY}" width="${bbox.width}" height="${bbox.height}" fill="#ffffff"/>`
       : "";
 
   const dbg = debug
-    ? `<rect x="${minX}" y="${minY}" width="${width}" height="${height}"
-              fill="none" stroke="#f36" stroke-dasharray="4 3" stroke-width="1" />`
+    ? `<rect x="${bbox.minX}" y="${bbox.minY}" width="${bbox.width}" height="${bbox.height}" fill="none" stroke="#f36" stroke-dasharray="4 3" stroke-width="1"/>`
     : "";
 
-  // 8) Finale SVG
+  // ---- 8) Sicherer viewBox (1px Rand) ----
+  const vbX = bbox.minX - 1;
+  const vbY = bbox.minY - 1;
+  const vbW = bbox.width + 2;
+  const vbH = bbox.height + 2;
+
   return `<svg xmlns="http://www.w3.org/2000/svg"
-               width="${width}" height="${height}"
-               viewBox="${minX} ${minY} ${width} ${height}"
+               width="${bbox.width}" height="${bbox.height}"
+               viewBox="${vbX} ${vbY} ${vbW} ${vbH}"
                role="img" aria-label="Exported subgraph">
-            ${defs}${bg}${dbg}
+            ${defs}
+            ${bg}
+            ${dbg}
             <g id="edges">${edgesSvg}</g>
             <g id="nodes">${nodesSvg}</g>
           </svg>`

@@ -1,5 +1,5 @@
-// EN: Graph helpers used by the SVG exporter.
-// DE: Graph-Helfer, die vom SVG-Exporter genutzt werden.
+// EN: Small graph helpers used by SVG export.
+// DE: Kleine Graph-Helfer, die der SVG-Export nutzt.
 
 import type { GraphNode, GraphEdge } from "@/types/graph";
 import type { NodeLabel } from "@/constants/label";
@@ -21,35 +21,59 @@ export function isFinitePos(
 // EN: Get source/target node ids from a GraphEdge.
 // DE: Quell-/Ziel-IDs aus einer Kante ermitteln.
 export function endpoints(e: GraphEdge): { s: string; t: string } {
-  return { s: e.source, t: e.target };
+  const s =
+    typeof (e as any).source === "string"
+      ? (e as any).source
+      : (e as any).source?.id;
+  const t =
+    typeof (e as any).target === "string"
+      ? (e as any).target
+      : (e as any).target?.id;
+  return { s, t };
 }
 
 // ---------- node label & icon helpers ----------
 
-// EN: Prefer human-friendly labels from node.data, else node.label/id.
-// DE: Bevorzuge menschenlesbare Bezeichner aus node.data, sonst node.label/id.
+// EN: Prefer a precomputed display name (nameForLabel). Otherwise use data fields.
+// DE: Bevorzuge vorberechneten Anzeigenamen (nameForLabel). Sonst Datenfelder nutzen.
 export function labelOf(n: GraphNode): string {
-  const d = n.data as Record<string, unknown>;
-  return (
-    (d["displayName"] as string | undefined) ??
-    (d["Name"] as string | undefined) ??
-    (d["Label"] as string | undefined) ??
-    n.label ??
-    n.id
-  );
+  const anyN = n as any;
+  if (
+    typeof anyN.nameForLabel === "string" &&
+    anyN.nameForLabel.trim().length > 0
+  ) {
+    return anyN.nameForLabel;
+  }
+
+  const d = (n.data ?? {}) as Record<string, unknown>;
+  const bpr =
+    typeof d["BPR"] === "string" && d["BPR"] !== "None"
+      ? (d["BPR"] as string)
+      : undefined;
+  const name =
+    typeof d["Name"] === "string" ? (d["Name"] as string) : undefined;
+  const label = typeof n.label === "string" ? n.label : undefined;
+
+  // Optional prefix (BPR) rauslassen, wenn du es im Viewer auch nicht zeigst:
+  // const prefix = bpr ? `${bpr}: ` : "";
+  // return `${prefix}${name ?? label ?? n.id}`;
+
+  return name ?? label ?? n.id;
 }
 
 /** EN: Resolve icon key like your CustomNode: data.labels[0] first, then node.label.
  *  DE: Icon-Key wie im CustomNode: zuerst data.labels[0], danach node.label.
  */
 export function resolveIconKey(n: GraphNode): NodeLabel | undefined {
-  const d = n.data as Record<string, unknown>;
+  const d = (n.data ?? {}) as Record<string, unknown>;
   const fromData =
-    Array.isArray(d?.labels) && typeof d.labels[0] === "string"
-      ? (d.labels[0] as string)
+    Array.isArray((d as any).labels) && typeof (d as any).labels[0] === "string"
+      ? ((d as any).labels[0] as string)
       : undefined;
   return (
-    (fromData as NodeLabel | undefined) ?? (n.label as NodeLabel | undefined)
+    ((fromData as NodeLabel | undefined) ??
+      (n.label as NodeLabel | undefined)) ||
+    undefined
   );
 }
 

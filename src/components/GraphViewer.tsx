@@ -29,10 +29,6 @@ type Props = {
   onChangeNode?: (node: NodeWithCollision<BaseNode>) => void;
 };
 
-// EN: Local view mode — no store change needed.
-// DE: Lokaler View-Modus — keine Store-Änderung nötig.
-type ViewMode = "subgraph" | "expand";
-
 export const GraphViewer = ({ onChangeNode }: Props) => {
   // -------- filters/topology from other slices --------
   const selectedTerms = useStore((s) => s.selectedTerms);
@@ -49,16 +45,11 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
 
   const { fetchGraphData, fetchNeighbors } = useGraphApi();
 
-  const [viewMode, setViewMode] = useState<ViewMode>("subgraph"); // DE: aktueller Modus
   const [lastNeighborId, setLastNeighborId] = useState<string | null>(null);
   const graphRef = useRef<GraphCanvasRef | null>(null);
 
   // -------- load subgraph on filter changes (only in "subgraph" mode) --------
   useEffect(() => {
-    // EN: When filters change and we are in subgraph mode, (re)load the subgraph.
-    // DE: Wenn Filter wechseln und wir im Subgraph-Modus sind, (neu) laden.
-    if (viewMode !== "subgraph") return;
-
     const load = async () => {
       const hasTerms = Object.values(selectedTerms).flat().length > 0;
       if (!hasTerms) {
@@ -80,7 +71,6 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
     void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    viewMode, // nur wenn wir im Subgraph-Modus sind
     JSON.stringify(selectedTerms),
     JSON.stringify(selectedTypes),
     JSON.stringify(selectedHops),
@@ -158,7 +148,6 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
         showOnlyEdges,
       );
       setGraph(newNodes, newEdges);
-      setViewMode("subgraph");
       setLastNeighborId(null);
     } catch (err) {
       console.error("reload subgraph error:", err);
@@ -174,28 +163,23 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
 
   return (
     <div className="relative flex h-[65dvh] w-full overflow-hidden rounded-xl border border-[var(--color-border)] bg-white p-1 md:h-full">
-      {/* EN: Only show the back button in "expand" mode.
-          DE: Zurück-Button nur im Expand-Modus anzeigen. */}
-      {viewMode === "expand" ? (
-        <button
-          className="absolute top-2 left-2 z-20 inline-flex h-9 items-center gap-2 rounded-md border border-[var(--color-border)] bg-white px-3 shadow-sm hover:bg-[var(--color-mark)]/10 focus-visible:outline-2 focus-visible:outline-[var(--color-mark)]"
-          onClick={handleBackToSubgraph}
-          title="Zurück zur Subgraph-Ansicht"
-          aria-label="Zurück zur Subgraph-Ansicht"
-          type="button"
-        >
-          <span className="relative block h-5 w-5">
-            <Image
-              src={uiIconMap.Rewind}
-              alt="zurück"
-              fill
-              className="pointer-events-none object-contain"
-              priority
-            />
-          </span>
-          <span className="text-sm">Subgraph</span>
-        </button>
-      ) : null}
+      <button
+        className="hover: absolute top-2 left-2 z-20 inline-flex h-9 w-9 cursor-pointer items-center rounded-md border border-[var(--color-border)] bg-white px-1 shadow-sm hover:bg-[var(--color-mark)]/10 focus-visible:outline-2 focus-visible:outline-[var(--color-mark)]"
+        onClick={handleBackToSubgraph}
+        title="Zurück zur Subgraph-Ansicht"
+        aria-label="Zurück zur Subgraph-Ansicht"
+        type="button"
+      >
+        <span className="relative block h-7 w-7">
+          <Image
+            src={uiIconMap.Rewind}
+            alt="zurück"
+            fill
+            className="pointer-events-none object-contain"
+            priority
+          />
+        </span>
+      </button>
 
       <GraphCanvas
         ref={graphRef}
@@ -203,7 +187,7 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
         edges={canvasEdges}
         theme={theme}
         edgeArrowPosition="none"
-        layoutType="forceDirected2d" // EN: supported; DE: von reagraph unterstützt
+        layoutType="forceDirected2d"
         labelType="hidden"
         draggable
         onNodeDragged={handleNodeDragged}
