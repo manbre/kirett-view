@@ -6,6 +6,7 @@ import { Text } from "@react-three/drei";
 import { useLoader } from "@react-three/fiber";
 import { labelIconMap } from "@/constants/label"; // Record<string, string>
 import { tokens } from "@/theme/tokens";
+import { useWhiteSvgTexture } from "@/hooks/useWhiteSvgTexture";
 import { useReportNodePosition } from "@/hooks/useReportNodePosition";
 
 import {
@@ -69,7 +70,8 @@ export function CustomNode<T extends BaseNode>({
 
   // In Weiß gerenderte (färbbare) Textur als Data-URL
 
-  if (!svgUrl) return null;
+  const dataUrl = useWhiteSvgTexture(svgUrl);
+  if (!dataUrl) return null;
 
   // Exakt derselbe Text wie im Label-Metrics
   const name = node.nameForLabel || buildDisplayName(node.data);
@@ -97,7 +99,7 @@ export function CustomNode<T extends BaseNode>({
         <circleGeometry args={[NODE_R, 32]} />
         <Suspense fallback={null}>
           <TexturedMaterial
-            url={svgUrl}
+            url={dataUrl}
             hovered={hovered}
             isHighlighted={isHighlighted}
           />
