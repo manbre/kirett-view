@@ -1,10 +1,9 @@
-// src/app/api/graph/subgraphs/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { withReadTx } from "@/server/db/neo4j";
-import { convertNeo4jRecords } from "@/server/utils/convertNeo4jRecords";
 import { subgraphFetchers } from "@/server/subgraphFetchers";
-import { Category } from "@/constants/category";
+import { convertNeo4jRecords } from "@/server/utils/convertNeo4jRecords";
 import type { Transaction, Record as Neo4jRecord } from "neo4j-driver";
+import { Category } from "@/constants/category";
 
 export const runtime = "nodejs";
 export async function POST(req: NextRequest) {
@@ -64,7 +63,7 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error("error in /api/graph/subgraphs:", err);
     return NextResponse.json(
-      { error: "graph could not be loaded" },
+      { error: "subgraph could not be loaded" },
       { status: 500 },
     );
   }
