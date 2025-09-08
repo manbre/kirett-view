@@ -2,6 +2,7 @@ import type { Transaction, Record as Neo4jRecord } from "neo4j-driver";
 import { Category } from "@/constants/category";
 
 import { getGroupsSubgraph } from "./groups";
+import { getDiseasesSubgraph } from "./diseases";
 import { getMedicationsSubgraph } from "./medications";
 import { getPathwaysSubgraph } from "./pathways";
 import { getProceduresSubgraph } from "./procedures";
@@ -18,6 +19,7 @@ export type SubgraphFetcher = (
 
 export const subgraphFetchers: Record<Category, SubgraphFetcher> = {
   [Category.Groups]: getGroupsSubgraph,
+  [Category.Diseases]: getDiseasesSubgraph,
   [Category.Medications]: getMedicationsSubgraph,
   [Category.Pathways]: getPathwaysSubgraph,
   [Category.Procedures]: getProceduresSubgraph,

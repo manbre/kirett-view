@@ -94,13 +94,14 @@ export function ToolBar() {
 
           {/* 1/8 */}
           <Section<ExportLabel>
-            keys={group3}
-            map={exportIconMap}
+            // keys={group3}
+            // map={exportIconMap}
             className="flex-1 md:min-h-0 md:flex-[1_0_0]"
             onReady={onSectionReady}
           />
         </div>
         <button
+          className="hover:cursor-pointer hover:bg-[var(--color-mark)]/10"
           type="button"
           onClick={() =>
             exportSvg({

@@ -3,6 +3,7 @@ import type { Transaction } from "neo4j-driver";
 import type { TermItem } from "@/types/terms";
 
 import { getGroupTerms } from "./groups";
+import { getDiseaseTerms } from "./diseases";
 import { getMedicationTerms } from "./medications";
 import { getPathwayTerms } from "./pathways";
 import { getProcedureTerms } from "./procedures";
@@ -14,6 +15,7 @@ export type TermFetcher = (tx: Transaction) => Promise<TermItem[]>; // each fetc
 
 export const termFetchers: Record<TermFetcher> = {
   [Category.Groups]: getGroupTerms,
+  [Category.Diseases]: getDiseaseTerms,
   [Category.Medications]: getMedicationTerms,
   [Category.Pathways]: getPathwayTerms,
   [Category.Procedures]: getProcedureTerms,

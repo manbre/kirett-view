@@ -81,7 +81,10 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
   const handleNodeDoubleClick = useCallback(
     async (nodeId: string) => {
       try {
-        setLastNeighborId(nodeId);
+        const neighborIds = edges
+          .filter((e: Edge) => e.source === nodeId || e.target === nodeId)
+          .map((e: Edge) => (e.source === nodeId ? e.target : e.source));
+        setLastNeighborId(neighborIds[0] ?? null);
 
         const { nodes: neighborNodes, edges: neighborEdges } =
           await fetchNeighbors(
@@ -162,24 +165,6 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
 
   return (
     <div className="relative flex h-[65dvh] w-full overflow-hidden rounded-xl border border-[var(--color-border)] bg-white p-1 md:h-full">
-      <button
-        className="hover: absolute top-2 left-2 z-20 inline-flex h-9 w-9 cursor-pointer items-center rounded-md border border-[var(--color-border)] bg-white px-1 shadow-sm hover:bg-[var(--color-mark)]/10 focus-visible:outline-2 focus-visible:outline-[var(--color-mark)]"
-        onClick={handleBackToSubgraph}
-        title="Zurück zur Subgraph-Ansicht"
-        aria-label="Zurück zur Subgraph-Ansicht"
-        type="button"
-      >
-        <span className="relative block h-7 w-7">
-          <Image
-            src={uiIconMap.Rewind}
-            alt="zurück"
-            fill
-            className="pointer-events-none object-contain"
-            priority
-          />
-        </span>
-      </button>
-
       <GraphCanvas
         ref={graphRef}
         nodes={preppedNodes}
