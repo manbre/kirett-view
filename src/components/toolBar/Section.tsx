@@ -7,7 +7,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { MaskedIcon } from "@/components/MaskedIcon";
+import { MaskedIcon } from "./MaskedIcon";
 
 type IconMap<K extends string = string> = Record<K, string>;
 

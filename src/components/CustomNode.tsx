@@ -1,30 +1,29 @@
-// src/components/CustomNode.tsx
 "use client";
 
 import React, { useState, Suspense } from "react";
 import * as THREE from "three";
 import { Text } from "@react-three/drei";
 import { useLoader } from "@react-three/fiber";
-import { labelIconMap, type NodeLabel } from "@/constants/label";
-import { useWhiteSvgTexture } from "@/hooks/useWhiteSvgTexture";
+import { labelIconMap } from "@/constants/label"; // Record<string, string>
 import { tokens } from "@/theme/tokens";
 import { useReportNodePosition } from "@/hooks/useReportNodePosition";
+
 import {
   NODE_R,
   FONT_PX,
   MAX_W,
   LABEL_Y_OFFSET,
   buildDisplayName,
-} from "@/graph/label-metrics";
-import type { BaseNode, NodeWithCollision } from "@/graph/prepareNodes";
+} from "@/graphUtils/labelMetrics";
+import type { BaseNode, NodeWithCollision } from "@/graphUtils/prepareNodes";
 
 type CustomNodeProps<T extends BaseNode> = {
   node: NodeWithCollision<T>;
   isHighlighted?: boolean;
   debugCollision?: boolean;
-  id?: string;
-  x?: number;
-  y?: number;
+  id: string; // vom Parent übergeben (z. B. node.id)
+  x: number; // vom Parent übergeben (z. B. node.position.x)
+  y: number; // vom Parent übergeben (z. B. node.position.y)
 };
 
 function TexturedMaterial({
@@ -40,6 +39,7 @@ function TexturedMaterial({
   return (
     <meshBasicMaterial
       map={texture}
+      // Hinweis: Weil die Texture weiß ist, färbt die color hier den Icon-Ton.
       color={isHighlighted ? "blue" : hovered ? tokens.mark : "black"}
       transparent
       depthTest={false}
@@ -58,41 +58,21 @@ export function CustomNode<T extends BaseNode>({
 }: CustomNodeProps<T>) {
   const [hovered, setHovered] = useState(false);
 
-  // PRIO der Quellen:
-  // 1) node.position.x/y (reagraph interner Zustand)
-  // 2) node.x/y (falls von lib gesetzt)
-  // 3) Props x/y (Fallback)
-  const raw: any = node as any;
-  const nx =
-    (raw?.position?.x as number | undefined) ??
-    (raw?.x as number | undefined) ??
-    x;
-  const ny =
-    (raw?.position?.y as number | undefined) ??
-    (raw?.y as number | undefined) ??
-    y;
+  // Positionen an den Store melden (damit der SVG-Export sie bekommt)
+  useReportNodePosition(id, x, y, { maxFrames: 90 });
 
-  const nodeId = (id ?? node.id) as string;
+  // Robust: labels kann fehlen/leer/null sein
+  const labelKey =
+    (Array.isArray(node.data?.labels) ? node.data!.labels![0] : undefined) ??
+    "";
+  const svgUrl = labelIconMap[labelKey] ?? "/icons/default.svg";
 
-  // An den Store melden, sobald endlich → Export kann posMap nutzen
-  useReportNodePosition(nodeId, nx, ny, { maxFrames: 90 });
+  // In Weiß gerenderte (färbbare) Textur als Data-URL
 
-  // Icon-Key wie im Export
-  const dataLabels = Array.isArray((node.data as any)?.labels)
-    ? ((node.data as any).labels as string[])
-    : [];
-  const iconKey =
-    (dataLabels[0] as NodeLabel | undefined) ??
-    (node.label as NodeLabel | undefined);
-  const svgUrl =
-    iconKey && labelIconMap[iconKey]
-      ? labelIconMap[iconKey]
-      : "/icons/default.svg";
+  if (!svgUrl) return null;
 
-  const dataUrl = useWhiteSvgTexture(svgUrl);
-  if (!dataUrl) return null;
-
-  const name = (node as any).nameForLabel || buildDisplayName(node.data);
+  // Exakt derselbe Text wie im Label-Metrics
+  const name = node.nameForLabel || buildDisplayName(node.data);
 
   return (
     <group
@@ -117,7 +97,7 @@ export function CustomNode<T extends BaseNode>({
         <circleGeometry args={[NODE_R, 32]} />
         <Suspense fallback={null}>
           <TexturedMaterial
-            url={dataUrl}
+            url={svgUrl}
             hovered={hovered}
             isHighlighted={isHighlighted}
           />

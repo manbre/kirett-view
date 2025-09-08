@@ -7,7 +7,7 @@ import type { GraphNode, GraphEdge } from "@/types/graph";
 // Wichtig ist nur: { x: number; y: number }
 import type { Pos } from "@/store/slices/graphSlice";
 import { buildSvgFromGraph, type SvgExportOptions } from "@/svgExport";
-import { NODE_R, FONT_PX, MAX_W } from "@/graph/label-metrics";
+import { NODE_R, FONT_PX, MAX_W } from "@/graphUtils/labelMetrics";
 
 async function awaitAllPositions(
   nodes: GraphNode[],

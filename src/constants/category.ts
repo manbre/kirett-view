@@ -1,5 +1,5 @@
 export enum Category {
-  // Diseases = "diseases",
+  Diseases = "diseases",
   Groups = "groups",
   Medications = "medications",
   Pathways = "pathways",
@@ -10,7 +10,7 @@ export enum Category {
 }
 
 export const CategoryLabels: Record<Category, string> = {
-  // [Category.Diseases]: "Krankheiten",
+  [Category.Diseases]: "Krankheiten",
   [Category.Groups]: "Krankheitsgruppen",
   [Category.Medications]: "Medikamente",
   [Category.Pathways]: "BPR",

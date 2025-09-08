@@ -9,11 +9,11 @@ import {
   exportIconMap,
   type ExportLabel,
 } from "@/constants/label";
-import { Section } from "@/components/Section";
+import { Section } from "./Section";
 import { useStore, selectors } from "@/store/useStore";
 import type { HopKey } from "@/store/slices/topologySlice";
 import { useSvgExport } from "@/hooks/useSvgExport";
-import { NODE_R, FONT_PX, MAX_W } from "@/graph/label-metrics";
+import { NODE_R, FONT_PX, MAX_W } from "@/graphUtils/labelMetrics";
 
 const excluded: NodeLabel[] = ["StartNode", "StopNode"];
 const group = Object.keys(labelIconMap) as NodeLabel[];

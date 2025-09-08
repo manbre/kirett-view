@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Category } from "@/constants/category";
 import { CategoryTabs } from "@/components/CategoryTabs";
 import { TermField } from "@/components/TermField";
-import { ToolBar } from "@/components/ToolBar";
+import { ToolBar } from "@/components/toolBar/ToolBar";
 import { GraphViewer } from "@/components/GraphViewer";
 
 export default function Home() {

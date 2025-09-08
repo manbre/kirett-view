@@ -4,7 +4,7 @@
 import type { GraphNode } from "@/types/graph";
 import type { Pos } from "./graphUtils";
 import { wrapTextToLines } from "./svgUtils";
-import { buildDisplayName } from "@/graph/label-metrics";
+import { buildDisplayName } from "@/graphUtils/labelMetrics";
 
 export interface BBox {
   minX: number;

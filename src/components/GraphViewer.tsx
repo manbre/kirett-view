@@ -12,7 +12,7 @@ import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { useStore } from "@/store/useStore";
 import { useGraphApi } from "@/hooks/useGraphApi";
 import { CustomNode } from "@/components/CustomNode";
-import { prepareNodes } from "@/graph/prepareNodes";
+import { prepareNodes } from "@/graphUtils/prepareNodes";
 import { tokens } from "@/theme/tokens";
 import Image from "next/image";
 import { uiIconMap } from "@/constants/label";

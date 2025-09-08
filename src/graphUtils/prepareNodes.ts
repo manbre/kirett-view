@@ -1,5 +1,5 @@
 // src/graph/prepareNodes.ts
-import { buildDisplayName, calcCollisionRadius } from "./label-metrics";
+import { buildDisplayName, calcCollisionRadius } from "./labelMetrics";
 
 // Minimale Node-Form, die wir brauchen (id, optionale Größe, optionale Daten).
 export type BaseNode = {

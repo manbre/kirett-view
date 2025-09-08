@@ -5,7 +5,7 @@ import type { GraphNode, GraphEdge } from "@/types/graph";
 import type { Pos } from "./graphUtils";
 import { endpoints } from "./graphUtils";
 import { esc, wrapTextToLines, type ParsedIcon } from "./svgUtils";
-import { buildDisplayName } from "@/graph/label-metrics";
+import { buildDisplayName } from "@/graphUtils/labelMetrics";
 
 function labelFor(n: GraphNode): string {
   const data =
