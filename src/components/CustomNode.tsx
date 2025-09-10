@@ -83,6 +83,18 @@ export function CustomNode<T extends BaseNode>({
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}
     >
+      {isHighlighted && (
+        <mesh position={[0, 0, 0.02]} renderOrder={5}>
+          {/** Kräftiger Ring um den Knoten (Einkreisen) */}
+          <ringGeometry args={[NODE_R + 2, NODE_R + 14, 64]} />
+          <meshBasicMaterial
+            color={tokens.mark}
+            transparent
+            opacity={0.4}
+            depthTest={false}
+          />
+        </mesh>
+      )}
       {debugCollision && (
         <mesh position={[0, 0, 0]}>
           <circleGeometry args={[node.collisionRadius, 64]} />

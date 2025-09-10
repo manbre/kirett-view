@@ -11,7 +11,6 @@ export const metadata: Metadata = {
 const cssVars = `
 :root{
   --color-bg:${tokens.bg};
-  --color-fg:${tokens.fg};
   --color-text:${tokens.text};
   --color-border:${tokens.border};
   --color-mark:${tokens.mark};

@@ -21,6 +21,10 @@ type Props<K extends string = string> = {
   cell?: string;
   /** Meldet dem Parent, dass diese Section ihre Rows berechnet hat (ab md) */
   onReady?: () => void;
+  /** Zusätzliche Kacheln (Buttons) die in das Grid eingereiht werden */
+  children?: React.ReactNode;
+  /** Mobil: nicht umbrechen (in einer Reihe bleiben) */
+  nowrapMobile?: boolean;
 };
 
 // Isomorphic Layout Effect: auf dem Client useLayoutEffect (vor Paint),
@@ -43,6 +47,8 @@ export function Section<K extends string>({
   onToggle,
   cell = "clamp(36px, 3.2vw, 72px)",
   onReady,
+  children,
+  nowrapMobile,
 }: Props<K>) {
   const items = useMemo(
     () => (keys || []).filter((k) => k in map),
@@ -121,7 +127,9 @@ export function Section<K extends string>({
       aria-hidden={ready ? undefined : true}
       className={[
         // 📱 Mobil: Flex + Wrap in Zeilen (immer sichtbar auf Mobil)
-        "flex w-full flex-row flex-wrap content-start justify-start gap-1",
+        nowrapMobile
+          ? "flex w-full flex-row flex-nowrap content-start justify-start gap-1"
+          : "flex w-full flex-row flex-wrap content-start justify-start gap-1",
         // 💻 Ab md: Grid, das vertikal füllt und dann neue Spalten anlegt
         "md:grid md:content-start md:gap-1",
         "md:[grid-auto-columns:var(--cell)] md:[grid-auto-flow:column] md:[grid-auto-rows:var(--cell)]",
@@ -168,6 +176,7 @@ export function Section<K extends string>({
           </button>
         );
       })}
+      {children}
     </div>
   );
 }

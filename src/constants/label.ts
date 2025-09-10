@@ -24,8 +24,8 @@ export type NodeLabel = keyof typeof labelIconMap;
 //============================================================
 //
 export const filterIconMap = {
-  HopOne: "/icons/hop1.svg",
-  HopTwo: "/icons/hop2.svg",
+  // HopOne: "/icons/hop1.svg",
+  // HopTwo: "/icons/hop2.svg",
   OnlyEdges: "/icons/polygon.svg",
 } as const;
 

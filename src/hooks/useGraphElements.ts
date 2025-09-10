@@ -1,6 +1,12 @@
-import { useRef, useState } from "react";
-import { GraphNode, GraphEdge } from "@/types/graph";
+"use client";
 
+import { useRef, useState } from "react";
+import type { GraphNode, GraphEdge } from "@/types/graph";
+
+/**
+ * Leichter lokaler Container für Nodes/Edges OHNE Dedupe.
+ * Dedupe passiert zentral in `useGraphApi`.
+ */
 export const useGraphElements = () => {
   const [nodes, setNodes] = useState<GraphNode[]>([]);
   const [edges, setEdges] = useState<GraphEdge[]>([]);
@@ -10,30 +16,22 @@ export const useGraphElements = () => {
     newNodes: GraphNode[],
     newEdges: GraphEdge[],
   ) => {
-    const nextIds = new Set(newNodes.map((n) => n.id));
+    setNodes(newNodes);
+    setEdges(newEdges);
+    loadedNodeIdsRef.current = new Set(newNodes.map((n) => n.id));
+  };
 
-    const uniqueNodesMap = new Map<string, GraphNode>();
-    for (const node of newNodes) {
-      if (!uniqueNodesMap.has(node.id)) {
-        uniqueNodesMap.set(node.id, node);
-      }
-    }
-
-    const uniqueEdgesMap = new Map<string, GraphEdge>();
-    for (const edge of newEdges) {
-      if (!uniqueEdgesMap.has(edge.id)) {
-        uniqueEdgesMap.set(edge.id, edge);
-      }
-    }
-
-    setNodes(Array.from(uniqueNodesMap.values()));
-    setEdges(Array.from(uniqueEdgesMap.values()));
-    loadedNodeIdsRef.current = nextIds;
+  const resetGraphElements = () => {
+    setNodes([]);
+    setEdges([]);
+    loadedNodeIdsRef.current = new Set();
   };
 
   return {
     nodes,
     edges,
     updateGraphElements,
+    resetGraphElements,
+    loadedNodeIdsRef, // falls extern gebraucht (read-only Nutzung)
   };
 };

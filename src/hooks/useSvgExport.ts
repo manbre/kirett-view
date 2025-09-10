@@ -1,18 +1,19 @@
+// src/hooks/useSvgExport.ts
 "use client";
 
 import { useCallback } from "react";
 import { useStore } from "@/store/useStore";
 import type { GraphNode, GraphEdge } from "@/types/graph";
-// Falls dein Store-Pos-Typ kompatibel ist, kannst du ihn lassen.
-// Wichtig ist nur: { x: number; y: number }
-import type { Pos } from "@/store/slices/graphSlice";
+import type { Store } from "@/store/useStore";
 import { buildSvgFromGraph, type SvgExportOptions } from "@/svgExport";
 import { NODE_R, FONT_PX, MAX_W } from "@/graphUtils/labelMetrics";
+
+type Pos = Store["pos"] extends Map<string, infer P> ? P : never;
 
 async function awaitAllPositions(
   nodes: GraphNode[],
   getPos: () => Map<string, Pos> | undefined,
-  maxFrames = 240, // ↑ mehr Zeit bei großen Graphen
+  maxFrames = 120,
 ): Promise<Map<string, Pos> | undefined> {
   let frames = 0;
   return new Promise((resolve) => {
@@ -29,22 +30,22 @@ async function awaitAllPositions(
   });
 }
 
-// ★ Wichtig: overscan in PX (2–4) + extraBottom hinzufügen
+// Robuste Defaults: weißer BG, großzügiger Overscan, Flip an
 const DEFAULT_EXPORT_OPTS: SvgExportOptions = {
-  background: "transparent",
+  background: "white",
   padding: 24,
   iconSize: NODE_R * 2,
   nodeRadius: NODE_R,
   fontSize: FONT_PX,
   maxTextWidth: MAX_W,
-  fontFamily:
-    "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto", // wie Viewer
   edgeColor: "#9bbcff",
   edgeWidth: 1.25,
-  labelBg: false,
-  overscan: 3, // war 1.08 → praktisch 0; nimm 2–4 px
-  extraBottom: 20, // NEU: zusätzlicher Unterrand gegen Cutoff
+  labelBg: true,
+  overscan: 24,
+  extraBottom: 24,
+  arrow: false,
   debug: false,
+  flipY: true, // ← wichtig
 };
 
 export function useSvgExport() {
@@ -53,8 +54,11 @@ export function useSvgExport() {
   const getPos = () => useStore.getState().pos as Map<string, Pos> | undefined;
 
   const exportSvg = useCallback(
-    async (userOpts?: SvgExportOptions): Promise<boolean> => {
-      const opts: SvgExportOptions = { ...DEFAULT_EXPORT_OPTS, ...userOpts };
+    async (userOpts?: Partial<SvgExportOptions>): Promise<boolean> => {
+      const opts: SvgExportOptions = {
+        ...DEFAULT_EXPORT_OPTS,
+        ...(userOpts ?? {}),
+      };
 
       const firstPos = getPos();
       console.log("export sanity (pre-wait)", {
@@ -64,7 +68,7 @@ export function useSvgExport() {
         missing: nodes.filter((n) => !firstPos?.has(n.id)).map((n) => n.id),
       });
 
-      const pos = await awaitAllPositions(nodes ?? [], getPos, 240);
+      const pos = await awaitAllPositions(nodes ?? [], getPos, 120);
 
       const afterPos = pos ?? new Map();
       console.log("export sanity (post-wait)", {
