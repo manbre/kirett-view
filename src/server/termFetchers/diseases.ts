@@ -5,19 +5,20 @@ export async function getDiseaseTerms(tx: Transaction): Promise<TermItem[]> {
   // second MATCH only because of "akutes Aortensyndrom"
   const result = await tx.run(
     `
-MATCH (d1:DisplayNode)-[]-(d2:DisplayNode)
-  WHERE d2.Name CONTAINS "Hinweise"
-    AND d1.Name <> "Zusatzinformationen"
-RETURN DISTINCT d1.Name AS name
+MATCH (n:DisplayNode)
+  WHERE n.Name CONTAINS "Hinweise" 
+RETURN DISTINCT 
+  REPLACE(REPLACE(REPLACE(n.Name, "Hinweise ", ""), "auf ", ""), ":", "") AS name
+ORDER BY name
 
 UNION
 
-MATCH (d1:DisplayNode)-[]-(w:WarningNode)
-  WHERE w.Name CONTAINS "Hinweise"
-    AND d1.Name <> "Erweiterte spez. Diagnostik"
-    AND d1.Name <> "Zusatzinformationen"
-RETURN DISTINCT d1.Name AS name
-            `,
+MATCH (n:WarningNode)
+  WHERE n.Name CONTAINS "Hinweise"
+RETURN DISTINCT 
+   REPLACE(REPLACE(REPLACE(n.Name, "Hinweise ", ""), "auf ", ""), ":", "") AS name
+ORDER BY name
+`,
   );
 
   return result.records.map((record) => ({

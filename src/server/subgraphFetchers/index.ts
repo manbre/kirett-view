@@ -23,12 +23,8 @@ export const subgraphFetchers: Record<Category, SubgraphFetcher> = {
   [Category.Medications]: getMedicationsSubgraph,
   [Category.Pathways]: getPathwaysSubgraph,
   [Category.Procedures]: getProceduresSubgraph,
+  [Category.Roles]: getRolesSubgraph,
   [Category.Symptoms]: getSymptomsSubgraph,
-  //
-  [Category.Roles]: ((terms, tx, include) =>
-    getRolesSubgraph(terms, tx, include)) as SubgraphFetcher,
-  //
-  [Category.Others]: ((terms, tx) =>
-    getOthersSubgraph(terms, tx)) as SubgraphFetcher,
+  [Category.Others]: getOthersSubgraph,
 };
 // Registry of subgraph fetchers per category; builds filtered Cypher queries
