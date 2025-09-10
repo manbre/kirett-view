@@ -15,7 +15,7 @@ export async function getGroupsSubgraph(
       query = `
   MATCH (n:JumpNode)-[r1]-(nbr1)
     WHERE n.BPR = "Disease Groups"
-    AND ANY(x IN $groups WHERE toLower(n.Name) = toLower(x))
+    AND ANY(x IN $groups WHERE toLower(n.Name) CONTAINS toLower(x))
     AND ANY (l IN labels(nbr1) WHERE l IN $include)
   RETURN n AS n, r1 AS r, nbr1 AS neighbor
     `;
@@ -25,7 +25,7 @@ export async function getGroupsSubgraph(
       query = `
   MATCH (n:JumpNode)-[r1]-(nbr1)-[r2]-(nbr2)
     WHERE n.BPR = "Disease Groups"
-    AND ANY(x IN $groups WHERE toLower(n.Name) = toLower(x))
+    AND ANY(x IN $groups WHERE toLower(n.Name) CONTAINS toLower(x))
     AND ANY (l IN labels(nbr2) WHERE l IN $include)
   RETURN n AS n, r2 AS r, nbr2 AS neighbor
     `;
@@ -35,7 +35,7 @@ export async function getGroupsSubgraph(
       query = `
   MATCH (n:JumpNode)-[r1]-(nbr1)-[r2]-(nbr2)
     WHERE n.BPR = "Disease Groups"
-    AND ANY(x IN $groups WHERE toLower(n.Name) = toLower(x))
+    AND ANY(x IN $groups WHERE toLower(n.Name) CONTAINS toLower(x))
   WITH n, r1, r2, nbr1, nbr2
     UNWIND [[nbr1, r1], [nbr2, r2]] AS pair
   WITH n, pair[0] AS nbr, pair[1] AS r
@@ -48,7 +48,7 @@ export async function getGroupsSubgraph(
       query = `
 MATCH (n:JumpNode)-[r1]-(nbr1)
   WHERE n.BPR = "Disease Groups"
-  AND ANY(x IN $groups WHERE toLower(n.Name) = toLower(x))
+  AND ANY(x IN $groups WHERE toLower(n.Name) CONTAINS toLower(x))
 RETURN n AS n, r1 AS r, nbr1 AS neighbor
     `;
       break;

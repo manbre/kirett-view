@@ -14,7 +14,7 @@ export async function getPathwaysSubgraph(
     case "1": // hop1
       query = `
   MATCH (n:BPRNode)-[r1]-(nbr1)
-    WHERE ANY(x IN $pathways WHERE toLower(n.BPR) = toLower(x))
+    WHERE ANY(x IN $pathways WHERE toLower(n.BPR) CONTAINS toLower(x))
     AND ANY (l IN labels(nbr1) WHERE l IN $include)
   RETURN n, r1 AS r, nbr1 AS neighbor
     `;
@@ -23,7 +23,7 @@ export async function getPathwaysSubgraph(
     case "2": // hop2
       query = `
   MATCH (n:BPRNode)-[r1]-(nbr1)-[r2]-(nbr2)
-    WHERE ANY(x IN $pathways WHERE toLower(n.BPR) = toLower(x))
+    WHERE ANY(x IN $pathways WHERE toLower(n.BPR) CONTAINS toLower(x))
     AND ANY (l IN labels(nbr2) WHERE l IN $include)
   RETURN n, r2 AS r, nbr2 AS neighbor
     `;
@@ -32,7 +32,7 @@ export async function getPathwaysSubgraph(
     case "1,2": // hop1 & hop2
       query = `
   MATCH (n:BPRNode)-[r1]-(nbr1)-[r2]-(nbr2)
-    WHERE ANY(x IN $pathways WHERE toLower(n.BPR) = toLower(x))
+    WHERE ANY(x IN $pathways WHERE toLower(n.BPR) CONTAINS toLower(x))
   WITH n, r1, r2, nbr1, nbr2
     UNWIND [[nbr1, r1], [nbr2, r2]] AS pair
   WITH n, pair[0] AS nbr, pair[1] AS r
@@ -44,7 +44,7 @@ export async function getPathwaysSubgraph(
     default: // fallback: hop1 without label restriction
       query = `
   MATCH (n:BPRNode)-[r1]-(nbr1)
-    WHERE ANY(x IN $pathways WHERE toLower(n.BPR) = toLower(x))
+    WHERE ANY(x IN $pathways WHERE toLower(n.BPR) CONTAINS toLower(x))
   RETURN n, r1 AS r, nbr1 AS neighbor
     `;
       break;

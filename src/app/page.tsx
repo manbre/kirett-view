@@ -4,9 +4,10 @@ import { useState } from "react";
 import { Category } from "@/constants/category";
 import { CategoryTabs } from "@/components/CategoryTabs";
 import { TermField } from "@/components/TermField";
-import { ToolBar } from "@/components/toolBar/ToolBar";
 import { GraphViewer } from "@/components/GraphViewer";
+import { ToolBar } from "@/components/toolBar/ToolBar";
 
+// Home page: category tabs, terms list, graph viewer and toolbar
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
     null,
@@ -48,4 +49,3 @@ export default function Home() {
     </div>
   );
 }
-// Home page: category tabs, terms list, graph viewer, and toolbar

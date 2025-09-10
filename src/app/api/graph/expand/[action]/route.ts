@@ -1,4 +1,3 @@
-// app/api/graph/expand/[action]/route.ts
 // POST /api/graph/expand/:action
 // Expands graph context from a node (e.g., neighbors) with filters applied.
 import { NextRequest, NextResponse } from "next/server";

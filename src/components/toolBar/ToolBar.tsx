@@ -78,12 +78,12 @@ export function ToolBar() {
         <div className="hidden border-t border-[var(--color-border)] md:block" />
 
         {/* ===== Section 2 (2/8) + Section 3 (1/8) ===== */}
-        <div className="flex flex-row gap-2 md:min-h-0 md:flex-[3_0_0] md:flex-col md:gap-0">
+        <div className="flex flex-row gap-2 md:min-h-0 md:flex-[3_0_0] md:flex-col md:gap-0 md:pt-4">
           {/* 2/8: Section-Grid mit HopToggle (als Grid-Items) + OnlyEdges-Icon */}
           <Section<FilterLabel>
             keys={["OnlyEdges"] as FilterLabel[]}
             map={filterIconMap}
-            className="flex-1 md:min-h-0 md:flex-[2_0_0]"
+            className="flex-1 md:min-h-0 md:flex-[4_0_0]"
             isActive={() => showOnlyEdges}
             onToggle={() => toggleOnlyEdges()}
             onReady={onSectionReady}
@@ -96,7 +96,7 @@ export function ToolBar() {
           <Section<ExportLabel>
             keys={group3}
             map={exportIconMap}
-            className="flex-1 md:min-h-0 md:flex-[1_0_0]"
+            className="flex-0 md:min-h-0 md:flex-[1_0_0]"
             onToggle={() =>
               exportSvg({
                 background: "white",

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+// useWhiteSvgTexture: fetches an SVG and normalizes it to white-only for tinting
 export function useWhiteSvgTexture(svgUrl: string | null) {
   const [dataUrl, setDataUrl] = useState<string | null>(null);
 
@@ -50,4 +51,3 @@ export function useWhiteSvgTexture(svgUrl: string | null) {
 
   return dataUrl;
 }
-// useWhiteSvgTexture: fetches an SVG and normalizes it to white-only for tinting

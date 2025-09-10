@@ -18,7 +18,7 @@ const cssVars = `
   --color-node:${tokens.node};
 }
 `;
-
+// Root layout: injects CSS variables for theme tokens and wraps the app
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
@@ -33,4 +33,3 @@ export default function RootLayout({
     </html>
   );
 }
-// Root layout: injects CSS variables for theme tokens and wraps the app

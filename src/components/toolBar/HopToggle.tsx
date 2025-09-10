@@ -3,7 +3,6 @@
 import React from "react";
 import { useStore } from "@/store/useStore";
 import type { HopMode } from "@/store/slices/topologySlice";
-// OnlyEdges is handled by the Section; this component is a single grouped control
 
 /**
  * HopToggle
