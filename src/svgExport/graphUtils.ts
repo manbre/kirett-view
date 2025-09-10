@@ -17,15 +17,25 @@ export function isFinitePos(
 // ---------- edge helpers ----------
 
 // Get source/target node ids from a GraphEdge
-export function endpoints(e: GraphEdge): { s: string; t: string } {
-  const s =
-    typeof (e as any).source === "string"
-      ? (e as any).source
-      : (e as any).source?.id;
-  const t =
-    typeof (e as any).target === "string"
-      ? (e as any).target
-      : (e as any).target?.id;
+type EdgeLike = {
+  source: string | { id?: unknown };
+  target: string | { id?: unknown };
+};
+
+export function endpoints(e: EdgeLike): { s: string; t: string } {
+  let s: string;
+  if (typeof e.source === "string") s = e.source;
+  else {
+    const id = e.source?.id;
+    s = typeof id === "string" ? id : String(id ?? "");
+  }
+
+  let t: string;
+  if (typeof e.target === "string") t = e.target;
+  else {
+    const id = e.target?.id;
+    t = typeof id === "string" ? id : String(id ?? "");
+  }
   return { s, t };
 }
 
@@ -33,12 +43,10 @@ export function endpoints(e: GraphEdge): { s: string; t: string } {
 
 // Prefer a precomputed display name (nameForLabel). Otherwise use data fields
 export function labelOf(n: GraphNode): string {
-  const anyN = n as any;
-  if (
-    typeof anyN.nameForLabel === "string" &&
-    anyN.nameForLabel.trim().length > 0
-  ) {
-    return anyN.nameForLabel;
+  const extra = n as unknown as Record<string, unknown>;
+  const nameForLabel = extra["nameForLabel"];
+  if (typeof nameForLabel === "string" && nameForLabel.trim().length > 0) {
+    return nameForLabel;
   }
 
   const d = (n.data ?? {}) as Record<string, unknown>;
@@ -60,9 +68,10 @@ export function labelOf(n: GraphNode): string {
 /** Resolve icon key like CustomNode: data.labels[0] first, then node.label */
 export function resolveIconKey(n: GraphNode): NodeLabel | undefined {
   const d = (n.data ?? {}) as Record<string, unknown>;
+  const labels = (d["labels"] as unknown) as unknown[] | undefined;
   const fromData =
-    Array.isArray((d as any).labels) && typeof (d as any).labels[0] === "string"
-      ? ((d as any).labels[0] as string)
+    Array.isArray(labels) && typeof labels[0] === "string"
+      ? (labels[0] as string)
       : undefined;
   return (
     ((fromData as NodeLabel | undefined) ??
