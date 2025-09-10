@@ -71,3 +71,4 @@ export const TermField = ({ selectedCategory }: Props) => {
     </div>
   );
 };
+// TermField: shows selectable terms for the active category; writes to store

@@ -8,3 +8,4 @@ export type GroupedTermItem = {
   label: string;
   group: string;
 };
+// Types for term payloads used by the term endpoints and UI lists

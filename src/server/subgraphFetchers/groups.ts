@@ -57,3 +57,4 @@ RETURN n AS n, r1 AS r, nbr1 AS neighbor
   const result = await tx.run(query, { groups, include });
   return result.records;
 }
+// Subgraph fetcher for disease groups: expands around JumpNode with BPR='Disease Groups'

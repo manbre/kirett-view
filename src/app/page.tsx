@@ -48,3 +48,4 @@ export default function Home() {
     </div>
   );
 }
+// Home page: category tabs, terms list, graph viewer, and toolbar

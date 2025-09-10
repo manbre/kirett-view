@@ -18,3 +18,4 @@ RETURN name
     label: record.get("name"),
   }));
 }
+// Term fetcher for miscellaneous labels (all labels except DisplayNode)

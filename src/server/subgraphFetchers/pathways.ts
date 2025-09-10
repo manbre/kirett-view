@@ -53,3 +53,4 @@ export async function getPathwaysSubgraph(
   const result = await tx.run(query, { pathways, include });
   return result.records;
 }
+// Subgraph fetcher for pathways (BPR nodes)

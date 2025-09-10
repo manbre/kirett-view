@@ -33,3 +33,4 @@ export default function RootLayout({
     </html>
   );
 }
+// Root layout: injects CSS variables for theme tokens and wraps the app

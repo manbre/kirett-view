@@ -17,3 +17,4 @@ export async function getGroupTerms(tx: Transaction): Promise<TermItem[]> {
     label: record.get("name"),
   }));
 }
+// Term fetcher for disease group names (JumpNode with BPR='Disease Groups')

@@ -23,3 +23,4 @@ export const termFetchers: Record<TermFetcher> = {
   [Category.Symptoms]: getSymptomTerms,
   [Category.Others]: getOtherTerms,
 };
+// Term fetcher registry per category, returns lists of selectable terms

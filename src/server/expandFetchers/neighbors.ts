@@ -53,3 +53,4 @@ export async function getNeighbors(
   const result = await tx.run(query, { nodeId, include });
   return result.records;
 }
+// Expand fetcher: returns 1/2-hop neighborhood for a given node id

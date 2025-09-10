@@ -63,3 +63,4 @@ export const CategoryTabs = ({ selectedCategory, onChangeCategory }: Props) => {
     </div>
   );
 };
+// CategoryTabs: renders category pills with counts; integrates with store selection

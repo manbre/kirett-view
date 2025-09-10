@@ -50,3 +50,4 @@ export function useWhiteSvgTexture(svgUrl: string | null) {
 
   return dataUrl;
 }
+// useWhiteSvgTexture: fetches an SVG and normalizes it to white-only for tinting

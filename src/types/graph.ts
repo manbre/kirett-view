@@ -15,3 +15,4 @@ export type SubgraphResult = {
   nodes: GraphNode[];
   edges: GraphEdge[];
 };
+// Graph data types shared across client and server

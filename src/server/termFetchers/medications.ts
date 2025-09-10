@@ -15,3 +15,4 @@ export async function getMedicationTerms(tx: Transaction): Promise<TermItem[]> {
     label: record.get("name"),
   }));
 }
+// Term fetcher for medication names (SAAMedicationNode)

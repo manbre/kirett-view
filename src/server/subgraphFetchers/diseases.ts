@@ -53,3 +53,4 @@ export async function getDiseasesSubgraph(
   const result = await tx.run(query, { symptoms, include });
   return result.records;
 }
+// Subgraph fetcher for diseases: returns nodes/edges around matching DisplayNodes

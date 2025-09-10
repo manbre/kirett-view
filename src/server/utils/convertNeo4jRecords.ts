@@ -132,3 +132,4 @@ export function convertNeo4jRecords(
     edges: edgesOnKnownNodes,
   };
 }
+// Converts raw Neo4j records (nodes/relationships/paths) into flat GraphNode/GraphEdge arrays

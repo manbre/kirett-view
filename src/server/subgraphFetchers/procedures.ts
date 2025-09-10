@@ -53,3 +53,4 @@ export async function getProceduresSubgraph(
   const result = await tx.run(query, { procedures, include });
   return result.records;
 }
+// Subgraph fetcher for SAA procedures (SAAProcedureNode)

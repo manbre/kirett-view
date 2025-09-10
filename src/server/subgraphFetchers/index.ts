@@ -31,3 +31,4 @@ export const subgraphFetchers: Record<Category, SubgraphFetcher> = {
   [Category.Others]: ((terms, tx) =>
     getOthersSubgraph(terms, tx)) as SubgraphFetcher,
 };
+// Registry of subgraph fetchers per category; builds filtered Cypher queries

@@ -13,3 +13,4 @@ export const expandFetchers: Record<string, ExpandFetcher> = {
 };
 
 export type ExpandAction = keyof typeof expandFetchers;
+// Registry of server-side expand actions (e.g., neighbors)

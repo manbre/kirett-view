@@ -15,3 +15,4 @@ RETURN n AS n
 
   return result.records;
 }
+// Subgraph fetcher for miscellaneous nodes (Others)

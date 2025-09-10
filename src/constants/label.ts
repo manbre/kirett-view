@@ -46,3 +46,4 @@ export const uiIconMap = {
 } as const;
 
 export type uiLabel = keyof typeof uiIconMap;
+// Icon mappings for nodes, filters, exports, and UI controls

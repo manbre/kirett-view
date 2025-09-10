@@ -20,3 +20,4 @@ export async function getPathwayTerms(
     group: record.get("group"),
   }));
 }
+// Term fetcher for BPR pathways (grouped by SituationDetectionGroup)
