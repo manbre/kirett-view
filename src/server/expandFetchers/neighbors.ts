@@ -1,7 +1,7 @@
 import { Transaction, Record as Neo4jRecord } from "neo4j-driver";
 
 export async function getNeighbors(
-  nodeId: string[],
+  nodeId: string,
   depth: ("1" | "2")[],
   include: string[],
   tx: Transaction,
@@ -24,7 +24,7 @@ export async function getNeighbors(
       query = `
   MATCH (n)-[r1]-(nbr1)-[r2]-(nbr2)
     WHERE id(n) = toInteger($nodeId)
-    AND ANY (l IN labels(nbr1) WHERE l IN $include)
+    AND ANY (l IN labels(nbr2) WHERE l IN $include)
   RETURN n AS n, r2 AS r, nbr2 AS neighbor
     `;
       break;
@@ -36,8 +36,8 @@ export async function getNeighbors(
   WITH n, r1, r2, nbr1, nbr2
     UNWIND [[nbr1, r1], [nbr2, r2]] AS pair
   WITH n, pair[0] AS nbr, pair[1] AS r
-    WHERE ANY (l IN labels(nbr1) WHERE l IN $include)
-  RETURN n AS n, rr AS r, nbr AS neighbor
+    WHERE ANY (l IN labels(nbr) WHERE l IN $include)
+  RETURN n AS n, r AS r, nbr AS neighbor
     `;
       break;
 
