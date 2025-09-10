@@ -12,11 +12,12 @@ export function convertNeo4jRecords(
   const addNode = (n: Node) => {
     const id = n.identity.toString();
     if (nodesMap.has(id)) return;
+    const props = n.properties as Record<string, unknown>;
     nodesMap.set(id, {
       id,
-      label: (n.properties as any)?.Name ?? n.labels?.[0] ?? "Node",
+      label: (props?.Name as string | undefined) ?? n.labels?.[0] ?? "Node",
       data: {
-        ...(n.properties as any),
+        ...props,
         labels: n.labels,
         type: n.labels?.[0] ?? null,
       },
@@ -33,15 +34,15 @@ export function convertNeo4jRecords(
   const isNeoNode = (v: unknown): v is Node =>
     !!v &&
     typeof v === "object" &&
-    "identity" in (v as any) &&
-    "labels" in (v as any);
+    "identity" in (v as Record<string, unknown>) &&
+    "labels" in (v as Record<string, unknown>);
   const isNeoRel = (v: unknown): v is Relationship =>
     !!v &&
     typeof v === "object" &&
-    "identity" in (v as any) &&
-    "start" in (v as any) &&
-    "end" in (v as any) &&
-    "type" in (v as any);
+    "identity" in (v as Record<string, unknown>) &&
+    "start" in (v as Record<string, unknown>) &&
+    "end" in (v as Record<string, unknown>) &&
+    "type" in (v as Record<string, unknown>);
   const isNeoPath = (
     v: unknown,
   ): v is {
@@ -49,8 +50,8 @@ export function convertNeo4jRecords(
   } =>
     !!v &&
     typeof v === "object" &&
-    "segments" in (v as any) &&
-    Array.isArray((v as any).segments);
+    "segments" in (v as Record<string, unknown>) &&
+    Array.isArray((v as Record<string, unknown>).segments);
 
   const visit = (val: unknown): void => {
     if (val == null) return;
@@ -63,7 +64,11 @@ export function convertNeo4jRecords(
       return;
     }
     if (isNeoPath(val)) {
-      const p: any = val;
+      const p = val as {
+        segments?: Array<{ start: Node; end: Node; relationship: Relationship }>;
+        start?: Node;
+        end?: Node;
+      };
       for (const seg of p.segments ?? []) {
         if (seg?.start) addNode(seg.start);
         if (seg?.end) addNode(seg.end);
@@ -78,7 +83,9 @@ export function convertNeo4jRecords(
       return;
     }
     if (typeof val === "object") {
-      for (const k of Object.keys(val as any)) visit((val as any)[k]);
+      for (const [, child] of Object.entries(val as Record<string, unknown>)) {
+        visit(child);
+      }
     }
   };
 

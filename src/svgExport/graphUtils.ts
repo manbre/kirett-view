@@ -17,15 +17,13 @@ export function isFinitePos(
 // ---------- edge helpers ----------
 
 // Get source/target node ids from a GraphEdge
-export function endpoints(e: GraphEdge): { s: string; t: string } {
-  const s =
-    typeof (e as any).source === "string"
-      ? (e as any).source
-      : (e as any).source?.id;
-  const t =
-    typeof (e as any).target === "string"
-      ? (e as any).target
-      : (e as any).target?.id;
+type EdgeLike = { source: string | { id: string }; target: string | { id: string } };
+
+export function endpoints(e: GraphEdge | EdgeLike): { s: string; t: string } {
+  const src = (e as EdgeLike).source;
+  const tgt = (e as EdgeLike).target;
+  const s = typeof src === "string" ? src : src?.id;
+  const t = typeof tgt === "string" ? tgt : tgt?.id;
   return { s, t };
 }
 
@@ -33,12 +31,9 @@ export function endpoints(e: GraphEdge): { s: string; t: string } {
 
 // Prefer a precomputed display name (nameForLabel). Otherwise use data fields
 export function labelOf(n: GraphNode): string {
-  const anyN = n as any;
-  if (
-    typeof anyN.nameForLabel === "string" &&
-    anyN.nameForLabel.trim().length > 0
-  ) {
-    return anyN.nameForLabel;
+  const withName = n as GraphNode & { nameForLabel?: string };
+  if (typeof withName.nameForLabel === "string" && withName.nameForLabel.trim().length > 0) {
+    return withName.nameForLabel;
   }
 
   const d = (n.data ?? {}) as Record<string, unknown>;
@@ -60,10 +55,8 @@ export function labelOf(n: GraphNode): string {
 /** Resolve icon key like CustomNode: data.labels[0] first, then node.label */
 export function resolveIconKey(n: GraphNode): NodeLabel | undefined {
   const d = (n.data ?? {}) as Record<string, unknown>;
-  const fromData =
-    Array.isArray((d as any).labels) && typeof (d as any).labels[0] === "string"
-      ? ((d as any).labels[0] as string)
-      : undefined;
+  const labels = d["labels"] as unknown;
+  const fromData = Array.isArray(labels) && typeof labels[0] === "string" ? (labels[0] as string) : undefined;
   return (
     ((fromData as NodeLabel | undefined) ??
       (n.label as NodeLabel | undefined)) ||
