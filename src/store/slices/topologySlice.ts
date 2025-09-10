@@ -1,19 +1,22 @@
 "use client";
+// TopologySlice
+// Controls hop depth selection (as an exclusive mode and as an array for
+// compatibility) and the edge-only rendering toggle.
 
 import type { StoreApi } from "zustand";
 import type { Store } from "../useStore";
 
-// Hops-Keys (Section 2)
+// Hop keys (Section 2)
 export type HopKey = "HopOne" | "HopTwo";
 export type HopMode = "hop1" | "hop2" | "both";
 
 export interface TopologySlice {
-  // Hops als Array (Rückwärtskompatibel für bestehende Aufrufer)
+  // Hops as an array (backward compatible for existing callers)
   selectedHops: HopKey[];
   setHops: (h: HopKey[]) => void;
   toggleHop: (k: HopKey) => void;
 
-  // Neuer, eindeutiger Modus für HopToggle (exakt eine Auswahl)
+  // New, explicit hop mode for HopToggle (exactly one selection)
   hopMode: HopMode;
   setHopMode: (m: HopMode) => void;
 
@@ -26,7 +29,7 @@ export const createTopologySlice = (
   set: StoreApi<Store>["setState"],
   get: StoreApi<Store>["getState"],
 ): TopologySlice => ({
-  // ✅ Default: nur HopOne aktiv
+  // Default: only HopOne active
   selectedHops: ["HopOne"],
   hopMode: "hop1",
 

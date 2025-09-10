@@ -1,4 +1,8 @@
 "use client";
+// CustomNode
+// Renders a single graph node (icon + label) with optional collision debug
+// and highlight ring when selected. Uses Drei/Text for labels and a white-
+// tinted texture for icons so color can be controlled via material color.
 
 import React, { useState, Suspense } from "react";
 import * as THREE from "three";
@@ -22,11 +26,12 @@ type CustomNodeProps<T extends BaseNode> = {
   node: NodeWithCollision<T>;
   isHighlighted?: boolean;
   debugCollision?: boolean;
-  id: string; // vom Parent übergeben (z. B. node.id)
-  x: number; // vom Parent übergeben (z. B. node.position.x)
-  y: number; // vom Parent übergeben (z. B. node.position.y)
+  id: string; // provided by parent (e.g., node.id)
+  x: number; // provided by parent (e.g., node.position.x)
+  y: number; // provided by parent (e.g., node.position.y)
 };
 
+// Simple textured material that tints a loaded SVG texture
 function TexturedMaterial({
   url,
   hovered,
@@ -40,7 +45,7 @@ function TexturedMaterial({
   return (
     <meshBasicMaterial
       map={texture}
-      // Hinweis: Weil die Texture weiß ist, färbt die color hier den Icon-Ton.
+      // Note: the texture is white, so material color tints the icon
       color={isHighlighted ? "blue" : hovered ? tokens.mark : "black"}
       transparent
       depthTest={false}
@@ -49,6 +54,7 @@ function TexturedMaterial({
   );
 }
 
+// Render a sized/tinted icon circle with a label underneath
 export function CustomNode<T extends BaseNode>({
   node,
   isHighlighted = false,
@@ -59,7 +65,7 @@ export function CustomNode<T extends BaseNode>({
 }: CustomNodeProps<T>) {
   const [hovered, setHovered] = useState(false);
 
-  // Positionen an den Store melden (damit der SVG-Export sie bekommt)
+  // Report current node position to the store (used by SVG export)
   useReportNodePosition(id, x, y, { maxFrames: 90 });
 
   // Robust: labels kann fehlen/leer/null sein
@@ -68,12 +74,12 @@ export function CustomNode<T extends BaseNode>({
     "";
   const svgUrl = labelIconMap[labelKey] ?? "/icons/default.svg";
 
-  // In Weiß gerenderte (färbbare) Textur als Data-URL
+  // Generate white-only (tintable) SVG texture as data URL
 
   const dataUrl = useWhiteSvgTexture(svgUrl);
   if (!dataUrl) return null;
 
-  // Exakt derselbe Text wie im Label-Metrics
+  // Same display name logic as label metrics
   const name = node.nameForLabel || buildDisplayName(node.data);
 
   return (
@@ -85,7 +91,7 @@ export function CustomNode<T extends BaseNode>({
     >
       {isHighlighted && (
         <mesh position={[0, 0, 0.02]} renderOrder={5}>
-          {/** Kräftiger Ring um den Knoten (Einkreisen) */}
+          {/** Thick highlight ring around the node */}
           <ringGeometry args={[NODE_R + 2, NODE_R + 14, 64]} />
           <meshBasicMaterial
             color={tokens.mark}

@@ -4,10 +4,10 @@ import type { StoreApi } from "zustand";
 import type { Store } from "../useStore";
 import { labelIconMap, type NodeLabel } from "@/constants/label";
 
-// Alle vorhandenen Node-Labels (Default: alle aktiv)
+// All available node labels (default: all active)
 export const ALL_TYPES = Object.keys(labelIconMap) as NodeLabel[];
 
-// Sichtbarkeit/Filter für Knotentypen (Section 1)
+// Visibility/filter for node types (Section 1)
 export interface TypeSlice {
   selectedTypes: NodeLabel[];
   toggleType: (label: NodeLabel) => void;
@@ -20,7 +20,7 @@ export const createTypeSlice = (
   set: StoreApi<Store>["setState"],
   get: StoreApi<Store>["getState"],
 ): TypeSlice => ({
-  // ✅ Default: ALLE Labels aktiv
+  // Default: all labels active
   selectedTypes: ALL_TYPES,
 
   toggleType: (label) =>

@@ -4,10 +4,8 @@ import { useEffect, useRef } from "react";
 import { useStore } from "@/store/useStore";
 
 /**
- * EN: Report a node's position once it becomes finite. We try for a few frames
- *     because many layouts assign x/y asynchronously.
- * DE: Meldet die Knotenposition, sobald sie endlich ist. Wir probieren es über
- *     einige Frames, weil viele Layouts x/y asynchron setzen.
+ * Report a node's position once it becomes finite.
+ * Retries for a few frames because many layouts assign x/y asynchronously.
  */
 export function useReportNodePosition(
   id: string,
@@ -16,14 +14,14 @@ export function useReportNodePosition(
   opts?: { maxFrames?: number },
 ) {
   const setNodePos = useStore.getState().setNodePos;
-  const triesLeft = useRef<number>(opts?.maxFrames ?? 60); // ~1s bei 60fps
+  const triesLeft = useRef<number>(opts?.maxFrames ?? 60); // ~1s at 60fps
   const last = useRef<{ x?: number; y?: number }>({});
 
   useEffect(() => {
     let raf: number | null = null;
 
     const tick = () => {
-      // nur melden, wenn wir endliche Werte haben
+      // Only update when we have finite coordinates
       const isFiniteXY =
         typeof x === "number" &&
         typeof y === "number" &&
@@ -31,15 +29,15 @@ export function useReportNodePosition(
         Number.isFinite(y);
 
       if (isFiniteXY) {
-        // unnötige Store-Updates vermeiden
+        // Avoid redundant store updates
         if (last.current.x !== x || last.current.y !== y) {
           setNodePos(id, x!, y!);
           last.current = { x, y };
         }
-        // wir haben eine gültige Position -> keinen weiteren Loop nötig
+        // We have a valid position -> stop the loop
         triesLeft.current = 0;
       } else {
-        // noch keine gültigen Werte -> weiter probieren, solange Rest > 0
+        // Not yet valid -> keep trying while retries remain
         triesLeft.current -= 1;
         if (triesLeft.current <= 0) {
           return;
@@ -48,13 +46,13 @@ export function useReportNodePosition(
       }
     };
 
-    // sofort starten, dann ggf. über RAF weiter probieren
+    // Kick off immediately; continue via rAF if needed
     raf = requestAnimationFrame(tick);
 
     return () => {
       if (raf) cancelAnimationFrame(raf);
     };
-    // bewusst nur bei id/x/y neu starten
+    // Intentionally only restart when id/x/y change
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, x, y]);
 }

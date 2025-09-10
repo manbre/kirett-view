@@ -1,7 +1,5 @@
-// EN: Low-level SVG helpers: escaping, sanitizing, parsing inline SVGs,
-//     and simple text width/line estimation used by bbox & labels.
-// DE: Low-Level SVG-Helfer: Escapen, Sanitizing, Inline-SVG parsen,
-//     plus einfache Textbreiten-/Zeilenabschätzung für BBox & Labels.
+// Low-level SVG helpers: escaping, sanitizing, parsing inline SVGs,
+// and simple text width/line estimation used by bbox & labels
 
 export type ParsedIcon = { viewBox: string; inner: string };
 
@@ -23,10 +21,8 @@ export function esc(s: string): string {
 
 // ---------- text metrics (approx) ----------
 
-// EN: Approximate text width in px for a given font size.
-//     0.5em per char is a robust compromise for UI fonts.
-// DE: Grobe Textbreite in px (für gegebene Fontgröße).
-//     0,5em pro Zeichen ist ein robuster Kompromiss für UI-Fonts.
+// Approximate text width in px for a given font size.
+// 0.5em per char is a robust compromise for UI fonts.
 export function estimateTextWidth(text: string, fontSize: number): number {
   const t = (text ?? "").trim();
   const approx = 0.5 * fontSize * t.length;
@@ -35,10 +31,8 @@ export function estimateTextWidth(text: string, fontSize: number): number {
   return Math.max(min, Math.min(max, approx));
 }
 
-// EN: Wrap text to lines using the same width constraint we pass to the viewer.
-//     Returns lines and the widest measured line width.
-// DE: Text anhand einer Maximalbreite umbrechen – wie im Viewer.
-//     Liefert Zeilen + Breite der breitesten Zeile.
+// Wrap text to lines using the same width constraint as the viewer.
+// Returns lines and the widest measured line width.
 export function wrapTextToLines(
   text: string,
   fontSize: number,

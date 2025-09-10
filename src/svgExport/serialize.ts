@@ -1,5 +1,4 @@
-// EN: Serialize edges and nodes to SVG markup.
-// DE: Serialisiert Kanten und Knoten zu SVG-Markup.
+// Serialize edges and nodes to SVG markup
 
 import type { GraphNode, GraphEdge } from "@/types/graph";
 import type { Pos } from "./graphUtils";

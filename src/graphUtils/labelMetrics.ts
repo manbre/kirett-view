@@ -2,14 +2,14 @@
 import {
   buildDisplayName as _bdn,
   calcCollisionRadius as _ccr,
-} from "./label-metrics"; // (Nur damit dein Import oben nicht meckert, falls du es als Barrel nutzt)
+} from "./label-metrics"; // keep barrel compatibility for outside imports
 
-export const NODE_R = 25; // sichtbarer Kreisradius im CustomNode
-export const FONT_PX = 20; // <Text fontSize={20}>
-export const MAX_W = 80; // <Text maxWidth={80}>
-export const LABEL_Y_OFFSET = 20; // <Text position={[0, -20, 0]}>
-export const PADDING = 6; // etwas Luft um Kreis+Text
-export const COLLISION_SCALE = 0.5; // dämpft Texteinfluss auf den Radius
+export const NODE_R = 25; // visible circle radius in CustomNode
+export const FONT_PX = 20; // label font size
+export const MAX_W = 80; // label max width
+export const LABEL_Y_OFFSET = 20; // vertical offset between icon and label
+export const PADDING = 6; // small padding around circle + text
+export const COLLISION_SCALE = 0.5; // damp text influence on radius
 
 function getStr(
   data: Record<string, unknown>,
@@ -19,7 +19,7 @@ function getStr(
   return typeof v === "string" ? v : undefined;
 }
 
-/** Baut exakt den Namen, den wir anzeigen wollen. */
+/** Build the exact display name used in the UI */
 export function buildDisplayName(
   data: Record<string, unknown> | undefined,
   fallbackLabel?: string,
@@ -27,11 +27,11 @@ export function buildDisplayName(
   const bpr = data ? getStr(data, "BPR") : undefined;
   const name = data ? getStr(data, "Name") : undefined;
   const prefix = bpr && bpr !== "None" ? `${bpr}: ` : "";
-  // ✅ WICHTIG: Prefix wirklich verwenden + Label als Fallback zulassen
+  // Important: apply prefix and allow label fallback
   return `${prefix}${name ?? fallbackLabel ?? ""}`;
 }
 
-/** Grobe Schätzung der Text-Bounding-Box (Breite/Höhe). */
+/** Rough estimate of text bounding box (width/height) */
 export function estimateTextBox(
   text: string,
   fontPx: number = FONT_PX,
@@ -45,11 +45,11 @@ export function estimateTextBox(
   return { width, height };
 }
 
-/** Radialer Kollisionsradius für Kreis + (versetzten) Text. */
+/** Radial collision radius for icon + offset label */
 export function calcCollisionRadius(displayName: string): number {
   const { width, height } = estimateTextBox(displayName);
   const halfW = width / 2;
-  const halfH = height / 2 + LABEL_Y_OFFSET; // Label hängt unter dem Kreis
+  const halfH = height / 2 + LABEL_Y_OFFSET; // label sits below the circle
   const textHalfDiag = Math.hypot(halfW, halfH);
   return NODE_R + COLLISION_SCALE * textHalfDiag + PADDING;
 }

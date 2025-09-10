@@ -1,4 +1,9 @@
 "use client";
+// Global store (Zustand) composed of domain slices
+// - TermSlice: selected terms by category
+// - TypeSlice: selected node types (labels)
+// - TopologySlice: hops and edge-only view
+// - GraphSlice: nodes, edges, positions, lastNeighborId
 
 import { create } from "zustand";
 
@@ -14,7 +19,7 @@ import { createGraphSlice, type GraphSlice } from "./slices/graphSlice";
 // Root-Typ
 export type Store = TermSlice & TypeSlice & TopologySlice & GraphSlice;
 
-// Store-Fabrik
+// Store factory: compose all slices
 export const useStore = create<Store>()((set, get) => ({
   ...createTermSlice(set, get),
   ...createTypeSlice(set, get),
@@ -22,7 +27,7 @@ export const useStore = create<Store>()((set, get) => ({
   ...createGraphSlice(set, get),
 }));
 
-// Komfort-Selektoren (einheitlich an einer Stelle)
+// Convenience selectors (single source of truth)
 export const selectors = {
   // terms
   selectedTerms: (s: Store) => s.selectedTerms,

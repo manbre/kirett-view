@@ -1,3 +1,5 @@
+// POST /api/graph/subgraphs
+// Build a subgraph for the selected terms with optional type/depth filters.
 import { NextRequest, NextResponse } from "next/server";
 import { withReadTx } from "@/server/db/neo4j";
 import { subgraphFetchers } from "@/server/subgraphFetchers";
@@ -9,7 +11,7 @@ export const runtime = "nodejs";
 export async function POST(req: NextRequest) {
   const body = await req.json();
 
-  // Pflichtfeld
+  // Required field
   const selectedTerms = (body?.selectedTerms ?? {}) as Partial<
     Record<Category, string[]>
   >;
@@ -18,25 +20,25 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ nodes: [], edges: [] }, { status: 200 });
   }
 
-  // Neu bevorzugt:
+  // Preferred payload fields:
   let include = Array.isArray(body?.include)
     ? (body.include as string[])
     : undefined;
   let depth = Array.isArray(body?.depth) ? (body.depth as string[]) : undefined;
 
-  // Rückwärtskompatibel: aus selectedTypes / selectedHops ableiten, falls nötig
+  // Back-compat: derive from selectedTypes / selectedHops if necessary
   if (!include && Array.isArray(body?.selectedTypes)) {
     include = Array.from(new Set(body.selectedTypes as string[]));
   }
   if (!depth && Array.isArray(body?.selectedHops)) {
-    const hops = body.selectedHops as string[]; // z.B. ["HopOne","HopTwo"]
+    const hops = body.selectedHops as string[]; // e.g. ["HopOne","HopTwo"]
     const d: ("1" | "2")[] = [];
     if (hops.includes("HopOne")) d.push("1");
     if (hops.includes("HopTwo")) d.push("2");
     depth = d.length ? d : ["1"];
   }
 
-  // Defaults/Final
+  // Defaults/final
   const finalInclude: string[] = include ?? [];
   const finalDepth = (depth && depth.length ? depth : ["1"]) as ("1" | "2")[];
 
@@ -46,7 +48,7 @@ export async function POST(req: NextRequest) {
       for (const cat of Object.values(Category)) {
         const terms = selectedTerms[cat];
         if (Array.isArray(terms) && terms.length) {
-          // Signatur: (terms, tx, depth[], include[])
+          // Signature: (terms, tx, depth[], include[])
           tasks.push(
             subgraphFetchers[cat](terms, tx, finalDepth, finalInclude),
           );

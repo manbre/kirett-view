@@ -1,4 +1,9 @@
 "use client";
+// ToolBar
+// Three stacked sections controlling the graph:
+// 1) Type filter icons (5/8)
+// 2) Topology controls (HopToggle as a bound group) + OnlyEdges (2/8)
+// 3) Export actions (1/8) – currently SVG export
 
 import React, { useCallback, useState } from "react";
 import {
@@ -21,6 +26,7 @@ const group1 = group.filter((k) => !excluded.includes(k));
 const group3 = Object.keys(exportIconMap) as ExportLabel[];
 
 export function ToolBar() {
+  // Subscribe to store for type toggling and edge-only filter
   const selectedTypes = useStore(selectors.selectedTypes);
   const toggleType = useStore(selectors.toggleType);
   const showOnlyEdges = useStore(selectors.showOnlyEdges);
@@ -28,7 +34,7 @@ export function ToolBar() {
 
   const { exportSvg } = useSvgExport();
 
-  // Readiness aller drei Sektionen: verhindert Vollbreiten-Sprung beim Paint
+  // Track readiness of all sections to avoid width jump on first paint
   const totalSections = 3;
   const [readyCount, setReadyCount] = useState(0);
   const ready = readyCount >= totalSections;
@@ -48,13 +54,13 @@ export function ToolBar() {
       aria-busy={!ready}
       className={[
         "rounded-xl border border-[var(--color-border)] p-2",
-        // mobil vollbreit, ab md: von 0 → max-content, sobald ready
+        // mobile full-width, from md: animate to max-content when ready
         "w-full md:min-w-0",
         desktopWidthClass,
         desktopVisibilityClass,
-        // volle Höhe innerhalb der Row, damit 5/8–2/8–1/8 funktionieren
+        // fill full height within the row to maintain 5/8 – 2/8 – 1/8 layout
         "md:h-full",
-        // Clipping für eventuelle Zwischenframes
+        // clip potential intermediate frames
         "md:overflow-hidden",
       ].join(" ")}
     >

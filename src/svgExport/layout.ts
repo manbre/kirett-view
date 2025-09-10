@@ -1,5 +1,4 @@
-// EN: Resolve positions from posMap or fallback circle layout.
-// DE: Positionen aus posMap oder Fallback-Kreis-Layout bestimmen.
+// Resolve positions from posMap or fallback to a circle layout
 
 import type { GraphNode } from "@/types/graph";
 import type { Pos } from "./graphUtils";

@@ -1,4 +1,8 @@
 "use client";
+// useGraphApi
+// Client-side helpers to load filtered subgraphs and neighbor-expansions.
+// Translates UI filters (types/hops/edge-only) into API payloads and
+// updates the central store with the result.
 
 import { useStore } from "@/store/useStore";
 import type { GraphNode, GraphEdge, SubgraphResult } from "@/types/graph";
@@ -7,16 +11,16 @@ export type SelectedTerms = Record<string, string[]>;
 export type SelectedTypes = string[];
 export type SelectedHops = string[]; // "HopOne" | "HopTwo"
 
-// UI-Hops -> Server-Depth ["1" | "2"]
+// Map UI hops -> server depth strings ["1" | "2"]
 function toDepth(selectedHops: SelectedHops): ("1" | "2")[] {
   const depth: ("1" | "2")[] = [];
   if (selectedHops.includes("HopOne")) depth.push("1");
   if (selectedHops.includes("HopTwo")) depth.push("2");
-  if (depth.length === 0) depth.push("1"); // Fallback: mindestens 1 Hop
+  if (depth.length === 0) depth.push("1"); // Fallback: at least one hop
   return depth;
 }
 
-// ---- zentraler Dedupe (einzige Stelle im Frontend) ----
+// Frontend-side dedupe (single place) to keep IDs unique
 function dedupeGraph(
   nodes: GraphNode[] = [],
   edges: GraphEdge[] = [],
@@ -34,9 +38,10 @@ function dedupeGraph(
 }
 
 export const useGraphApi = () => {
-  // in den Store schreiben via Root-(flache) Graph-Actions
+  // Access root graph actions for replacing/merging graph data
   const { setGraph, mergeGraph } = useStore.getState();
 
+  // Load a subgraph for a selection of terms with current filters
   const fetchGraphData = async (
     selectedTerms: SelectedTerms,
     selectedTypes: SelectedTypes,
@@ -59,11 +64,12 @@ export const useGraphApi = () => {
     const raw = (await res.json()) as SubgraphResult;
     const { nodes, edges } = dedupeGraph(raw.nodes, raw.edges);
 
-    // Ersetzen (keine weitere Dedupe hier nötig)
+    // Replace in store (no additional dedupe needed here)
     setGraph(nodes, edges);
     return { nodes, edges };
   };
 
+  // Expand neighbors for a given node with current filters
   const fetchNeighbors = async (
     nodeId: string,
     selectedHops: SelectedHops,

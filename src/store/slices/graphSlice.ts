@@ -1,4 +1,7 @@
 "use client";
+// GraphSlice
+// Holds the rendered graph (nodes/edges), tracked node positions for export,
+// and a lastNeighborId helper for transient highlights.
 
 import type { StoreApi } from "zustand";
 import type { GraphNode, GraphEdge } from "@/types/graph";
@@ -31,13 +34,13 @@ export const createGraphSlice = (
   pos: new Map<string, Pos>(),
   lastNeighborId: null,
 
-  // gesamten Graph ersetzen (z.B. Terms- oder Neighbor-Load)
+  // Replace entire graph (e.g., when loading terms or replacing on expand)
   setGraph: (nodes, edges) => {
-    // Positionen werden beim Rendern wieder gefüllt
+    // Positions are repopulated on render by the viewer
     set({ nodes, edges, pos: new Map<string, Pos>() });
   },
 
-  // Graph mergen (z.B. bei Filter/Terms-Ergänzungen)
+  // Merge graph (e.g., when incrementally adding more nodes/edges)
   mergeGraph: (nodes, edges) => {
     const curN = get().nodes;
     const curE = get().edges;
@@ -51,7 +54,7 @@ export const createGraphSlice = (
     set({ nodes: [...nById.values()], edges: [...eById.values()] });
   },
 
-  // Position eines Knotens speichern (vom Viewer gemeldet)
+  // Persist a node's position (reported by the viewer)
   setNodePos: (id, x, y) => {
     const next = new Map(get().pos);
     next.set(id, { x, y });

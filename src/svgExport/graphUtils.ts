@@ -1,5 +1,4 @@
-// EN: Small graph helpers used by SVG export.
-// DE: Kleine Graph-Helfer, die der SVG-Export nutzt.
+// Small graph helpers used by SVG export
 
 import type { GraphNode, GraphEdge } from "@/types/graph";
 import type { NodeLabel } from "@/constants/label";
@@ -8,8 +7,7 @@ import type { NodeLabel } from "@/constants/label";
 
 export type Pos = { x: number; y: number };
 
-// EN: Guard to ensure we only use finite coordinates.
-// DE: Wächter, damit nur endliche Koordinaten verwendet werden.
+// Guard to ensure we only use finite coordinates
 export function isFinitePos(
   p: { x: number; y: number } | undefined | null,
 ): p is { x: number; y: number } {
@@ -18,8 +16,7 @@ export function isFinitePos(
 
 // ---------- edge helpers ----------
 
-// EN: Get source/target node ids from a GraphEdge.
-// DE: Quell-/Ziel-IDs aus einer Kante ermitteln.
+// Get source/target node ids from a GraphEdge
 export function endpoints(e: GraphEdge): { s: string; t: string } {
   const s =
     typeof (e as any).source === "string"
@@ -34,8 +31,7 @@ export function endpoints(e: GraphEdge): { s: string; t: string } {
 
 // ---------- node label & icon helpers ----------
 
-// EN: Prefer a precomputed display name (nameForLabel). Otherwise use data fields.
-// DE: Bevorzuge vorberechneten Anzeigenamen (nameForLabel). Sonst Datenfelder nutzen.
+// Prefer a precomputed display name (nameForLabel). Otherwise use data fields
 export function labelOf(n: GraphNode): string {
   const anyN = n as any;
   if (
@@ -54,16 +50,14 @@ export function labelOf(n: GraphNode): string {
     typeof d["Name"] === "string" ? (d["Name"] as string) : undefined;
   const label = typeof n.label === "string" ? n.label : undefined;
 
-  // Optional prefix (BPR) rauslassen, wenn du es im Viewer auch nicht zeigst:
+  // Optional: skip the BPR prefix if the viewer does not show it
   // const prefix = bpr ? `${bpr}: ` : "";
   // return `${prefix}${name ?? label ?? n.id}`;
 
   return name ?? label ?? n.id;
 }
 
-/** EN: Resolve icon key like your CustomNode: data.labels[0] first, then node.label.
- *  DE: Icon-Key wie im CustomNode: zuerst data.labels[0], danach node.label.
- */
+/** Resolve icon key like CustomNode: data.labels[0] first, then node.label */
 export function resolveIconKey(n: GraphNode): NodeLabel | undefined {
   const d = (n.data ?? {}) as Record<string, unknown>;
   const fromData =
@@ -79,16 +73,13 @@ export function resolveIconKey(n: GraphNode): NodeLabel | undefined {
 
 // ---------- layout fallback ----------
 
-/** EN: Deterministic circle layout for nodes without known positions.
- *  DE: Deterministisches Kreis-Layout für Knoten ohne bekannte Position.
- */
+/** Deterministic circle layout for nodes without known positions */
 export function circleFallback(nodes: GraphNode[]): Map<string, Pos> {
   const out = new Map<string, Pos>();
   const n = nodes.length;
   if (!n) return out;
 
-  // EN: Radius grows with sqrt(n); reduces overlap a bit.
-  // DE: Radius wächst mit sqrt(n); reduziert Überlappungen etwas.
+  // Radius grows with sqrt(n); reduces overlap a bit
   const R = Math.max(120, Math.ceil(80 * Math.sqrt(n)));
   const step = (2 * Math.PI) / n;
 

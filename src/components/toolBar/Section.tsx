@@ -1,4 +1,8 @@
 "use client";
+// Section
+// Responsive container that lays out a set of icon tiles.
+// - Mobile: flex row with wrap
+// - Desktop: CSS grid that fills rows vertically and creates new columns
 
 import React, {
   useEffect,
@@ -17,27 +21,26 @@ type Props<K extends string = string> = {
   className?: string;
   isActive?: (key: K) => boolean;
   onToggle?: (key: K) => void;
-  /** Optional feste Zellgröße; Standard ist responsive clamp(...) */
+  /** Optional fixed cell size; defaults to responsive clamp(...) */
   cell?: string;
-  /** Meldet dem Parent, dass diese Section ihre Rows berechnet hat (ab md) */
+  /** Notifies parent when this section computed its rows (md+) */
   onReady?: () => void;
-  /** Zusätzliche Kacheln (Buttons) die in das Grid eingereiht werden */
+  /** Additional tiles (buttons) to be appended to the grid */
   children?: React.ReactNode;
-  /** Mobil: nicht umbrechen (in einer Reihe bleiben) */
+  /** Mobile: prevent wrapping (keep in a single row) */
   nowrapMobile?: boolean;
 };
 
-// Isomorphic Layout Effect: auf dem Client useLayoutEffect (vor Paint),
-// auf dem Server (SSR) fallback auf useEffect.
+// Isomorphic Layout Effect: on client useLayoutEffect (before paint),
+// on server (SSR) fallback to useEffect.
 const useIsomorphicLayoutEffect =
   typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 /**
- * Verhalten:
- * - 📱 Mobil (default): Flex + Wrap → Buttons laufen in ZEILEN um.
- * - 💻 Ab md: CSS Grid mit vertikalem Füllen und Spalten nach rechts.
- *   Die Zeilenanzahl (--rows) wird *vor dem Paint* berechnet.
- *   Bis dahin bleibt die Section ab md unsichtbar (kein Flash).
+ * Behavior:
+ * - Mobile (default): flex + wrap → tiles wrap into rows.
+ * - Desktop: CSS grid that fills rows vertically and creates new columns.
+ *   The row count (--rows) is computed pre-paint; remains hidden until ready.
  */
 export function Section<K extends string>({
   keys,
@@ -56,16 +59,16 @@ export function Section<K extends string>({
   );
   const ref = useRef<HTMLDivElement | null>(null);
   const [rows, setRows] = useState<number>(1);
-  const [ready, setReady] = useState(false); // ⬅️ steuert Sichtbarkeit ab md
+  const [ready, setReady] = useState(false); // controls visibility on md+
 
-  // Hilfsfunktionen
+  // Helpers
   const measureCellPx = (host: HTMLElement) => {
     const firstChild = host.firstElementChild as HTMLElement | null;
     if (firstChild) {
       const h = Math.round(firstChild.getBoundingClientRect().height);
       if (h > 0) return h;
     }
-    // Fallback: Probe-Element misst var(--cell)
+    // Fallback: measure var(--cell) using a temporary probe element
     const probe = document.createElement("div");
     probe.style.position = "absolute";
     probe.style.visibility = "hidden";
@@ -80,7 +83,7 @@ export function Section<K extends string>({
   const computeRows = (host: HTMLElement) => {
     const mq = window.matchMedia("(min-width: 768px)");
     if (!mq.matches) {
-      // mobil: keine Grid-Zeilenberechnung nötig
+      // mobile: no grid row computation needed
       return 1;
     }
     const cs = getComputedStyle(host);
@@ -92,7 +95,7 @@ export function Section<K extends string>({
     return Math.max(1, Math.floor((h + rowGap) / (cellPx + rowGap)));
   };
 
-  // Vor dem ersten Paint rows berechnen und danach sichtbar schalten
+  // Compute rows before first paint and then reveal
   useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -101,7 +104,7 @@ export function Section<K extends string>({
       setRows(computeRows(el));
       if (!ready) {
         setReady(true);
-        onReady?.(); // ⬅️ Parent informieren: diese Section ist bereit
+        onReady?.(); // notify parent that this section is ready
       }
     };
 
@@ -126,17 +129,17 @@ export function Section<K extends string>({
       data-ready={ready ? "1" : "0"}
       aria-hidden={ready ? undefined : true}
       className={[
-        // 📱 Mobil: Flex + Wrap in Zeilen (immer sichtbar auf Mobil)
+        // 📱 Mobile: flex + wrap into rows
         nowrapMobile
           ? "flex w-full flex-row flex-nowrap content-start justify-start gap-1"
           : "flex w-full flex-row flex-wrap content-start justify-start gap-1",
-        // 💻 Ab md: Grid, das vertikal füllt und dann neue Spalten anlegt
+        // 💻 Desktop (md+): grid that fills rows vertically and then adds columns
         "md:grid md:content-start md:gap-1",
         "md:[grid-auto-columns:var(--cell)] md:[grid-auto-flow:column] md:[grid-auto-rows:var(--cell)]",
         "md:[grid-template-rows:repeat(var(--rows),var(--cell))]",
-        // Desktop: feste Höhe vom Parent, Breite folgt dem Inhalt
+        // Desktop: fixed height from parent, width follows content
         "md:h-full md:[width:max-content] md:overflow-visible",
-        // 💡 WICHTIG: Kein Flash – bis ready unsichtbar (nur ab md)
+        // 💡 Important: no flash – keep hidden until ready (md+)
         ready ? "md:visible md:opacity-100" : "md:invisible md:opacity-0",
         "transition-opacity",
         "min-h-0",
@@ -161,11 +164,11 @@ export function Section<K extends string>({
             title={k}
             onClick={() => onToggle?.(k)}
             className={[
-              // exakt eine Zelle groß
+              // exactly one cell in size
               "inline-grid h-[var(--cell)] w-[var(--cell)] place-items-center",
               "rounded-md border border-[var(--color-border)]",
               "hover: cursor-pointer hover:bg-[var(--color-mark)]/10",
-              // Fokus: Ring statt Outline
+              // focus: ring instead of outline
               "focus-visible:ring-2 focus-visible:ring-[var(--color-mark)]",
               active
                 ? "text-[var(--color-mark)] ring-1 ring-[var(--color-mark)]"

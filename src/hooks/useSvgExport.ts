@@ -1,5 +1,9 @@
 // src/hooks/useSvgExport.ts
 "use client";
+// useSvgExport
+// Builds a high-fidelity SVG snapshot from the current graph state.
+// Waits for node positions to be reported by the viewer, then serializes
+// nodes and edges using the same font metrics and label wrapping as the UI.
 
 import { useCallback } from "react";
 import { useStore } from "@/store/useStore";
@@ -10,6 +14,7 @@ import { NODE_R, FONT_PX, MAX_W } from "@/graphUtils/labelMetrics";
 
 type Pos = Store["pos"] extends Map<string, infer P> ? P : never;
 
+// Wait until all/most positions are known (or a frame limit is reached)
 async function awaitAllPositions(
   nodes: GraphNode[],
   getPos: () => Map<string, Pos> | undefined,
@@ -30,7 +35,7 @@ async function awaitAllPositions(
   });
 }
 
-// Robuste Defaults: weißer BG, großzügiger Overscan, Flip an
+// Robust defaults: white background, generous overscan, Y-flip enabled
 const DEFAULT_EXPORT_OPTS: SvgExportOptions = {
   background: "white",
   padding: 24,
@@ -45,7 +50,7 @@ const DEFAULT_EXPORT_OPTS: SvgExportOptions = {
   extraBottom: 24,
   arrow: false,
   debug: false,
-  flipY: true, // ← wichtig
+  flipY: true, // important: coordinate system alignment
 };
 
 export function useSvgExport() {

@@ -1,5 +1,4 @@
-// EN: Load inline SVG icons per node id.
-// DE: Lädt Inline-SVG-Icons pro Knoten-ID.
+// Load inline SVG icons per node id
 
 import type { GraphNode } from "@/types/graph";
 import { labelIconMap } from "@/constants/label";

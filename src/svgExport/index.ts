@@ -1,5 +1,5 @@
-// EN: Build final SVG (viewer-parity: same wrap width & font size).
-// DE: Finales SVG bauen (Viewer-Parität: gleiche Umbruchbreite & Fontgröße).
+// SVG Export entry-point
+// Builds a final SVG that matches the viewer (same wrap width & font size).
 
 import type { GraphNode, GraphEdge } from "@/types/graph";
 import type { Pos } from "./graphUtils";
@@ -12,20 +12,20 @@ export type Bg = "transparent" | "white";
 
 export interface SvgExportOptions {
   background?: Bg; // "transparent" | "white"
-  padding?: number; // Außenrand (default 24)
-  fontFamily?: string; // Default System-UI
-  fontSize?: number; // MUSS dem Viewer entsprechen
+  padding?: number; // outer padding (default 24)
+  fontFamily?: string; // default system UI
+  fontSize?: number; // must match the viewer
   iconSize?: number; // 24..50
   nodeRadius?: number; // default iconSize/2
   iconColor?: string; // "#111"
   edgeColor?: string; // "#7aa7ff"
   edgeWidth?: number; // 1.25
-  arrow?: boolean; // Pfeilspitzen
-  labelBg?: boolean; // Hintergrund für Label-Box
-  debug?: boolean; // Debug-Rahmen
-  maxTextWidth?: number; // exakt wie im Viewer (z.B. MAX_W)
-  overscan?: number; // kleiner Sicherheits-Puffer (default 2)
-  extraBottom?: number; // zusätzlicher Bodenabstand in px (default 8)
+  arrow?: boolean; // arrowheads on edges
+  labelBg?: boolean; // label background rectangle under icon
+  debug?: boolean; // debug border
+  maxTextWidth?: number; // exactly like the viewer (e.g., MAX_W)
+  overscan?: number; // small safety buffer (default 2)
+  extraBottom?: number; // extra bottom padding in px (default 8)
 }
 
 export async function buildSvgFromGraph(
@@ -36,7 +36,7 @@ export async function buildSvgFromGraph(
 ): Promise<string | null> {
   if (!nodes || nodes.length === 0) return null;
 
-  // ---- Options (mit stabilen Defaults) ----
+  // ---- Options (stable defaults) ----
   const padding = opts?.padding ?? 24;
   const fontSize = opts?.fontSize ?? 12;
   const iconSize = opts?.iconSize ?? 24;
@@ -52,15 +52,15 @@ export async function buildSvgFromGraph(
   const labelBg = opts?.labelBg ?? true;
   const debug = opts?.debug ?? false;
 
-  // WICHTIG: identisch zum Viewer übergeben
+  // Important: must match viewer values
   const maxTextWidth = opts?.maxTextWidth ?? 200;
   const overscan = opts?.overscan ?? 2;
   const extraBottom = opts?.extraBottom ?? 8;
 
-  // ---- 1) Positionen (roh) ----
+  // ---- 1) Positions (raw) ----
   const posRaw = resolvePositions(nodes, posMap);
 
-  // ---- 2) BBox aus Roh-Koordinaten (inkl. Padding/Overscan/Bottom) ----
+  // ---- 2) BBox from raw positions (incl. padding/overscan/bottom) ----
   const bbox = computeBBox(
     nodes,
     posRaw,
@@ -72,17 +72,17 @@ export async function buildSvgFromGraph(
     extraBottom,
   );
 
-  // ---- 3) Y-Flip (Canvas ↑ vs. SVG ↓) relativ zur BBox ----
+  // ---- 3) Y-flip (canvas up vs. SVG down) relative to BBox ----
   const maxY = bbox.minY + bbox.height;
   const flipY = (y: number) => bbox.minY + (maxY - y);
 
   const pos = new Map<string, Pos>();
   for (const [id, p] of posRaw) pos.set(id, { x: p.x, y: flipY(p.y) });
 
-  // ---- 4) Icons laden ----
+  // ---- 4) Load icons ----
   const icons = await loadIconsFor(nodes);
 
-  // ---- 5) Optionale Marker ----
+  // ---- 5) Optional markers ----
   const defs = withArrow
     ? `<defs>
          <marker id="arrow" markerUnits="strokeWidth" markerWidth="8" markerHeight="8" orient="auto" refX="8" refY="4">
@@ -91,7 +91,7 @@ export async function buildSvgFromGraph(
        </defs>`
     : "";
 
-  // ---- 6) Primitives (mit identischem Wrap) ----
+  // ---- 6) Primitives (with identical wrapping) ----
   const edgesSvg = edgesToSvg(edges, pos, {
     edgeColor,
     edgeWidth,
@@ -111,7 +111,7 @@ export async function buildSvgFromGraph(
     maxTextWidth,
   });
 
-  // ---- 7) Background + Debug ----
+  // ---- 7) Background + debug ----
   const bg =
     background === "white"
       ? `<rect x="${bbox.minX}" y="${bbox.minY}" width="${bbox.width}" height="${bbox.height}" fill="#ffffff"/>`
@@ -121,7 +121,7 @@ export async function buildSvgFromGraph(
     ? `<rect x="${bbox.minX}" y="${bbox.minY}" width="${bbox.width}" height="${bbox.height}" fill="none" stroke="#f36" stroke-dasharray="4 3" stroke-width="1"/>`
     : "";
 
-  // ---- 8) Sicherer viewBox (1px Rand) ----
+  // ---- 8) Safe viewBox (1px inset) ----
   const vbX = bbox.minX - 1;
   const vbY = bbox.minY - 1;
   const vbW = bbox.width + 2;

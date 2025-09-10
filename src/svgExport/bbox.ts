@@ -1,5 +1,4 @@
-// EN: Compute bounding box of icons + wrapped labels.
-// DE: Berechnet die Bounding-Box von Icons + umbrochenen Labels.
+// Compute bounding box of icons + wrapped labels
 
 import type { GraphNode } from "@/types/graph";
 import type { Pos } from "./graphUtils";
@@ -13,9 +12,7 @@ export interface BBox {
   height: number;
 }
 
-/** EN: Safe label (same logic as viewer) without using `any`.
- *  DE: Gleiches Label wie im Viewer – ohne `any`.
- */
+/** Safe label (same logic as viewer) without using `any` */
 function labelFor(node: GraphNode): string {
   const data =
     typeof node.data === "object" && node.data !== null
@@ -24,9 +21,7 @@ function labelFor(node: GraphNode): string {
   return buildDisplayName(data, node.label);
 }
 
-/** EN: Compute bbox with padding, overscan and extra bottom padding.
- *  DE: BBox mit Padding, Overscan und zusätzlichem Unter-Padding berechnen.
- */
+/** Compute bbox with padding, overscan, and extra bottom padding */
 export function computeBBox(
   nodes: GraphNode[],
   pos: Map<string, Pos>,

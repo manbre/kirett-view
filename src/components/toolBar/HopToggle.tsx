@@ -3,11 +3,13 @@
 import React from "react";
 import { useStore } from "@/store/useStore";
 import type { HopMode } from "@/store/slices/topologySlice";
-// no icon imports here; OnlyEdges is handled by the Section
+// OnlyEdges is handled by the Section; this component is a single grouped control
 
-/** Drei Optionen: Hop 1, Hop 2, Hop 1 & 2.
- *  Mobil horizontal (row), ab md vertikal (col).
- *  Buttons sind quadratisch (var(--cell)) und reihen sich in Section-Spalten ein.
+/**
+ * HopToggle
+ * Three mutually exclusive hop-depth options (1 / 2 / 1&2).
+ * Mobile: horizontal row; Desktop: vertical column.
+ * Rendered as a single column group that spans 3 rows in the Section grid.
  */
 export function HopToggle() {
   const hopMode = useStore((s) => s.hopMode);
@@ -20,7 +22,7 @@ export function HopToggle() {
     { value: "both", label: "1&2", title: "Hop 1 & 2" },
   ];
 
-  // Wrapper als EIN Grid-Item (Verbund): mobil Reihe, ab md Spalte; spannt 3 Rows
+  // Wrapper as a single grid item (group): mobile row, desktop column; spans 3 rows
   return (
     <div className="flex items-stretch justify-start gap-1.5 rounded-md bg-[var(--color-border)] ring-1 ring-[var(--color-bg)] md:[grid-row:span_3_/span_3] md:[width:var(--cell)] md:flex-col">
       {items.map(({ value, label, title }) => {
@@ -34,7 +36,7 @@ export function HopToggle() {
             aria-pressed={active}
             onClick={() => setHopMode(value)}
             className={[
-              // exakt eine Zelle groß, wie die Icons
+              // exactly one cell size, same as icon tiles
               "inline-grid h-[var(--cell)] w-[var(--cell)] place-items-center",
               "rounded-md border border-[var(--color-border)] bg-[var(--color-bg)]",
               "hover:cursor-pointer hover:bg-[var(--color-mark)]/10",

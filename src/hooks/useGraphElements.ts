@@ -1,11 +1,15 @@
 "use client";
+// useGraphElements
+// Lightweight local container for nodes/edges WITHOUT deduplication.
+// Central dedupe happens in useGraphApi. This hook is useful when a
+// component wants to control its own transient graph view.
 
 import { useRef, useState } from "react";
 import type { GraphNode, GraphEdge } from "@/types/graph";
 
 /**
- * Leichter lokaler Container für Nodes/Edges OHNE Dedupe.
- * Dedupe passiert zentral in `useGraphApi`.
+ * Lightweight local container for nodes/edges WITHOUT deduplication.
+ * Central dedupe happens in `useGraphApi`.
  */
 export const useGraphElements = () => {
   const [nodes, setNodes] = useState<GraphNode[]>([]);
@@ -32,6 +36,6 @@ export const useGraphElements = () => {
     edges,
     updateGraphElements,
     resetGraphElements,
-    loadedNodeIdsRef, // falls extern gebraucht (read-only Nutzung)
+    loadedNodeIdsRef, // for external read-only usage if needed
   };
 };

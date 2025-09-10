@@ -18,30 +18,30 @@ export function useWhiteSvgTexture(svgUrl: string | null) {
       .then((txt) => {
         if (cancelled) return;
 
-        // 1) Styles entfernen (könnten Farben/Opazitäten setzen)
+        // 1) Remove styles that could override colors/opacities
         let s = txt
           .replace(/<style[\s\S]*?<\/style>/gi, "")
           .replace(/\sstyle="[^"]*"/gi, "");
 
-        // 2) fill/stroke auf Weiß setzen (außer 'none')
+        // 2) Force fill/stroke to white (except 'none')
         s = s
           .replace(/\sfill="(?!none")[^"]*"/gi, ' fill="#fff"')
           .replace(/\sstroke="(?!none")[^"]*"/gi, ' stroke="#fff"');
 
-        // 3) Opazitäten erzwingen
+        // 3) Force full opacities
         s = s
           .replace(/\sopacity="[^"]*"/gi, ' opacity="1"')
           .replace(/\sfill-opacity="[^"]*"/gi, ' fill-opacity="1"')
           .replace(/\sstroke-opacity="[^"]*"/gi, ' stroke-opacity="1"');
 
-        // 4) evtl. fill/stroke am <svg>-Root entfernen (Kinder regeln)
+        // 4) Remove fill/stroke on <svg> root (children decide)
         s = s.replace(/<svg([^>]*)\s(fill|stroke)="[^"]*"/gi, "<svg$1");
 
-        // 5) als Data-URL (utf-8) zurückgeben
+        // 5) Return as UTF-8 data URL
         const url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(s);
         setDataUrl(url);
       })
-      .catch(() => setDataUrl(svgUrl)); // Fallback: Original
+      .catch(() => setDataUrl(svgUrl)); // Fallback: original
 
     return () => {
       cancelled = true;
