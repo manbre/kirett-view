@@ -7,9 +7,9 @@ import {
   lightTheme,
   type InternalGraphNode,
 } from "reagraph";
-import { useEffect, useState, useCallback, useMemo, useRef } from "react";
+import { useState, useCallback, useMemo, useRef } from "react";
 import { useStore } from "@/store/useStore";
-import { useGraphApi } from "@/hooks/useGraphApi";
+import { useGraphController } from "@/hooks/useGraphController";
 import { CustomNode } from "@/components/CustomNode";
 import { prepareNodes } from "@/graphUtils/prepareNodes";
 import { tokens } from "@/theme/tokens";
@@ -29,84 +29,16 @@ type Props = {
 // GraphViewer: renders the graph and handles term/neighbors view logic
 export const GraphViewer = ({ onChangeNode }: Props) => {
   // Read filters and graph data from the store
-  // -------- Filter/Topologie aus Slices --------
-  const selectedTerms = useStore((s) => s.selectedTerms);
-  const selectedTypes = useStore((s) => s.selectedTypes);
-  const selectedHops = useStore((s) => s.selectedHops);
-  const showOnlyEdges = useStore((s) => s.showOnlyEdges);
-  const clearTerms = useStore((s) => s.clearTerms);
+  // filters handled in controller
 
   // -------- Graph Slice (root) --------
   const nodes = useStore((s) => s.nodes);
   const edges = useStore((s) => s.edges);
-  const setGraph = useStore((s) => s.setGraph);
   const setNodePos = useStore((s) => s.setNodePos);
-
-  const { fetchGraphData, fetchNeighbors } = useGraphApi();
+  const { view, resetToTerms, openNeighbors } = useGraphController();
 
   const [lastNeighborId, setLastNeighborId] = useState<string | null>(null);
-  const [view, setView] = useState<
-    | { mode: "terms"; anchorId?: undefined }
-    | { mode: "neighbors"; anchorId: string }
-  >({ mode: "terms" });
   const graphRef = useRef<GraphCanvasRef | null>(null);
-
-  // Load either term subgraph or neighbor expansion based on local mode
-  useEffect(() => {
-    const load = async () => {
-      try {
-        if (view.mode === "neighbors") {
-          // In neighbors mode: reload anchor (replace) then optionally merge terms
-          await fetchNeighbors(
-            view.anchorId,
-            selectedHops,
-            selectedTypes,
-            showOnlyEdges,
-            { apply: "set" },
-          );
-          const hasTerms = Object.values(selectedTerms).flat().length > 0;
-          if (hasTerms) {
-            await fetchGraphData(
-              selectedTerms,
-              selectedTypes,
-              selectedHops,
-              showOnlyEdges,
-              { apply: "merge" },
-            );
-          }
-        } else {
-          // In terms mode: load only if terms exist; otherwise clear
-          const hasTerms = Object.values(selectedTerms).flat().length > 0;
-          if (!hasTerms) {
-            setGraph([], []);
-            return;
-          }
-          await fetchGraphData(
-            selectedTerms,
-            selectedTypes,
-            selectedHops,
-            showOnlyEdges,
-            { apply: "set" },
-          );
-        }
-      } catch (err) {
-        console.error("graph loading error:", err);
-      }
-    };
-    void load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    JSON.stringify(selectedTerms),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    JSON.stringify(selectedTypes),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    JSON.stringify(selectedHops),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    JSON.stringify(showOnlyEdges),
-    // Wechsel im lokalen View-State (Mode/Anchor) soll nachladen
-    view,
-  ]);
 
   // Double-click: expand neighbors and switch to neighbors mode
   const handleNodeDoubleClick = useCallback(
@@ -118,27 +50,14 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
           .map((e: GraphEdge) => (e.source === nodeId ? e.target : e.source));
         setLastNeighborId(neighborIds[0] ?? null);
 
-        await fetchNeighbors(
-          nodeId,
-          selectedHops,
-          selectedTypes,
-          showOnlyEdges,
-        );
-        // Switch to neighbors mode and remember anchor
-        setView({ mode: "neighbors", anchorId: nodeId });
-        // Clear terms to avoid parallel term loads
-        clearTerms();
+        await openNeighbors(nodeId);
       } catch (err) {
         console.error("error while loading neighbors:", err);
       }
     },
     [
       edges,
-      fetchNeighbors,
-      selectedHops,
-      selectedTypes,
-      showOnlyEdges,
-      clearTerms,
+      openNeighbors,
     ],
   );
 
@@ -213,7 +132,7 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
             type="button"
             className="pointer-events-auto rounded-md border border-[var(--color-border)] bg-white/90 px-3 py-1 text-sm shadow-sm hover:cursor-pointer hover:bg-white"
             onClick={() => {
-              setView({ mode: "terms" });
+              resetToTerms();
               setLastNeighborId(null);
             }}
             title="Back to term view"

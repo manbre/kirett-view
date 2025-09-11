@@ -83,7 +83,7 @@ export function ToolBar() {
           <Section<FilterLabel>
             keys={["OnlyEdges"] as FilterLabel[]}
             map={filterIconMap}
-            className="flex-1 md:min-h-0 md:flex-[4_0_0]"
+            className="flex-1 gap-5 md:min-h-0 md:flex-[4_0_0]"
             isActive={() => showOnlyEdges}
             onToggle={() => toggleOnlyEdges()}
             onReady={onSectionReady}
