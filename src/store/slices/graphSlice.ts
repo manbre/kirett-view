@@ -33,10 +33,15 @@ export const createGraphSlice = (
   pos: new Map<string, Pos>(),
   lastNeighborId: null,
 
-  // Replace entire graph
+  // Replace entire graph, but preserve known positions for still-present nodes
   setGraph: (nodes, edges) => {
-    // Positions are rebuilt by the viewer after render
-    set({ nodes, edges, pos: new Map<string, Pos>() });
+    const prevPos = get().pos ?? new Map<string, Pos>();
+    const keep = new Set(nodes.map((n) => n.id));
+    const nextPos = new Map<string, Pos>();
+    for (const [id, p] of prevPos) {
+      if (keep.has(id)) nextPos.set(id, p);
+    }
+    set({ nodes, edges, pos: nextPos });
   },
 
   // Merge graph by id (nodes/edges)

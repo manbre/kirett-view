@@ -18,7 +18,7 @@ type Pos = Store["pos"] extends Map<string, infer P> ? P : never;
 async function awaitAllPositions(
   nodes: GraphNode[],
   getPos: () => Map<string, Pos> | undefined,
-  maxFrames = 120,
+  maxFrames = 240,
 ): Promise<Map<string, Pos> | undefined> {
   let frames = 0;
   return new Promise((resolve) => {

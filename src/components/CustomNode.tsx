@@ -66,7 +66,8 @@ export function CustomNode<T extends BaseNode>({
   const [hovered, setHovered] = useState(false);
 
   // Report current node position to the store (used by SVG export)
-  useReportNodePosition(id, x, y, { maxFrames: 90 });
+  // Allow more frames so slow layouts still get captured for export
+  useReportNodePosition(id, x, y, { maxFrames: 240 });
 
   // Robust: labels kann fehlen/leer/null sein
   const labelKey =
