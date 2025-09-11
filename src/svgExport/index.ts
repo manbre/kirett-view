@@ -7,6 +7,7 @@ import { resolvePositions } from "./layout";
 import { computeBBox } from "./bbox";
 import { loadIconsFor } from "./icons";
 import { edgesToSvg, nodesToSvg } from "./serialize";
+import { tokens } from "@/theme/tokens";
 
 export type Bg = "transparent" | "white";
 
@@ -98,6 +99,10 @@ export async function buildSvgFromGraph(
     trimAtNode: true,
     iconRadius: nodeRadius,
     arrowMarker: withArrow ? "url(#arrow)" : undefined,
+    labelFontSize: fontSize,
+    fontFamily,
+    // Match viewer edge label color exactly
+    textColor: tokens.mark,
   });
 
   const nodesSvg = nodesToSvg(nodes, pos, icons, {

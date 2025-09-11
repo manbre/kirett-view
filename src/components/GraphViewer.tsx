@@ -16,6 +16,7 @@ import { useGraphApi } from "@/hooks/useGraphApi";
 import { CustomNode } from "@/components/CustomNode";
 import { prepareNodes } from "@/graphUtils/prepareNodes";
 import { tokens } from "@/theme/tokens";
+import { FONT_PX } from "@/graphUtils/labelMetrics";
 import type { GraphEdge } from "@/types/graph";
 
 // Normalize edges that may carry { id } objects
@@ -128,19 +129,48 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
   // Normalize edges to string ids for the canvas
   const canvasEdges = useMemo(
     () =>
-      (edges as readonly EdgeIn[]).map((e) => ({
-        ...e,
-        source: typeof e.source === "string" ? e.source : e.source.id,
-        target: typeof e.target === "string" ? e.target : e.target.id,
-        size: 2,
-      })),
+      (edges as readonly EdgeIn[]).map((e) => {
+        const src = typeof e.source === "string" ? e.source : e.source.id;
+        const tgt = typeof e.target === "string" ? e.target : e.target.id;
+
+        // Edge label rule: only keep labels that contain "yes" or "no" (case-insensitive)
+        const label = typeof e.label === "string" ? e.label : "";
+        const lower = label.toLowerCase();
+        const allowed = lower.includes("yes") || lower.includes("no");
+        const hideLabel = !allowed;
+
+        return {
+          ...e,
+          source: src,
+          target: tgt,
+          // keep a consistent visual weight
+          size: 2,
+          // blank label hides it in reagraph (labelVisible && label && ...)
+          label: hideLabel ? "" : label,
+        };
+      }),
     [edges],
   );
 
   const theme = {
     ...lightTheme,
-    edge: { ...lightTheme.edge, fill: tokens.edge, activeFill: tokens.edge },
-  };
+    edge: {
+      ...lightTheme.edge,
+      fill: tokens.edge,
+      activeFill: tokens.edge,
+      // Keep edge opacity constant to avoid hover/selection flicker on labels
+      opacity: lightTheme.edge.opacity,
+      selectedOpacity: lightTheme.edge.opacity,
+      inactiveOpacity: lightTheme.edge.opacity,
+      label: {
+        ...lightTheme.edge.label,
+        fontSize: FONT_PX,
+        // Match design color for edge labels and disable hover color change
+        color: tokens.mark,
+        activeColor: tokens.mark,
+      },
+    },
+  } as const;
 
   // Persist node positions on drag for correct SVG export placement
   const handleNodeDragged = (n: InternalGraphNode) => {
@@ -154,9 +184,11 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
         nodes={preppedNodes}
         edges={canvasEdges}
         theme={theme}
+        // Always show edge labels (nodes handled by CustomNode)
+        labelType="edges"
+        edgeLabelPosition="inline"
         edgeArrowPosition="none"
         layoutType="forceDirected2d"
-        labelType="hidden"
         draggable
         onNodeDragged={handleNodeDragged}
         renderNode={({ node }) => (

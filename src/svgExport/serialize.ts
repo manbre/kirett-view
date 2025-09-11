@@ -22,6 +22,10 @@ export interface EdgeStyle {
   trimAtNode: boolean;
   iconRadius: number;
   arrowMarker?: string;
+  // Edge label styling
+  labelFontSize: number;
+  fontFamily: string;
+  textColor: string;
 }
 
 export function edgesToSvg(
@@ -29,7 +33,16 @@ export function edgesToSvg(
   pos: Map<string, Pos>,
   style: EdgeStyle,
 ): string {
-  const { edgeColor, edgeWidth, trimAtNode, iconRadius, arrowMarker } = style;
+  const {
+    edgeColor,
+    edgeWidth,
+    trimAtNode,
+    iconRadius,
+    arrowMarker,
+    labelFontSize,
+    fontFamily,
+    textColor,
+  } = style;
 
   const parts: string[] = [];
   for (const e of edges) {
@@ -55,11 +68,26 @@ export function edgesToSvg(
       y2 -= uy * iconRadius;
     }
 
+    // Edge line
     parts.push(
       `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${edgeColor}" stroke-width="${edgeWidth}"${
         style.arrowMarker ? ` marker-end="${arrowMarker}"` : ""
       }/>`,
     );
+
+    // Edge label (only when it contains "yes" or "no")
+    const label = (e.label ?? "").toString();
+    const lower = label.toLowerCase();
+    const allowed = !!label && (lower.includes("yes") || lower.includes("no"));
+    if (allowed) {
+      const mx = (x1 + x2) / 2;
+      const my = (y1 + y2) / 2;
+      parts.push(
+        `<text x="${mx}" y="${my}" text-anchor="middle" dominant-baseline="central" font-family="${esc(
+          fontFamily,
+        )}" font-size="${labelFontSize}" fill="${textColor}">${esc(label)}</text>`,
+      );
+    }
   }
   return parts.join("");
 }
