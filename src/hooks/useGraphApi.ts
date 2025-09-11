@@ -1,8 +1,4 @@
 "use client";
-// useGraphApi
-// Client-side helpers to load filtered subgraphs and neighbor-expansions.
-// Translates UI filters (types/hops/edge-only) into API payloads and
-// updates the central store with the result.
 
 import { useStore } from "@/store/useStore";
 import type { GraphNode, GraphEdge, SubgraphResult } from "@/types/graph";
@@ -11,7 +7,7 @@ export type SelectedTerms = Record<string, string[]>;
 export type SelectedTypes = string[];
 export type SelectedHops = string[]; // "HopOne" | "HopTwo"
 
-// Map UI hops -> server depth strings ["1" | "2"]
+// Map UI hops to server depth strings ["1" | "2"]
 function toDepth(selectedHops: SelectedHops): ("1" | "2")[] {
   const depth: ("1" | "2")[] = [];
   if (selectedHops.includes("HopOne")) depth.push("1");
@@ -20,7 +16,7 @@ function toDepth(selectedHops: SelectedHops): ("1" | "2")[] {
   return depth;
 }
 
-// Frontend-side dedupe (single place) to keep IDs unique
+// Dedupe nodes/edges by id on the client
 function dedupeGraph(
   nodes: GraphNode[] = [],
   edges: GraphEdge[] = [],
@@ -37,8 +33,11 @@ function dedupeGraph(
   };
 }
 
+type ApplyMode = "set" | "merge" | "none";
+
+// useGraphApi: fetch subgraphs/neighbors and update the store
 export const useGraphApi = () => {
-  // Access root graph actions for replacing/merging graph data
+  // Access root graph actions (default remains setGraph)
   const { setGraph, mergeGraph } = useStore.getState();
 
   // Load a subgraph for a selection of terms with current filters
@@ -47,6 +46,7 @@ export const useGraphApi = () => {
     selectedTypes: SelectedTypes,
     selectedHops: SelectedHops,
     showOnlyEdges: boolean,
+    opts?: { apply?: ApplyMode },
   ): Promise<SubgraphResult> => {
     const include = selectedTypes;
     const depth = toDepth(selectedHops);
@@ -64,8 +64,10 @@ export const useGraphApi = () => {
     const raw = (await res.json()) as SubgraphResult;
     const { nodes, edges } = dedupeGraph(raw.nodes, raw.edges);
 
-    // Replace in store (no additional dedupe needed here)
-    setGraph(nodes, edges);
+    const apply: ApplyMode = opts?.apply ?? "set";
+    if (apply === "set") setGraph(nodes, edges);
+    else if (apply === "merge") mergeGraph(nodes, edges);
+    // apply === "none" -> return only
     return { nodes, edges };
   };
 
@@ -75,6 +77,7 @@ export const useGraphApi = () => {
     selectedHops: SelectedHops,
     selectedTypes: SelectedTypes,
     showOnlyEdges: boolean,
+    opts?: { apply?: ApplyMode },
   ): Promise<SubgraphResult> => {
     const include = selectedTypes;
     const depth = toDepth(selectedHops);
@@ -92,8 +95,10 @@ export const useGraphApi = () => {
     const raw = (await res.json()) as SubgraphResult;
     const { nodes, edges } = dedupeGraph(raw.nodes, raw.edges);
 
-    // In bestehenden Graphen mergen (Store darf optional erneut vereinigen)
-    mergeGraph(nodes, edges);
+    const apply: ApplyMode = opts?.apply ?? "set";
+    if (apply === "set") setGraph(nodes, edges);
+    else if (apply === "merge") mergeGraph(nodes, edges);
+    // apply === "none" -> return only
     return { nodes, edges };
   };
 

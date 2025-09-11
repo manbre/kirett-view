@@ -1,8 +1,5 @@
 "use client";
-// GraphViewer
-// Renders the interactive graph (nodes/edges) and reacts to filter changes.
-// Loads subgraphs and neighbor-expansions via API hooks and preserves
-// node positions on drag to support high-quality SVG export.
+// Interactive graph canvas that reacts to filters and expansions.
 
 import {
   GraphCanvas,
@@ -29,6 +26,7 @@ type Props = {
   onChangeNode?: (nodeId: string) => void;
 };
 
+// GraphViewer: renders the graph and handles term/neighbors view logic
 export const GraphViewer = ({ onChangeNode }: Props) => {
   // Read filters and graph data from the store
   // -------- Filter/Topologie aus Slices --------
@@ -36,6 +34,7 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
   const selectedTypes = useStore((s) => s.selectedTypes);
   const selectedHops = useStore((s) => s.selectedHops);
   const showOnlyEdges = useStore((s) => s.showOnlyEdges);
+  const clearTerms = useStore((s) => s.clearTerms);
 
   // -------- Graph Slice (root) --------
   const nodes = useStore((s) => s.nodes);
@@ -46,24 +45,50 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
   const { fetchGraphData, fetchNeighbors } = useGraphApi();
 
   const [lastNeighborId, setLastNeighborId] = useState<string | null>(null);
+  const [view, setView] = useState<
+    | { mode: "terms"; anchorId?: undefined }
+    | { mode: "neighbors"; anchorId: string }
+  >({ mode: "terms" });
   const graphRef = useRef<GraphCanvasRef | null>(null);
 
-  // Load subgraph whenever filters change
+  // Load either term subgraph or neighbor expansion based on local mode
   useEffect(() => {
     const load = async () => {
-      const hasTerms = Object.values(selectedTerms).flat().length > 0;
-      if (!hasTerms) {
-        setGraph([], []);
-        return;
-      }
       try {
-        const { nodes: newNodes, edges: newEdges } = await fetchGraphData(
-          selectedTerms,
-          selectedTypes,
-          selectedHops,
-          showOnlyEdges,
-        );
-        setGraph(newNodes, newEdges);
+        if (view.mode === "neighbors") {
+          // In neighbors mode: reload anchor (replace) then optionally merge terms
+          await fetchNeighbors(
+            view.anchorId,
+            selectedHops,
+            selectedTypes,
+            showOnlyEdges,
+            { apply: "set" },
+          );
+          const hasTerms = Object.values(selectedTerms).flat().length > 0;
+          if (hasTerms) {
+            await fetchGraphData(
+              selectedTerms,
+              selectedTypes,
+              selectedHops,
+              showOnlyEdges,
+              { apply: "merge" },
+            );
+          }
+        } else {
+          // In terms mode: load only if terms exist; otherwise clear
+          const hasTerms = Object.values(selectedTerms).flat().length > 0;
+          if (!hasTerms) {
+            setGraph([], []);
+            return;
+          }
+          await fetchGraphData(
+            selectedTerms,
+            selectedTypes,
+            selectedHops,
+            showOnlyEdges,
+            { apply: "set" },
+          );
+        }
       } catch (err) {
         console.error("graph loading error:", err);
       }
@@ -79,9 +104,11 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
     JSON.stringify(selectedHops),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify(showOnlyEdges),
+    // Wechsel im lokalen View-State (Mode/Anchor) soll nachladen
+    view,
   ]);
 
-  // Double-click: expand neighbors and replace the current view
+  // Double-click: expand neighbors and switch to neighbors mode
   const handleNodeDoubleClick = useCallback(
     async (nodeId: string) => {
       try {
@@ -91,16 +118,16 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
           .map((e: GraphEdge) => (e.source === nodeId ? e.target : e.source));
         setLastNeighborId(neighborIds[0] ?? null);
 
-        const { nodes: neighborNodes, edges: neighborEdges } =
-          await fetchNeighbors(
-            nodeId,
-            selectedHops,
-            selectedTypes,
-            showOnlyEdges,
-          );
-
-        // Replace the view with expanded neighborhood (no merge)
-        setGraph(neighborNodes, neighborEdges);
+        await fetchNeighbors(
+          nodeId,
+          selectedHops,
+          selectedTypes,
+          showOnlyEdges,
+        );
+        // Switch to neighbors mode and remember anchor
+        setView({ mode: "neighbors", anchorId: nodeId });
+        // Clear terms to avoid parallel term loads
+        clearTerms();
       } catch (err) {
         console.error("error while loading neighbors:", err);
       }
@@ -111,11 +138,11 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
       selectedHops,
       selectedTypes,
       showOnlyEdges,
-      setGraph,
+      clearTerms,
     ],
   );
 
-  // Single-click: notify external listener (e.g. details panel)
+  // Single-click: notify external listener (e.g., details panel)
   const handleNodeClick = useCallback(
     (nodeId: string) => {
       onChangeNode?.(nodeId);
@@ -172,13 +199,29 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
     },
   } as const;
 
-  // Persist node positions on drag for correct SVG export placement
+  // Persist node positions on drag (for correct SVG export)
   const handleNodeDragged = (n: InternalGraphNode) => {
     setNodePos(n.id, n.position.x, n.position.y);
   };
 
   return (
     <div className="relative flex h-[65dvh] w-full overflow-hidden rounded-xl border border-[var(--color-border)] bg-white p-1 md:h-full">
+      {/* Floating Reset button to switch back to terms mode */}
+      {view.mode === "neighbors" && (
+        <div className="pointer-events-none absolute top-2 left-2 z-10">
+          <button
+            type="button"
+            className="pointer-events-auto rounded-md border border-[var(--color-border)] bg-white/90 px-3 py-1 text-sm shadow-sm hover:bg-white"
+            onClick={() => {
+              setView({ mode: "terms" });
+              setLastNeighborId(null);
+            }}
+            title="Back to term view"
+          >
+            Reset
+          </button>
+        </div>
+      )}
       <GraphCanvas
         ref={graphRef}
         nodes={preppedNodes}

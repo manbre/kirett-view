@@ -1,9 +1,4 @@
 "use client";
-// Global store (Zustand) composed of domain slices
-// - TermSlice: selected terms by category
-// - TypeSlice: selected node types (labels)
-// - TopologySlice: hops and edge-only view
-// - GraphSlice: nodes, edges, positions, lastNeighborId
 
 import { create } from "zustand";
 
@@ -16,10 +11,10 @@ import {
 } from "./slices/topologySlice";
 import { createGraphSlice, type GraphSlice } from "./slices/graphSlice";
 
-// Root-Typ
+// Store: root Zustand type combining all slices
 export type Store = TermSlice & TypeSlice & TopologySlice & GraphSlice;
 
-// Store factory: compose all slices
+// useStore: composed Zustand store of all slices
 export const useStore = create<Store>()((set, get) => ({
   ...createTermSlice(set, get),
   ...createTypeSlice(set, get),
@@ -27,7 +22,7 @@ export const useStore = create<Store>()((set, get) => ({
   ...createGraphSlice(set, get),
 }));
 
-// Convenience selectors (single source of truth)
+// selectors: centralized selectors for components
 export const selectors = {
   // terms
   selectedTerms: (s: Store) => s.selectedTerms,

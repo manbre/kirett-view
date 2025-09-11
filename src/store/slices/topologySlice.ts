@@ -1,7 +1,4 @@
 "use client";
-// TopologySlice
-// Controls hop depth selection (as an exclusive mode and as an array for
-// compatibility) and the edge-only rendering toggle.
 
 import type { StoreApi } from "zustand";
 import type { Store } from "../useStore";
@@ -25,11 +22,13 @@ export interface TopologySlice {
   toggleShowOnlyEdges: () => void;
 }
 
+// createTopologySlice: hop mode/array and edge-only flag
 export const createTopologySlice = (
   set: StoreApi<Store>["setState"],
   get: StoreApi<Store>["getState"],
 ): TopologySlice => ({
-  // Default: only HopOne active
+  // TopologySlice: hop depth selection and edge-only toggle
+  // Default: HopOne active
   selectedHops: ["HopOne"],
   hopMode: "hop1",
 
@@ -50,7 +49,7 @@ export const createTopologySlice = (
       const next = exists
         ? s.selectedHops.filter((x) => x !== k)
         : [...s.selectedHops, k];
-      // Nie leer lassen: fallback auf HopOne
+      // Never empty: fallback to HopOne
       const safe = next.length === 0 ? ["HopOne"] : (next as HopKey[]);
       const mode =
         safe.length === 2 ? "both" : safe.includes("HopTwo") ? "hop2" : "hop1";
