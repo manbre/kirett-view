@@ -22,7 +22,7 @@ export async function loadIconsFor(
         const parsed = parseInlineSvg(txt);
         out.set(n.id, parsed);
       } catch {
-        // ignore: fallback drawing will kick in
+        // fallback drawing will kick in
       }
     }),
   );

@@ -3,17 +3,16 @@
 import type { StoreApi } from "zustand";
 import type { Store } from "../useStore";
 
-// Hop keys (Section 2)
+// hop keys (ToolBar Section 2)
 export type HopKey = "HopOne" | "HopTwo";
 export type HopMode = "hop1" | "hop2" | "both";
 
 export interface TopologySlice {
-  // Hops as an array (backward compatible for existing callers)
   selectedHops: HopKey[];
   setHops: (h: HopKey[]) => void;
   toggleHop: (k: HopKey) => void;
 
-  // New, explicit hop mode for HopToggle (exactly one selection)
+  // hop mode for HopToggle (exactly one selection)
   hopMode: HopMode;
   setHopMode: (m: HopMode) => void;
 
@@ -25,22 +24,15 @@ export interface TopologySlice {
 // createTopologySlice: hop mode/array and edge-only flag
 export const createTopologySlice = (
   set: StoreApi<Store>["setState"],
-  get: StoreApi<Store>["getState"],
 ): TopologySlice => ({
-  // TopologySlice: hop depth selection and edge-only toggle
-  // Default: HopOne active
+  // default: HopOne active
   selectedHops: ["HopOne"],
   hopMode: "hop1",
 
   setHops: (h) =>
     set(() => ({
       selectedHops: h,
-      hopMode:
-        h.length === 2
-          ? "both"
-          : h.includes("HopTwo")
-          ? "hop2"
-          : "hop1",
+      hopMode: h.length === 2 ? "both" : h.includes("HopTwo") ? "hop2" : "hop1",
     })),
 
   toggleHop: (k) =>
@@ -49,7 +41,7 @@ export const createTopologySlice = (
       const next = exists
         ? s.selectedHops.filter((x) => x !== k)
         : [...s.selectedHops, k];
-      // Never empty: fallback to HopOne
+      // never empty: fallback to HopOne
       const safe = next.length === 0 ? ["HopOne"] : (next as HopKey[]);
       const mode =
         safe.length === 2 ? "both" : safe.includes("HopTwo") ? "hop2" : "hop1";

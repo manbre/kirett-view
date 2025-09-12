@@ -1,6 +1,8 @@
 import { Transaction } from "neo4j-driver";
 import type { TermItem } from "@/types/terms";
 
+//
+// term fetcher for medication names (SAAMedicationNode)
 export async function getMedicationTerms(tx: Transaction): Promise<TermItem[]> {
   const result = await tx.run(
     `
@@ -15,4 +17,3 @@ export async function getMedicationTerms(tx: Transaction): Promise<TermItem[]> {
     label: record.get("name"),
   }));
 }
-// Term fetcher for medication names (SAAMedicationNode)

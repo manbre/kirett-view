@@ -1,4 +1,5 @@
-// Resolve positions from posMap or fallback to a circle layout
+//
+// resolve positions from posMap or fallback to a circle layout
 
 import type { GraphNode } from "@/types/graph";
 import type { Pos } from "./graphUtils";

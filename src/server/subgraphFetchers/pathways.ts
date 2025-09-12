@@ -1,5 +1,7 @@
 import type { Transaction, Record as Neo4jRecord } from "neo4j-driver";
 
+//
+// subgraph fetcher for pathways (BPR nodes) by BPR
 export async function getPathwaysSubgraph(
   pathways: string[],
   tx: Transaction,
@@ -53,4 +55,3 @@ export async function getPathwaysSubgraph(
   const result = await tx.run(query, { pathways, include });
   return result.records;
 }
-// Subgraph fetcher for pathways (BPR nodes)

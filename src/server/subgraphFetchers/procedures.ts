@@ -1,5 +1,7 @@
 import type { Transaction, Record as Neo4jRecord } from "neo4j-driver";
 
+//
+// subgraph fetcher for SAA (SAAProcedureNode) by name
 export async function getProceduresSubgraph(
   procedures: string[],
   tx: Transaction,
@@ -53,4 +55,3 @@ export async function getProceduresSubgraph(
   const result = await tx.run(query, { procedures, include });
   return result.records;
 }
-// Subgraph fetcher for SAA procedures (SAAProcedureNode)

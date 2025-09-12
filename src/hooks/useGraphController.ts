@@ -1,5 +1,4 @@
 "use client";
-// useGraphController: first minimal version (single effect + simple open/reset)
 
 import { useEffect, useState, useCallback } from "react";
 import { useStore } from "@/store/useStore";
@@ -63,9 +62,13 @@ export function useGraphController() {
     void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify(selectedTerms),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify(selectedTypes),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify(selectedHops),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify(showOnlyEdges),
     view,
   ]);
@@ -92,4 +95,3 @@ export function useGraphController() {
 
   return { view, resetToTerms, openNeighbors };
 }
-

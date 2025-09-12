@@ -1,5 +1,7 @@
 import type { Transaction, Record as Neo4jRecord } from "neo4j-driver";
 
+//
+// subgraph fetcher for diseases: returns nodes/edges around matching Nodes
 export async function getDiseasesSubgraph(
   diseases: string[],
   tx: Transaction,
@@ -83,4 +85,3 @@ UNION
   const result = await tx.run(query, { diseases, include });
   return result.records;
 }
-// Subgraph fetcher for diseases: returns nodes/edges around matching DisplayNodes

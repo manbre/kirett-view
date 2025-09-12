@@ -1,5 +1,7 @@
 import type { Transaction, Record as Neo4jRecord } from "neo4j-driver";
 
+//
+// subgraph fetcher for medications: expands around SAAMedicationNode with certain medication name
 export async function getMedicationsSubgraph(
   medications: string[],
   tx: Transaction,
@@ -53,4 +55,3 @@ export async function getMedicationsSubgraph(
   const result = await tx.run(query, { medications, include });
   return result.records;
 }
-// Subgraph fetcher for medications

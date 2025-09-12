@@ -1,6 +1,8 @@
 import type { Transaction } from "neo4j-driver";
 import type { GroupedTermItem } from "@/types/terms";
 
+//
+// term fetcher for BPR pathways (grouped by SituationDetectionGroup)
 export async function getPathwayTerms(
   tx: Transaction,
 ): Promise<GroupedTermItem[]> {
@@ -20,4 +22,3 @@ export async function getPathwayTerms(
     group: record.get("group"),
   }));
 }
-// Term fetcher for BPR pathways (grouped by SituationDetectionGroup)

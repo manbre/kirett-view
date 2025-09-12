@@ -1,5 +1,7 @@
 import type { Transaction, Record as Neo4jRecord } from "neo4j-driver";
 
+//
+// subgraph fetcher (others) for nodes of a certain type
 export async function getOthersSubgraph(
   others: string[],
   tx: Transaction,
@@ -33,4 +35,3 @@ RETURN n AS n
   const result = await tx.run(query, { others, include });
   return result.records;
 }
-// Subgraph fetcher for miscellaneous nodes (Others)

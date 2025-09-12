@@ -1,6 +1,8 @@
 import { Transaction } from "neo4j-driver";
 import type { TermItem } from "@/types/terms";
 
+//
+// term fetcher: all labels except DisplayNode
 export async function getOtherTerms(tx: Transaction): Promise<TermItem[]> {
   const result = await tx.run(
     `
@@ -18,4 +20,3 @@ RETURN name
     label: record.get("name"),
   }));
 }
-// Term fetcher for miscellaneous labels (all labels except DisplayNode)

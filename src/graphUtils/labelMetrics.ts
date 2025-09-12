@@ -1,15 +1,9 @@
-// src/graph/label-metrics.ts
-import {
-  buildDisplayName as _bdn,
-  calcCollisionRadius as _ccr,
-} from "./label-metrics"; // keep barrel compatibility for outside imports
-
-export const NODE_R = 25; // visible circle radius in CustomNode
+export const NODE_R = 25; // visible circle radius in customNode
 export const FONT_PX = 20; // label font size
 export const MAX_W = 80; // label max width
 export const LABEL_Y_OFFSET = 20; // vertical offset between icon and label
-export const PADDING = 6; // small padding around circle + text
-export const COLLISION_SCALE = 0.5; // damp text influence on radius
+export const PADDING = 6; // small padding around circle and text
+export const COLLISION_SCALE = 0.5; // text influence on radius
 
 function getStr(
   data: Record<string, unknown>,
@@ -19,7 +13,7 @@ function getStr(
   return typeof v === "string" ? v : undefined;
 }
 
-/** Build the exact display name used in the UI */
+/// build exact display name used in the UI
 export function buildDisplayName(
   data: Record<string, unknown> | undefined,
   fallbackLabel?: string,
@@ -27,11 +21,11 @@ export function buildDisplayName(
   const bpr = data ? getStr(data, "BPR") : undefined;
   const name = data ? getStr(data, "Name") : undefined;
   const prefix = bpr && bpr !== "None" ? `${bpr}: ` : "";
-  // Important: apply prefix and allow label fallback
+  // apply prefix and allow label fallback
   return `${prefix}${name ?? fallbackLabel ?? ""}`;
 }
 
-/** Rough estimate of text bounding box (width/height) */
+// rough estimate of text bounding box (width/height)
 export function estimateTextBox(
   text: string,
   fontPx: number = FONT_PX,
@@ -45,11 +39,11 @@ export function estimateTextBox(
   return { width, height };
 }
 
-/** Radial collision radius for icon + offset label */
+// radial collision radius for icon + offset label
 export function calcCollisionRadius(displayName: string): number {
   const { width, height } = estimateTextBox(displayName);
   const halfW = width / 2;
-  const halfH = height / 2 + LABEL_Y_OFFSET; // label sits below the circle
+  const halfH = height / 2 + LABEL_Y_OFFSET;
   const textHalfDiag = Math.hypot(halfW, halfH);
   return NODE_R + COLLISION_SCALE * textHalfDiag + PADDING;
 }

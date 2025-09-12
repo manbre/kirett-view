@@ -1,6 +1,8 @@
 import { Transaction } from "neo4j-driver";
 import type { TermItem } from "@/types/terms";
 
+//
+// term fetcher for symptoms
 export async function getSymptomTerms(tx: Transaction): Promise<TermItem[]> {
   // second MATCH only because of "akutes Aortensyndrom"
   const result = await tx.run(

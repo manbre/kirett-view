@@ -9,7 +9,8 @@ type Props = {
   onChangeCategory: (category: Category) => void;
 };
 
-// CategoryTabs: renders category pills with counts; integrates with store selection
+//
+// renders category pills with counts and store selection
 export const CategoryTabs = ({ selectedCategory, onChangeCategory }: Props) => {
   const selectedTerms = useStore((state) => state.selectedTerms);
 

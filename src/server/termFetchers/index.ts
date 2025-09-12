@@ -13,6 +13,7 @@ import { getOtherTerms } from "./others";
 
 export type TermFetcher = (tx: Transaction) => Promise<TermItem[]>; // each fetcher returns TermItem[]
 
+// term fetcher registry per category, returns lists of selectable terms
 export const termFetchers: Record<TermFetcher> = {
   [Category.Groups]: getGroupTerms,
   [Category.Diseases]: getDiseaseTerms,
@@ -23,4 +24,3 @@ export const termFetchers: Record<TermFetcher> = {
   [Category.Symptoms]: getSymptomTerms,
   [Category.Others]: getOtherTerms,
 };
-// Term fetcher registry per category, returns lists of selectable terms

@@ -1,3 +1,5 @@
+//
+// category enum and localized labels for UI category tabs
 export enum Category {
   Diseases = "diseases",
   Groups = "groups",
@@ -29,4 +31,3 @@ export const createEmptySelectedTerms = (): Record<Category, string[]> => {
     {} as Record<Category, string[]>,
   );
 };
-// Category enum and localized labels for UI tabs and term selection

@@ -1,5 +1,4 @@
 "use client";
-// Interactive graph canvas that reacts to filters and expansions.
 
 import {
   GraphCanvas,
@@ -16,22 +15,15 @@ import { tokens } from "@/theme/tokens";
 import { FONT_PX } from "@/graphUtils/labelMetrics";
 import type { GraphEdge } from "@/types/graph";
 
-// Normalize edges that may carry { id } objects
+// normalize edges that may carry { id } objects
 type EdgeIn = GraphEdge & {
   source: string | { id: string };
   target: string | { id: string };
 };
 
-type Props = {
-  onChangeNode?: (nodeId: string) => void;
-};
-
-// GraphViewer: renders the graph and handles term/neighbors view logic
-export const GraphViewer = ({ onChangeNode }: Props) => {
-  // Read filters and graph data from the store
-  // filters handled in controller
-
-  // -------- Graph Slice (root) --------
+//
+// renders the graph and handles term/neighbors view logic
+export const GraphViewer = () => {
   const nodes = useStore((s) => s.nodes);
   const edges = useStore((s) => s.edges);
   const setNodePos = useStore((s) => s.setNodePos);
@@ -40,11 +32,14 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
   const [lastNeighborId, setLastNeighborId] = useState<string | null>(null);
   const graphRef = useRef<GraphCanvasRef | null>(null);
 
-  // Double-click: expand neighbors and switch to neighbors mode
+  // prepare nodes (collision radius, display label, space)
+  const preppedNodes = useMemo(() => prepareNodes(nodes), [nodes]);
+
+  // double click: expand neighbors and switch to neighbors mode
   const handleNodeDoubleClick = useCallback(
     async (nodeId: string) => {
       try {
-        // (Optional) light UI feedback: remember the first neighbor id
+        // remember the first neighbor id
         const neighborIds = edges
           .filter((e: GraphEdge) => e.source === nodeId || e.target === nodeId)
           .map((e: GraphEdge) => (e.source === nodeId ? e.target : e.source));
@@ -55,31 +50,25 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
         console.error("error while loading neighbors:", err);
       }
     },
-    [
-      edges,
-      openNeighbors,
-    ],
+    [edges, openNeighbors],
   );
 
-  // Single-click: notify external listener (e.g., details panel)
-  const handleNodeClick = useCallback(
-    (nodeId: string) => {
-      onChangeNode?.(nodeId);
-    },
-    [onChangeNode],
-  );
+  // single-click
+  const handleNodeClick = () => {};
 
-  // Prepare nodes (collision radius, display label, size lift)
-  const preppedNodes = useMemo(() => prepareNodes(nodes), [nodes]);
+  // node positions on drag (for correct SVG export)
+  const handleNodeDragged = (n: InternalGraphNode) => {
+    setNodePos(n.id, n.position.x, n.position.y);
+  };
 
-  // Normalize edges to string ids for the canvas
+  // normalize edges to string ids for canvas
   const canvasEdges = useMemo(
     () =>
       (edges as readonly EdgeIn[]).map((e) => {
         const src = typeof e.source === "string" ? e.source : e.source.id;
         const tgt = typeof e.target === "string" ? e.target : e.target.id;
 
-        // Edge label rule: only keep labels that contain "yes" or "no" (case-insensitive)
+        // only keep labels that contain "yes" or "no"
         const label = typeof e.label === "string" ? e.label : "";
         const lower = label.toLowerCase();
         const allowed = lower.includes("yes") || lower.includes("no");
@@ -91,7 +80,7 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
           target: tgt,
           // keep a consistent visual weight
           size: 2,
-          // blank label hides it in reagraph (labelVisible && label && ...)
+          // blank label for hiding
           label: hideLabel ? "" : label,
         };
       }),
@@ -104,28 +93,21 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
       ...lightTheme.edge,
       fill: tokens.edge,
       activeFill: tokens.edge,
-      // Keep edge opacity constant to avoid hover/selection flicker on labels
-      opacity: lightTheme.edge.opacity,
+      opacity: lightTheme.edge.opacity, // keep it constant to avoid hover/selection flicker
       selectedOpacity: lightTheme.edge.opacity,
       inactiveOpacity: lightTheme.edge.opacity,
       label: {
         ...lightTheme.edge.label,
         fontSize: FONT_PX,
-        // Match design color for edge labels and disable hover color change
         color: tokens.mark,
         activeColor: tokens.mark,
       },
     },
   } as const;
 
-  // Persist node positions on drag (for correct SVG export)
-  const handleNodeDragged = (n: InternalGraphNode) => {
-    setNodePos(n.id, n.position.x, n.position.y);
-  };
-
   return (
     <div className="relative flex h-[65dvh] w-full overflow-hidden rounded-xl border border-[var(--color-border)] bg-white p-1 md:h-full">
-      {/* Floating Reset button to switch back to terms mode */}
+      {/* floating reset button to switch back to terms mode */}
       {view.mode === "neighbors" && (
         <div className="pointer-events-none absolute top-2 left-2 z-10">
           <button
@@ -135,7 +117,7 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
               resetToTerms();
               setLastNeighborId(null);
             }}
-            title="Back to term view"
+            title="Nachbar-Ansicht beenden"
           >
             Reset
           </button>
@@ -146,7 +128,6 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
         nodes={preppedNodes}
         edges={canvasEdges}
         theme={theme}
-        // Always show edge labels (nodes handled by CustomNode)
         labelType="edges"
         edgeLabelPosition="inline"
         edgeArrowPosition="none"
@@ -155,7 +136,7 @@ export const GraphViewer = ({ onChangeNode }: Props) => {
         onNodeDragged={handleNodeDragged}
         renderNode={({ node }) => (
           <CustomNode
-            // CustomNode expects id/x/y and the prepared node
+            // customNode expects id/x/y and the prepared node
             node={node as unknown as Parameters<typeof CustomNode>[0]["node"]}
             isHighlighted={node.id === lastNeighborId}
             id={node.id}

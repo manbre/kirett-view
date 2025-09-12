@@ -4,16 +4,12 @@ import React from "react";
 import { useStore } from "@/store/useStore";
 import type { HopMode } from "@/store/slices/topologySlice";
 
-/**
- * HopToggle
- * Three mutually exclusive hop-depth options (1 / 2 / 1&2).
- * Mobile: horizontal row; Desktop: vertical column.
- * Rendered as a single column group that spans 3 rows in the Section grid.
- */
+//
+// three mutually exclusive hop-depth options (1 / 2 / 1&2)
+// mobile: horizontal row, desktop: vertical column with 3 rows
 export function HopToggle() {
   const hopMode = useStore((s) => s.hopMode);
   const setHopMode = useStore((s) => s.setHopMode);
-  // OnlyEdges control is rendered by the parent Section (ToolBar)
 
   const items: { value: HopMode; label: string; title: string }[] = [
     { value: "hop1", label: "1", title: "Hop 1" },
@@ -21,7 +17,6 @@ export function HopToggle() {
     { value: "both", label: "1&2", title: "Hop 1 & 2" },
   ];
 
-  // Wrapper as a single grid item (group): mobile row, desktop column; spans 3 rows
   return (
     <div className="flex items-stretch justify-start gap-1.5 rounded-md bg-[var(--color-border)] ring-1 ring-[var(--color-bg)] md:[grid-row:span_3_/span_3] md:[width:var(--cell)] md:flex-col">
       {items.map(({ value, label, title }) => {

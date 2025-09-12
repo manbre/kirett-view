@@ -6,6 +6,8 @@ const roleSynonyms: Record<string, string> = {
   NS: "NFS",
 };
 
+//
+// term fetcher for role names stored in attributes like "Betrifft1/2"
 export async function getRoleTerms(tx: Transaction): Promise<TermItem[]> {
   const result = await tx.run(
     `
@@ -27,4 +29,3 @@ export async function getRoleTerms(tx: Transaction): Promise<TermItem[]> {
     label: name,
   }));
 }
-// Term fetcher for role names stored in attributes like "Betrifft1/2"

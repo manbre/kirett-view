@@ -1,3 +1,5 @@
+//
+// icon mappings for graph nodes, filters, exports
 // paths relative to /public
 //============================================================
 // graph node icons
@@ -24,8 +26,6 @@ export type NodeLabel = keyof typeof labelIconMap;
 //============================================================
 //
 export const filterIconMap = {
-  // HopOne: "/icons/hop1.svg",
-  // HopTwo: "/icons/hop2.svg",
   OnlyEdges: "/icons/polygon.svg",
 } as const;
 
@@ -37,13 +37,4 @@ export const exportIconMap = {
   SvgExport: "/icons/svg.svg",
 } as const;
 
-export type exportLabel = keyof typeof exportIconMap;
-
-//============================================================
-//
-export const uiIconMap = {
-  Rewind: "/icons/rewind.svg",
-} as const;
-
-export type uiLabel = keyof typeof uiIconMap;
-// Icon mappings for nodes, filters, exports, and UI controls
+export type ExportLabel = keyof typeof exportIconMap;

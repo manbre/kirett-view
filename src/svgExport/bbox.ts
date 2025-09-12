@@ -1,5 +1,3 @@
-// Compute bounding box of icons + wrapped labels
-
 import type { GraphNode } from "@/types/graph";
 import type { Pos } from "./graphUtils";
 import { wrapTextToLines } from "./svgUtils";
@@ -12,7 +10,7 @@ export interface BBox {
   height: number;
 }
 
-/** Safe label (same logic as viewer) without using `any` */
+// label (same logic as viewer)
 function labelFor(node: GraphNode): string {
   const data =
     typeof node.data === "object" && node.data !== null
@@ -21,7 +19,9 @@ function labelFor(node: GraphNode): string {
   return buildDisplayName(data, node.label);
 }
 
-/** Compute bbox with padding, overscan, and extra bottom padding */
+//
+// compute bounding box of icons + wrapped labels
+// with padding, overscan, and extra bottom padding
 export function computeBBox(
   nodes: GraphNode[],
   pos: Map<string, Pos>,
@@ -44,13 +44,13 @@ export function computeBBox(
     const p = pos.get(n.id);
     if (!p) continue;
 
-    // Icon box
+    // icon box
     minX = Math.min(minX, p.x - r);
     maxX = Math.max(maxX, p.x + r);
     minY = Math.min(minY, p.y - r);
     maxY = Math.max(maxY, p.y + r);
 
-    // Text box (wrapped like the viewer)
+    // text box (wrapped like the viewer)
     const label = labelFor(n);
     const wrapped = wrapTextToLines(label, fontSize, maxTextWidth);
     const textH = wrapped.lines.length * lineHeight;

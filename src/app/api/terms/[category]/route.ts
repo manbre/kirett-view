@@ -1,5 +1,6 @@
-// GET /api/terms/:category
-// Returns a list of selectable terms for the given category.
+//
+// returns list of selectable terms for given category
+
 import { NextRequest, NextResponse } from "next/server";
 import { withReadTx } from "@/server/db/neo4j";
 import { termFetchers } from "@/server/termFetchers";

@@ -1,11 +1,13 @@
 import "server-only";
-// Neo4j driver setup and helpers for read-only transactions.
-// Caches a single driver instance across hot-reloads and exposes
-// a withReadTx helper to run safe read transactions.
+//
+// neo4j driver setup and helpers for read-only transactions
+// caches a single driver instance across hot-reloads and exposes
+// withReadTx helper to run safe read transactions
 import neo4j, { Driver, Session } from "neo4j-driver";
 
-//prevent this file from creating a new driver while reloading
+// prevent this file from creating a new driver while reloading
 declare global {
+  //
   // eslint-disable-next-line no-var
   var __neo4jDriver: Driver | undefined;
 }

@@ -1,4 +1,5 @@
-// Theme tokens to keep colors in CSS and canvas consistent
+//
+// theme tokens to keep colors in CSS and canvas consistent
 export const tokens = {
   bg: "#f4f4f4", // background
   text: "#0b0a0a",

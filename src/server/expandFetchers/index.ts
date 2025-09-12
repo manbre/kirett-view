@@ -1,6 +1,8 @@
 import type { Transaction, Record as Neo4jRecord } from "neo4j-driver";
 import { getNeighbors } from "./neighbors";
 
+//
+// registry of expand actions
 export type ExpandFetcher = (
   nodeId: string,
   depth: ("1" | "2")[], // hop selection
@@ -13,4 +15,3 @@ export const expandFetchers: Record<string, ExpandFetcher> = {
 };
 
 export type ExpandAction = keyof typeof expandFetchers;
-// Registry of server-side expand actions (e.g., neighbors)

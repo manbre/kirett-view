@@ -2,7 +2,8 @@
 
 type Props = { src: string; className?: string };
 
-// MaskedIcon: renders a monochrome SVG by applying it as a CSS mask
+//
+// renders a monochrome SVG by applying it as a CSS mask
 export function MaskedIcon({ src, className = "w-5 h-5" }: Props) {
   if (!src) return <span className={`inline-block ${className}`} />;
 

@@ -1,5 +1,6 @@
-// SVG Export entry-point
-// Builds a final SVG that matches the viewer (same wrap width & font size).
+//
+// SVG Export entry point
+// builds a final SVG that matches the viewer (same wrap width & font size).
 
 import type { GraphNode, GraphEdge } from "@/types/graph";
 import type { Pos } from "./graphUtils";
@@ -24,7 +25,7 @@ export interface SvgExportOptions {
   arrow?: boolean; // arrowheads on edges
   labelBg?: boolean; // label background rectangle under icon
   debug?: boolean; // debug border
-  maxTextWidth?: number; // exactly like the viewer (e.g., MAX_W)
+  maxTextWidth?: number; // exactly like the viewer (MAX_W)
   overscan?: number; // small safety buffer (default 2)
   extraBottom?: number; // extra bottom padding in px (default 8)
 }
@@ -37,7 +38,7 @@ export async function buildSvgFromGraph(
 ): Promise<string | null> {
   if (!nodes || nodes.length === 0) return null;
 
-  // ---- Options (stable defaults) ----
+  // defaults
   const padding = opts?.padding ?? 24;
   const fontSize = opts?.fontSize ?? 12;
   const iconSize = opts?.iconSize ?? 24;
@@ -53,15 +54,15 @@ export async function buildSvgFromGraph(
   const labelBg = opts?.labelBg ?? true;
   const debug = opts?.debug ?? false;
 
-  // Important: must match viewer values
+  // important: must match viewer values
   const maxTextWidth = opts?.maxTextWidth ?? 200;
   const overscan = opts?.overscan ?? 2;
   const extraBottom = opts?.extraBottom ?? 8;
 
-  // ---- 1) Positions (raw) ----
+  // 1) Positions (raw)
   const posRaw = resolvePositions(nodes, posMap);
 
-  // ---- 2) BBox from raw positions (incl. padding/overscan/bottom) ----
+  // 2) BBox from raw positions
   const bbox = computeBBox(
     nodes,
     posRaw,
@@ -73,17 +74,17 @@ export async function buildSvgFromGraph(
     extraBottom,
   );
 
-  // ---- 3) Y-flip (canvas up vs. SVG down) relative to BBox ----
+  // 3) y-flip (canvas up vs. SVG down), relative to BBox
   const maxY = bbox.minY + bbox.height;
   const flipY = (y: number) => bbox.minY + (maxY - y);
 
   const pos = new Map<string, Pos>();
   for (const [id, p] of posRaw) pos.set(id, { x: p.x, y: flipY(p.y) });
 
-  // ---- 4) Load icons ----
+  // 4) load icons
   const icons = await loadIconsFor(nodes);
 
-  // ---- 5) Optional markers ----
+  // 5) optional markers
   const defs = withArrow
     ? `<defs>
          <marker id="arrow" markerUnits="strokeWidth" markerWidth="8" markerHeight="8" orient="auto" refX="8" refY="4">
@@ -92,7 +93,7 @@ export async function buildSvgFromGraph(
        </defs>`
     : "";
 
-  // ---- 6) Primitives (with identical wrapping) ----
+  // 6) primitives (with identical wrapping)
   const edgesSvg = edgesToSvg(edges, pos, {
     edgeColor,
     edgeWidth,
@@ -101,7 +102,6 @@ export async function buildSvgFromGraph(
     arrowMarker: withArrow ? "url(#arrow)" : undefined,
     labelFontSize: fontSize,
     fontFamily,
-    // Match viewer edge label color exactly
     textColor: tokens.mark,
   });
 
@@ -116,7 +116,7 @@ export async function buildSvgFromGraph(
     maxTextWidth,
   });
 
-  // ---- 7) Background + debug ----
+  // 7) background + debug
   const bg =
     background === "white"
       ? `<rect x="${bbox.minX}" y="${bbox.minY}" width="${bbox.width}" height="${bbox.height}" fill="#ffffff"/>`
@@ -126,7 +126,7 @@ export async function buildSvgFromGraph(
     ? `<rect x="${bbox.minX}" y="${bbox.minY}" width="${bbox.width}" height="${bbox.height}" fill="none" stroke="#f36" stroke-dasharray="4 3" stroke-width="1"/>`
     : "";
 
-  // ---- 8) Safe viewBox (1px inset) ----
+  // 8) safe viewBox (1px inset)
   const vbX = bbox.minX - 1;
   const vbY = bbox.minY - 1;
   const vbW = bbox.width + 2;

@@ -1,4 +1,5 @@
-// Serialize edges and nodes to SVG markup
+//
+// serialize edges and nodes to SVG markup
 
 import type { GraphNode, GraphEdge } from "@/types/graph";
 import type { Pos } from "./graphUtils";
@@ -14,15 +15,14 @@ function labelFor(n: GraphNode): string {
   return buildDisplayName(data, n.label);
 }
 
-// ---------- Edges ----------
-
+// edges
 export interface EdgeStyle {
   edgeColor: string;
   edgeWidth: number;
   trimAtNode: boolean;
   iconRadius: number;
   arrowMarker?: string;
-  // Edge label styling
+  // edge label styling
   labelFontSize: number;
   fontFamily: string;
   textColor: string;
@@ -68,14 +68,14 @@ export function edgesToSvg(
       y2 -= uy * iconRadius;
     }
 
-    // Edge line
+    // edge line
     parts.push(
       `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${edgeColor}" stroke-width="${edgeWidth}"${
         style.arrowMarker ? ` marker-end="${arrowMarker}"` : ""
       }/>`,
     );
 
-    // Edge label (only when it contains "yes" or "no")
+    // edge label (only when it contains "yes" or "no")
     const label = (e.label ?? "").toString();
     const lower = label.toLowerCase();
     const allowed = !!label && (lower.includes("yes") || lower.includes("no"));
@@ -92,7 +92,7 @@ export function edgesToSvg(
   return parts.join("");
 }
 
-// ---------- Nodes ----------
+// nodes
 
 export interface NodeStyle {
   iconSize: number;
@@ -132,7 +132,7 @@ export function nodesToSvg(
     const title = labelFor(n);
     const { lines, widest } = wrapTextToLines(title, fontSize, maxTextWidth);
 
-    // Label background directly under icon
+    // label background directly under icon
     const rectW = Math.max(iconSize * 1.6, widest + 16);
     const rectH = Math.max(iconSize * 1.6, lines.length * lineHeight + 16);
     const rectX = p.x - rectW / 2;
@@ -144,7 +144,7 @@ export function nodesToSvg(
       );
     }
 
-    // Icon
+    // icon
     const icon = icons.get(n.id);
     if (icon) {
       parts.push(
@@ -160,7 +160,7 @@ export function nodesToSvg(
       );
     }
 
-    // Text (centered, stacked)
+    // text (centered, stacked)
     const startY = rectY + fontSize + 2;
     for (let i = 0; i < lines.length; i++) {
       const ty = startY + i * lineHeight;

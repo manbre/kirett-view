@@ -3,10 +3,9 @@
 import { useEffect, useRef } from "react";
 import { useStore } from "@/store/useStore";
 
-/**
- * Report a node's position once it becomes finite.
- * Retries for a few frames because many layouts assign x/y asynchronously.
- */
+//
+// report a node's position once it becomes finite
+// retries for a few frames
 export function useReportNodePosition(
   id: string,
   x?: number,
@@ -21,7 +20,7 @@ export function useReportNodePosition(
     let raf: number | null = null;
 
     const tick = () => {
-      // Only update when we have finite coordinates
+      // only update when we have finite coordinates
       const isFiniteXY =
         typeof x === "number" &&
         typeof y === "number" &&
@@ -29,15 +28,15 @@ export function useReportNodePosition(
         Number.isFinite(y);
 
       if (isFiniteXY) {
-        // Avoid redundant store updates
+        // avoid redundant store updates
         if (last.current.x !== x || last.current.y !== y) {
           setNodePos(id, x!, y!);
           last.current = { x, y };
         }
-        // We have a valid position -> stop the loop
+        // valid position -> stop
         triesLeft.current = 0;
       } else {
-        // Not yet valid -> keep trying while retries remain
+        // not valid -> keep trying while retries remain
         triesLeft.current -= 1;
         if (triesLeft.current <= 0) {
           return;
@@ -46,13 +45,14 @@ export function useReportNodePosition(
       }
     };
 
-    // Kick off immediately; continue via rAF if needed
+    // kick off, continue with rAF if needed
     raf = requestAnimationFrame(tick);
 
     return () => {
       if (raf) cancelAnimationFrame(raf);
     };
-    // Intentionally only restart when id/x/y change
+    // only restart when id/x/y change
+    //
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, x, y]);
 }

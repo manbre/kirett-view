@@ -4,7 +4,8 @@ import type { StoreApi } from "zustand";
 import { Category, createEmptySelectedTerms } from "@/constants/category";
 import type { Store } from "../useStore";
 
-// TermSlice state and actions (selected terms per category)
+//
+// state and actions (selected terms per category)
 export interface TermSlice {
   selectedTerms: Record<Category, string[]>;
   selectTerm: (category: Category, term: string) => void;
@@ -13,7 +14,6 @@ export interface TermSlice {
   clearTerms: () => void;
 }
 
-// createTermSlice: builds the term selection slice
 export const createTermSlice = (
   set: StoreApi<Store>["setState"],
   get: StoreApi<Store>["getState"],
@@ -41,7 +41,7 @@ export const createTermSlice = (
     }));
   },
 
-  // Remove a term from all categories
+  // remove a term from all categories
   unselectTermEverywhere: (term) => {
     const cur = get().selectedTerms;
     const next: Record<Category, string[]> = Object.fromEntries(
@@ -53,7 +53,7 @@ export const createTermSlice = (
     set({ selectedTerms: next });
   },
 
-  // Clear all selected terms (all categories)
+  // clear all selected terms (all categories)
   clearTerms: () => {
     set({ selectedTerms: createEmptySelectedTerms() });
   },

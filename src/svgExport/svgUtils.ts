@@ -1,10 +1,9 @@
-// Low-level SVG helpers: escaping, sanitizing, parsing inline SVGs,
+// SVG helpers: escaping, sanitizing, parsing inline SVGs,
 // and simple text width/line estimation used by bbox & labels
 
 export type ParsedIcon = { viewBox: string; inner: string };
 
-// ---------- XML text escaping ----------
-
+// XML text escaping
 export function esc(s: string): string {
   return s.replace(
     /[<>&"']/g,
@@ -19,10 +18,9 @@ export function esc(s: string): string {
   );
 }
 
-// ---------- text metrics (approx) ----------
-
-// Approximate text width in px for a given font size.
-// 0.5em per char is a robust compromise for UI fonts.
+// text metrics (approx)
+// approximate text width in px for a given font size
+// 0.5em per char
 export function estimateTextWidth(text: string, fontSize: number): number {
   const t = (text ?? "").trim();
   const approx = 0.5 * fontSize * t.length;
@@ -31,8 +29,8 @@ export function estimateTextWidth(text: string, fontSize: number): number {
   return Math.max(min, Math.min(max, approx));
 }
 
-// Wrap text to lines using the same width constraint as the viewer.
-// Returns lines and the widest measured line width.
+// wrap text to lines using the same width constraint as the viewer
+// returns lines and the widest measured line width
 export function wrapTextToLines(
   text: string,
   fontSize: number,
@@ -61,8 +59,7 @@ export function wrapTextToLines(
   return { lines, widest };
 }
 
-// ---------- sanitize & parse inline svg ----------
-
+// sanitize & parse inline svg
 export function sanitizeSvgInner(inner: string): string {
   let s = inner;
   s = s.replace(/<script[\s\S]*?<\/script>/gi, "");
@@ -99,8 +96,7 @@ export function parseInlineSvg(text: string): ParsedIcon {
   return { viewBox: vb, inner };
 }
 
-// ---------- url helper for public assets ----------
-
+// url helper for public assets
 export function toAbsoluteUrl(path: string): string {
   try {
     return new URL(path, window.location.origin).toString();

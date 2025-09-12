@@ -1,6 +1,8 @@
 import type { Node, Relationship, Record as Neo4jRecord } from "neo4j-driver";
 import type { GraphNode, GraphEdge } from "@/types/graph";
 
+//
+// converts raw neo4j records (nodes/relationships) into flat GraphNode/GraphEdge arrays
 export function convertNeo4jRecords(
   records: Neo4jRecord[],
   showOnlyEdges: boolean,
@@ -8,7 +10,8 @@ export function convertNeo4jRecords(
   const nodesMap = new Map<string, GraphNode>();
   const edges: GraphEdge[] = [];
 
-  // Helpers
+  // helpers
+  //
   const addNode = (n: Node) => {
     const id = n.identity.toString();
     if (nodesMap.has(id)) return;
@@ -93,12 +96,13 @@ export function convertNeo4jRecords(
     }
   };
 
-  // 1) Collect everything – alias-agnostic (nodes, relationships, arrays, paths)
+  //
+  // collect everything (nodes, relationships)
   for (const record of records) {
     for (const key of record.keys) visit(record.get(key));
   }
 
-  // 2) Deduplicate edges
+  // deduplicate edges
   const uniqEdges = (() => {
     const seen = new Set<string>();
     const out: GraphEdge[] = [];
@@ -112,21 +116,21 @@ export function convertNeo4jRecords(
     return out;
   })();
 
-  // 3) Crucial: restrict edges to known node ids first
+  // restrict edges to known node ids first
   const knownIds = new Set(nodesMap.keys());
   const edgesOnKnownNodes = uniqEdges.filter(
     (e) => knownIds.has(e.source) && knownIds.has(e.target),
   );
 
   if (showOnlyEdges) {
-    // 4) Build connected set from the cleaned edges
+    // build connected set from the cleaned edges
     const connected = new Set<string>();
     for (const e of edgesOnKnownNodes) {
       connected.add(e.source);
       connected.add(e.target);
     }
 
-    // 5) Keep only nodes that participate in these edges
+    // keep only nodes that participate in these edges
     const nodes = Array.from(nodesMap.values()).filter((n) =>
       connected.has(n.id),
     );
@@ -143,4 +147,3 @@ export function convertNeo4jRecords(
     edges: edgesOnKnownNodes,
   };
 }
-// Converts raw Neo4j records (nodes/relationships/paths) into flat GraphNode/GraphEdge arrays

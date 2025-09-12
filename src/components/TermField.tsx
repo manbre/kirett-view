@@ -10,6 +10,8 @@ type Term = {
   label: string;
 };
 
+//
+// shows selectable terms for the active category, writes to store
 export const TermField = ({ selectedCategory }: Props) => {
   const { selectedTerms, selectTerm, unselectTerm } = useStore();
 
@@ -71,4 +73,3 @@ export const TermField = ({ selectedCategory }: Props) => {
     </div>
   );
 };
-// TermField: shows selectable terms for the active category; writes to store

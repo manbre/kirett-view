@@ -5,18 +5,18 @@ import type { GraphNode, GraphEdge, SubgraphResult } from "@/types/graph";
 
 export type SelectedTerms = Record<string, string[]>;
 export type SelectedTypes = string[];
-export type SelectedHops = string[]; // "HopOne" | "HopTwo"
+export type SelectedHops = string[];
 
-// Map UI hops to server depth strings ["1" | "2"]
+// map hops to server depth strings ["1" | "2"]
 function toDepth(selectedHops: SelectedHops): ("1" | "2")[] {
   const depth: ("1" | "2")[] = [];
   if (selectedHops.includes("HopOne")) depth.push("1");
   if (selectedHops.includes("HopTwo")) depth.push("2");
-  if (depth.length === 0) depth.push("1"); // Fallback: at least one hop
+  if (depth.length === 0) depth.push("1"); // fallback: at least one hop
   return depth;
 }
 
-// Dedupe nodes/edges by id on the client
+// dedupe nodes/edges by id
 function dedupeGraph(
   nodes: GraphNode[] = [],
   edges: GraphEdge[] = [],
@@ -35,12 +35,12 @@ function dedupeGraph(
 
 type ApplyMode = "set" | "merge" | "none";
 
-// useGraphApi: fetch subgraphs/neighbors and update the store
+// fetch subgraphs/neighbors and update the store
 export const useGraphApi = () => {
-  // Access root graph actions (default remains setGraph)
+  // access root graph actions (default: setGraph)
   const { setGraph, mergeGraph } = useStore.getState();
 
-  // Load a subgraph for a selection of terms with current filters
+  // load a subgraph for a selection of terms with current filters
   const fetchGraphData = async (
     selectedTerms: SelectedTerms,
     selectedTypes: SelectedTypes,
@@ -71,7 +71,7 @@ export const useGraphApi = () => {
     return { nodes, edges };
   };
 
-  // Expand neighbors for a given node with current filters
+  // expand neighbors for a given node with current filters
   const fetchNeighbors = async (
     nodeId: string,
     selectedHops: SelectedHops,

@@ -1,5 +1,8 @@
 import { Transaction, Record as Neo4jRecord } from "neo4j-driver";
 
+//
+// expand fetcher: returns 1/2-hop neighborhood for a given node id
+// respect node type filter (include)
 export async function getNeighbors(
   nodeId: string,
   depth: ("1" | "2")[],
@@ -53,4 +56,3 @@ export async function getNeighbors(
   const result = await tx.run(query, { nodeId, include });
   return result.records;
 }
-// Expand fetcher: returns 1/2-hop neighborhood for a given node id

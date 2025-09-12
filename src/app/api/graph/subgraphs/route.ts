@@ -1,5 +1,6 @@
-// POST /api/graph/subgraphs
-// Build a subgraph for the selected terms with optional type/depth filters.
+//
+// build a subgraph for selected terms with optional filters
+
 import { NextRequest, NextResponse } from "next/server";
 import { withReadTx } from "@/server/db/neo4j";
 import { subgraphFetchers } from "@/server/subgraphFetchers";
@@ -11,7 +12,7 @@ export const runtime = "nodejs";
 export async function POST(req: NextRequest) {
   const body = await req.json();
 
-  // Required field
+  // required field
   const selectedTerms = (body?.selectedTerms ?? {}) as Partial<
     Record<Category, string[]>
   >;
@@ -20,25 +21,25 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ nodes: [], edges: [] }, { status: 200 });
   }
 
-  // Preferred payload fields:
+  // preferred payload fields
   let include = Array.isArray(body?.include)
     ? (body.include as string[])
     : undefined;
   let depth = Array.isArray(body?.depth) ? (body.depth as string[]) : undefined;
 
-  // Back-compat: derive from selectedTypes / selectedHops if necessary
+  // derive from selectedTypes / selectedHops if needed
   if (!include && Array.isArray(body?.selectedTypes)) {
     include = Array.from(new Set(body.selectedTypes as string[]));
   }
   if (!depth && Array.isArray(body?.selectedHops)) {
-    const hops = body.selectedHops as string[]; // e.g. ["HopOne","HopTwo"]
+    const hops = body.selectedHops as string[];
     const d: ("1" | "2")[] = [];
     if (hops.includes("HopOne")) d.push("1");
     if (hops.includes("HopTwo")) d.push("2");
     depth = d.length ? d : ["1"];
   }
 
-  // Defaults/final
+  // defaults
   const finalInclude: string[] = include ?? [];
   const finalDepth = (depth && depth.length ? depth : ["1"]) as ("1" | "2")[];
 
@@ -48,7 +49,6 @@ export async function POST(req: NextRequest) {
       for (const cat of Object.values(Category)) {
         const terms = selectedTerms[cat];
         if (Array.isArray(terms) && terms.length) {
-          // Signature: (terms, tx, depth[], include[])
           tasks.push(
             subgraphFetchers[cat](terms, tx, finalDepth, finalInclude),
           );
@@ -59,6 +59,7 @@ export async function POST(req: NextRequest) {
       return results.flat();
     });
 
+    // response (respect showOnlyEdges)
     return NextResponse.json(convertNeo4jRecords(records, body.showOnlyEdges), {
       status: 200,
     });

@@ -11,10 +11,10 @@ import {
 } from "./slices/topologySlice";
 import { createGraphSlice, type GraphSlice } from "./slices/graphSlice";
 
-// Store: root Zustand type combining all slices
+// Zustand type combining all slices
 export type Store = TermSlice & TypeSlice & TopologySlice & GraphSlice;
 
-// useStore: composed Zustand store of all slices
+// composed Zustand store of all slices
 export const useStore = create<Store>()((set, get) => ({
   ...createTermSlice(set, get),
   ...createTypeSlice(set, get),
@@ -22,7 +22,7 @@ export const useStore = create<Store>()((set, get) => ({
   ...createGraphSlice(set, get),
 }));
 
-// selectors: centralized selectors for components
+// selectors for components
 export const selectors = {
   // terms
   selectedTerms: (s: Store) => s.selectedTerms,

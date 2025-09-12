@@ -1,9 +1,4 @@
 "use client";
-// ToolBar
-// Three stacked sections controlling the graph:
-// 1) Type filter icons (5/8)
-// 2) Topology controls (HopToggle as a bound group) + OnlyEdges (2/8)
-// 3) Export actions (1/8) – currently SVG export
 
 import React, { useCallback, useState } from "react";
 import {
@@ -25,8 +20,12 @@ const group = Object.keys(labelIconMap) as NodeLabel[];
 const group1 = group.filter((k) => !excluded.includes(k));
 const group3 = Object.keys(exportIconMap) as ExportLabel[];
 
+//
+// three stacked sections controlling the graph
+// 1) type filter node icons (5/8)
+// 2) topology controls: HopToggle, OnlyEdges (2/8)
+// 3) export actions: SVG export (1/8)
 export function ToolBar() {
-  // Subscribe to store for type toggling and edge-only filter
   const selectedTypes = useStore(selectors.selectedTypes);
   const toggleType = useStore(selectors.toggleType);
   const showOnlyEdges = useStore(selectors.showOnlyEdges);
@@ -34,7 +33,7 @@ export function ToolBar() {
 
   const { exportSvg } = useSvgExport();
 
-  // Track readiness of all sections to avoid width jump on first paint
+  // track readiness of all sections to avoid width jump on first paint
   const totalSections = 3;
   const [readyCount, setReadyCount] = useState(0);
   const ready = readyCount >= totalSections;
@@ -54,7 +53,7 @@ export function ToolBar() {
       aria-busy={!ready}
       className={[
         "rounded-xl border border-[var(--color-border)] p-2",
-        // mobile full-width, from md: animate to max-content when ready
+        // mobile: full-width, desktop (md): animate to max-content when ready
         "w-full md:min-w-0",
         desktopWidthClass,
         desktopVisibilityClass,
@@ -69,7 +68,7 @@ export function ToolBar() {
         <Section<NodeLabel>
           keys={group1}
           map={labelIconMap}
-          className="w-full md:min-h-0 md:flex-[5_0_0]" // 5/8
+          className="w-full md:min-h-0 md:flex-[5_0_0]"
           isActive={(k) => selectedTypes.includes(k)}
           onToggle={toggleType}
           onReady={onSectionReady}
@@ -77,9 +76,9 @@ export function ToolBar() {
 
         <div className="hidden border-t border-[var(--color-border)] md:block" />
 
-        {/* ===== Section 2 (2/8) + Section 3 (1/8) ===== */}
+        {/* ===== Section 2: (2/8) ===== */}
         <div className="flex flex-row gap-2 md:min-h-0 md:flex-[3_0_0] md:flex-col md:gap-0 md:pt-4">
-          {/* 2/8: Section-Grid mit HopToggle (als Grid-Items) + OnlyEdges-Icon */}
+          {/* with HopToggle and OnlyEdges-Icon */}
           <Section<FilterLabel>
             keys={["OnlyEdges"] as FilterLabel[]}
             map={filterIconMap}
@@ -92,7 +91,7 @@ export function ToolBar() {
           </Section>
           <div className="hidden border-t border-[var(--color-border)] md:block md:pb-2" />
 
-          {/* 1/8 */}
+          {/* ===== Section 3: (1/8) ===== */}
           <Section<ExportLabel>
             keys={group3}
             map={exportIconMap}
@@ -110,7 +109,7 @@ export function ToolBar() {
                 //
                 overscan: 4,
                 padding: 300,
-                extraBottom: 300,
+                extraBottom: 1000,
                 //
                 debug: false,
                 fileName: "subgraph.svg",

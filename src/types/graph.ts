@@ -1,3 +1,5 @@
+//
+// graph data types shared across client and server
 export type GraphNode = {
   id: string;
   label: string;
@@ -15,4 +17,3 @@ export type SubgraphResult = {
   nodes: GraphNode[];
   edges: GraphEdge[];
 };
-// Graph data types shared across client and server

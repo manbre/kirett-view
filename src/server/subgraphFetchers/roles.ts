@@ -5,6 +5,8 @@ const roleSynonyms: Record<string, string> = {
   NS: "NFS",
 };
 
+//
+// subgraph fetcher for roles (attributes like "Betrifft1"...)
 export async function getRolesSubgraph(
   roles: string[],
   tx: Transaction,

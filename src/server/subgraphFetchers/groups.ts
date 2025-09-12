@@ -1,5 +1,7 @@
 import type { Transaction, Record as Neo4jRecord } from "neo4j-driver";
 
+//
+// subgraph fetcher for disease groups: expands around JumpNode with BPR='Disease Groups'
 export async function getGroupsSubgraph(
   groups: string[],
   tx: Transaction,
@@ -57,4 +59,3 @@ RETURN n AS n, r1 AS r, nbr1 AS neighbor
   const result = await tx.run(query, { groups, include });
   return result.records;
 }
-// Subgraph fetcher for disease groups: expands around JumpNode with BPR='Disease Groups'

@@ -10,6 +10,8 @@ import { getRolesSubgraph } from "./roles";
 import { getSymptomsSubgraph } from "./symptoms";
 import { getOthersSubgraph } from "./others";
 
+//
+// registry of subgraph fetchers per category
 export type SubgraphFetcher = (
   terms: string[],
   tx: Transaction,
@@ -27,4 +29,3 @@ export const subgraphFetchers: Record<Category, SubgraphFetcher> = {
   [Category.Symptoms]: getSymptomsSubgraph,
   [Category.Others]: getOthersSubgraph,
 };
-// Registry of subgraph fetchers per category; builds filtered Cypher queries
