@@ -39,7 +39,7 @@ const DEFAULT_EXPORT_OPTS: SvgExportOptions = {
   nodeRadius: NODE_R,
   fontSize: FONT_PX,
   maxTextWidth: MAX_W,
-  edgeColor: "tokens.edge",
+  edgeColor: `${tokens.edge}`,
   edgeWidth: 1.25,
   labelBg: true,
   overscan: 24,
