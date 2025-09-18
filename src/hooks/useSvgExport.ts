@@ -6,6 +6,7 @@ import type { GraphNode, GraphEdge } from "@/types/graph";
 import type { Store } from "@/store/useStore";
 import { buildSvgFromGraph, type SvgExportOptions } from "@/svgExport";
 import { NODE_R, FONT_PX, MAX_W } from "@/graphUtils/labelMetrics";
+import { tokens } from "@/theme/tokens";
 
 type Pos = Store["pos"] extends Map<string, infer P> ? P : never;
 
@@ -38,7 +39,7 @@ const DEFAULT_EXPORT_OPTS: SvgExportOptions = {
   nodeRadius: NODE_R,
   fontSize: FONT_PX,
   maxTextWidth: MAX_W,
-  edgeColor: "#9bbcff",
+  edgeColor: "tokens.edge",
   edgeWidth: 1.25,
   labelBg: true,
   overscan: 24,

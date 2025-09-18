@@ -42,7 +42,9 @@ function TexturedMaterial({
     <meshBasicMaterial
       map={texture}
       // texture is white, so material color tints the icon
-      color={isHighlighted ? "blue" : hovered ? tokens.mark : tokens.node}
+      color={
+        isHighlighted ? tokens.double : hovered ? tokens.mark : tokens.node
+      }
       transparent
       depthTest={false}
       toneMapped={false}

@@ -117,7 +117,7 @@ export const GraphViewer = () => {
               resetToTerms();
               setLastNeighborId(null);
             }}
-            title="Nachbar-Ansicht beenden"
+            title="Navigation zurücksetzen"
           >
             Reset
           </button>
