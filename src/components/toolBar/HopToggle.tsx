@@ -18,7 +18,7 @@ export function HopToggle() {
   ];
 
   return (
-    <div className="flex items-stretch justify-start gap-1.5 rounded-md bg-[var(--color-border)] ring-1 ring-[var(--color-bg)] md:[grid-row:span_3_/span_3] md:[width:var(--cell)] md:flex-col">
+    <div className="flex items-stretch justify-start gap-1.5 rounded-md bg-[var(--color-bg)] ring-1 ring-[var(--color-border)] md:[grid-row:span_3_/span_3] md:[width:var(--cell)] md:flex-col">
       {items.map(({ value, label, title }) => {
         const active = hopMode === value;
         return (

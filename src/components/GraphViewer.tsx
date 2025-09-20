@@ -112,7 +112,7 @@ export const GraphViewer = () => {
         <div className="pointer-events-none absolute top-2 left-2 z-10">
           <button
             type="button"
-            className="pointer-events-auto rounded-md border border-[var(--color-border)] bg-white/90 px-3 py-1 text-sm shadow-sm hover:cursor-pointer hover:bg-white"
+            className="pointer-events-auto rounded-md border border-[var(--color-border)] bg-white/90 px-3 py-1 text-sm shadow-sm hover:cursor-pointer hover:bg-[var(--color-mark)]/10"
             onClick={() => {
               resetToTerms();
               setLastNeighborId(null);
