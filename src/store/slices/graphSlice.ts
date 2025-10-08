@@ -13,17 +13,14 @@ export interface GraphSlice {
   nodes: GraphNode[];
   edges: GraphEdge[];
   pos: Map<string, Pos>;
-  lastNeighborId: string | null;
 
   setGraph: (nodes: GraphNode[], edges: GraphEdge[]) => void;
   mergeGraph: (nodes: GraphNode[], edges: GraphEdge[]) => void;
   setNodePos: (id: string, x: number, y: number) => void;
-  setLastNeighborId: (id: string | null) => void;
-  clearGraph: () => void;
 }
 
 //
-// graph data (nodes/edges), positions, and lastNeighborId
+// graph data (nodes/edges) and persisted positions
 export const createGraphSlice = (
   set: StoreApi<Store>["setState"],
   get: StoreApi<Store>["getState"],
@@ -31,7 +28,6 @@ export const createGraphSlice = (
   nodes: [],
   edges: [],
   pos: new Map<string, Pos>(),
-  lastNeighborId: null,
 
   // replace entire graph, but preserve known positions for still present nodes
   setGraph: (nodes, edges) => {
@@ -65,8 +61,4 @@ export const createGraphSlice = (
     set({ pos: next });
   },
 
-  setLastNeighborId: (id) => set({ lastNeighborId: id }),
-
-  clearGraph: () =>
-    set({ nodes: [], edges: [], pos: new Map(), lastNeighborId: null }),
 });

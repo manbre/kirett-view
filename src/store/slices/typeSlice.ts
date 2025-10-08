@@ -11,9 +11,6 @@ export const ALL_TYPES = Object.keys(labelIconMap) as NodeLabel[];
 export interface TypeSlice {
   selectedTypes: NodeLabel[];
   toggleType: (label: NodeLabel) => void;
-  setTypes: (labels: NodeLabel[]) => void;
-  selectAllTypes: () => void;
-  clearTypes: () => void;
 }
 
 export const createTypeSlice = (
@@ -29,9 +26,4 @@ export const createTypeSlice = (
         : [...s.selectedTypes, label],
     })),
 
-  setTypes: (labels) => set({ selectedTypes: labels }),
-
-  selectAllTypes: () => set({ selectedTypes: ALL_TYPES }),
-
-  clearTypes: () => set({ selectedTypes: [] }),
 });

@@ -10,7 +10,6 @@ export interface TermSlice {
   selectedTerms: Record<Category, string[]>;
   selectTerm: (category: Category, term: string) => void;
   unselectTerm: (category: Category, term: string) => void;
-  unselectTermEverywhere: (term: string) => void;
   clearTerms: () => void;
 }
 
@@ -39,18 +38,6 @@ export const createTermSlice = (
         [category]: prev.filter((t) => t !== term),
       },
     }));
-  },
-
-  // remove a term from all categories
-  unselectTermEverywhere: (term) => {
-    const cur = get().selectedTerms;
-    const next: Record<Category, string[]> = Object.fromEntries(
-      Object.entries(cur).map(([cat, list]) => [
-        cat,
-        Array.isArray(list) ? list.filter((t) => t !== term) : [],
-      ]),
-    ) as Record<Category, string[]>;
-    set({ selectedTerms: next });
   },
 
   // clear all selected terms (all categories)

@@ -9,8 +9,6 @@ export type HopMode = "hop1" | "hop2" | "both";
 
 export interface TopologySlice {
   selectedHops: HopKey[];
-  setHops: (h: HopKey[]) => void;
-  toggleHop: (k: HopKey) => void;
 
   // hop mode for HopToggle (exactly one selection)
   hopMode: HopMode;
@@ -28,25 +26,6 @@ export const createTopologySlice = (
   // default: HopOne active
   selectedHops: ["HopOne"],
   hopMode: "hop1",
-
-  setHops: (h) =>
-    set(() => ({
-      selectedHops: h,
-      hopMode: h.length === 2 ? "both" : h.includes("HopTwo") ? "hop2" : "hop1",
-    })),
-
-  toggleHop: (k) =>
-    set((s) => {
-      const exists = s.selectedHops.includes(k);
-      const next = exists
-        ? s.selectedHops.filter((x) => x !== k)
-        : [...s.selectedHops, k];
-      // never empty: fallback to HopOne
-      const safe = next.length === 0 ? ["HopOne"] : (next as HopKey[]);
-      const mode =
-        safe.length === 2 ? "both" : safe.includes("HopTwo") ? "hop2" : "hop1";
-      return { selectedHops: safe, hopMode: mode } as Partial<TopologySlice>;
-    }),
 
   setHopMode: (m) =>
     set(() => {

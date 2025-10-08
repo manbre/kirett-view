@@ -14,6 +14,7 @@ type Props = {
 export const CategoryTabs = ({ selectedCategory, onChangeCategory }: Props) => {
   const selectedTerms = useStore((state) => state.selectedTerms);
 
+  // builds the sorted list of CategoryLabels once
   const entries = useMemo(
     () =>
       Object.entries(CategoryLabels).sort((a, b) => a[1].localeCompare(b[1])),

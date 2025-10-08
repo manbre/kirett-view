@@ -13,7 +13,9 @@ type Term = {
 //
 // shows selectable terms for the active category, writes to store
 export const TermField = ({ selectedCategory }: Props) => {
-  const { selectedTerms, selectTerm, unselectTerm } = useStore();
+  const selectedTerms = useStore((s) => s.selectedTerms);
+  const selectTerm = useStore((s) => s.selectTerm);
+  const unselectTerm = useStore((s) => s.unselectTerm);
 
   const [terms, setTerms] = useState<Term[]>([]);
 

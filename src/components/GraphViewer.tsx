@@ -33,9 +33,11 @@ export const GraphViewer = () => {
   const graphRef = useRef<GraphCanvasRef | null>(null);
 
   // prepare nodes (collision radius, display label, space)
+  // useMemo: only runs when nodes or edges change
   const preppedNodes = useMemo(() => prepareNodes(nodes), [nodes]);
 
   // double click: expand neighbors and switch to neighbors mode
+  // useCallback: keep same reference unless edges or openNeighbors change
   const handleNodeDoubleClick = useCallback(
     async (nodeId: string) => {
       try {
@@ -62,6 +64,7 @@ export const GraphViewer = () => {
   };
 
   // normalize edges to string ids for canvas
+  // useMemo: prevent new object instances on each render
   const canvasEdges = useMemo(
     () =>
       (edges as readonly EdgeIn[]).map((e) => {

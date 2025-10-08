@@ -40,7 +40,7 @@ export async function verifyConnection(): Promise<void> {
   await getDriver().verifyConnectivity();
 }
 
-// v5: executeRead, v4: readTransaction
+// driver v5: executeRead, driver v4: readTransaction
 export async function withReadTx<T>(
   fn: (tx: Transaction) => Promise<T>,
 ): Promise<T> {

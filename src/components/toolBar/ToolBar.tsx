@@ -10,7 +10,7 @@ import {
   type ExportLabel,
 } from "@/constants/label";
 import { Section } from "./Section";
-import { useStore, selectors } from "@/store/useStore";
+import { useStore } from "@/store/useStore";
 import { useSvgExport } from "@/hooks/useSvgExport";
 import { HopToggle } from "./HopToggle";
 import { NODE_R, FONT_PX, MAX_W } from "@/graphUtils/labelMetrics";
@@ -26,10 +26,10 @@ const group3 = Object.keys(exportIconMap) as ExportLabel[];
 // 2) topology controls: HopToggle, OnlyEdges (2/8)
 // 3) export actions: SVG export (1/8)
 export function ToolBar() {
-  const selectedTypes = useStore(selectors.selectedTypes);
-  const toggleType = useStore(selectors.toggleType);
-  const showOnlyEdges = useStore(selectors.showOnlyEdges);
-  const toggleOnlyEdges = useStore(selectors.toggleShowOnlyEdges);
+  const selectedTypes = useStore((s) => s.selectedTypes);
+  const toggleType = useStore((s) => s.toggleType);
+  const showOnlyEdges = useStore((s) => s.showOnlyEdges);
+  const toggleOnlyEdges = useStore((s) => s.toggleShowOnlyEdges);
 
   const { exportSvg } = useSvgExport();
 
