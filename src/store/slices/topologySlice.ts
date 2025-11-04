@@ -38,6 +38,5 @@ export const createTopologySlice = (
     }),
 
   showOnlyEdges: false,
-  setShowOnlyEdges: (v) => set({ showOnlyEdges: v }),
   toggleShowOnlyEdges: () => set((s) => ({ showOnlyEdges: !s.showOnlyEdges })),
 });
