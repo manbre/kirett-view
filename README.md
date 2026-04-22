@@ -1,1 +1,1 @@
-![Uploading kirett-view.gif…]()
+![Filtering demo](public/images/kirett-view.gif)
