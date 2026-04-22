@@ -12,7 +12,7 @@
     </td>
     <td align="center">
       <strong>Mobile View</strong><br>
-      <img src="public/images/mobile_view.png" width="100%">
+      <img src="public/images/mobile_view.png" width="90%">
     </td>
   </tr>
 </table>
