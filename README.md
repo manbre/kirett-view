@@ -14,9 +14,9 @@
 
   <tr>
     <td colspan="2" align="left">
-       <strong>1:</strong><br> 
-        <strong>2:</strong><br>
-        <strong>3:</strong>
+       <strong>1:</strong> Filtering by Terms<br> 
+        <strong>2:</strong> Combining Categories<br>
+        <strong>3:</strong> Traversing Paths
     </td>
   </tr>
 
