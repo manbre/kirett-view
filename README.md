@@ -7,10 +7,13 @@
   </tr>
 
   <tr>
+       <td colspan="2" align="center">
+     <strong>Use Cases</strong>
+    </td>
     <td colspan="2" align="left">
-     <strong>Use Case 1:</strong><br>
-      <strong>Use Case 2:</strong><br>
-      <strong>Use Case 3:</strong><br>
+     <strong>1:</strong><br>
+      <strong>2:</strong><br>
+      <strong>3:</strong><br>
     </td>
   </tr>
 
