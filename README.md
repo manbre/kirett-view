@@ -1,8 +1,11 @@
 <table align="center">
   <tr>
-    <td colspan="2">
+    <td colspan="2" align="center">
       <strong>Desktop Demo</strong><br>
       <img src="public/images/kirett-view.gif" width="100%">
+    </td>
+      <td colspan="2">
+      <strong>Desktop Demo</strong><br>
       <p>hallo</p>
     </td>
   </tr>
