@@ -1,15 +1,18 @@
-<img src="public/images/kirett-view.gif" width="95%">
-<table>
+<table align="center">
   <tr>
-    <th>Tablet View</th>
-    <th>Mobile View</th>
+    <td colspan="2" align="center">
+      <strong>Desktop View</strong><br>
+      <img src="public/images/kirett-view.gif" width="850">
+    </td>
   </tr>
   <tr>
-    <td>
-      <img src="public/images/tablet_view.png" width="130%">
+    <td align="center">
+      <strong>Tablet View</strong><br>
+      <img src="public/images/tablet_view.png" width="320">
     </td>
-    <td>
-      <img src="public/images/mobile_view.png" width="70%">
+    <td align="center">
+      <strong>Mobile View</strong><br>
+      <img src="public/images/mobile_view.png" width="180">
     </td>
   </tr>
 </table>
