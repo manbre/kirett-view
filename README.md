@@ -1,7 +1,7 @@
 <table align="center">
   <tr>
     <td colspan="2" align="center">
-      <strong>Desktop View</strong><br>
+      <strong>Desktop Demo</strong><br>
       <img src="public/images/kirett-view.gif" width="100%">
     </td>
   </tr>
