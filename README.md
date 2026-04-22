@@ -5,6 +5,14 @@
       <img src="public/images/kirett-view.gif" width="100%">
     </td>
   </tr>
+
+  <tr>
+    <td colspan="2" align="left">
+      The desktop interface provides full access to filtering,
+      graph exploration and detailed node interaction.
+    </td>
+  </tr>
+
   <tr>
     <td align="center">
       <strong>Tablet View</strong><br>
