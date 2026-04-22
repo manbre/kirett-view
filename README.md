@@ -8,8 +8,9 @@
 
   <tr>
     <td colspan="2" align="left">
-      The desktop interface provides full access to filtering,
-      graph exploration and detailed node interaction.
+     <strong>Use Case 1:</strong><br>
+      <strong>Use Case 2:</strong><br>
+      <strong>Use Case 3:</strong><br>
     </td>
   </tr>
 
