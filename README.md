@@ -24,11 +24,11 @@
   <tr>
     <td colspan="1" align="center">
       <strong>Tablet View</strong><br>
-      <img src="public/images/tablet_view.png" width="120%">
+      <img src="public/images/tablet_view.png" width="70%">
     </td>
     <td colspan="2" align="center">
       <strong>Mobile View</strong><br>
-      <img src="public/images/mobile_view.png" width="93%">
+      <img src="public/images/mobile_view.png" width="30%">
     </td>
   </tr>
 </table>
