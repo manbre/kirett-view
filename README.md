@@ -14,9 +14,9 @@
 
   <tr>
     <td colspan="2" align="left">
-       <strong>1:</strong>    Filtering by Terms<br> 
-        <strong>2:</strong>    Combining Categories<br>
-        <strong>3:</strong>    Traversing Paths<br>
+       <strong>1:</strong> &nbsp;Filtering by Terms<br> 
+        <strong>2:</strong> &nbsp;Combining Categories<br>
+        <strong>3:</strong> &nbsp;Traversing Paths<br>
       <br>
       In all three cases, neighboring nodes can be filtered by node type and path depth.
        <br>
