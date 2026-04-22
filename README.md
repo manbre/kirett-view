@@ -1,6 +1,6 @@
 <table align="center">
   <tr>
-    <td colspan="2" align="center">
+    <td colspan="2">
       <strong>Desktop Demo</strong><br>
       <img src="public/images/kirett-view.gif" width="100%">
       <p>hallo</p>
