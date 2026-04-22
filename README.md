@@ -20,6 +20,7 @@
       <br>
       In all three cases, neighboring nodes can be filtered by node type and path depth.
        <br>
+       <br>
     </td>
   </tr>
 
