@@ -9,7 +9,7 @@
       <img src="public/images/tablet_view.png" width="100%">
     </td>
     <td>
-      <img src="public/images/mobile_view.png" width="22%">
+      <img src="public/images/mobile_view.png" width="100%">
     </td>
   </tr>
 </table>
