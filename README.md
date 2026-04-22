@@ -1,4 +1,4 @@
-<table align="center" width="100%">
+<table align="center">
   <tr>
     <td colspan="3" align="center">
       <strong>Demo (Desktop View)</strong><br>
@@ -9,15 +9,15 @@
   <tr>
     <td align="center">
       <strong>Filtering</strong><br>
-      <img src="public/images/UC1.png" width="100%">
+      <img src="public/images/UC1.png" width="120%">
     </td>
     <td align="center">
       <strong>Expansion</strong><br>
-      <img src="public/images/UC2.png" width="100%">
+      <img src="public/images/UC2.png" width="120%">
     </td>
     <td align="center">
       <strong>Category Selection</strong><br>
-      <img src="public/images/UC3.png" width="100%">
+      <img src="public/images/UC3.png" width="120%">
     </td>
   </tr>
 
