@@ -2,17 +2,17 @@
   <tr>
     <td colspan="2" align="center">
       <strong>Desktop View</strong><br>
-      <img src="public/images/kirett-view.gif" width="95%">
+      <img src="public/images/kirett-view.gif" width="100%">
     </td>
   </tr>
   <tr>
     <td align="center">
       <strong>Tablet View</strong><br>
-      <img src="public/images/tablet_view.png" width="73%">
+      <img src="public/images/tablet_view.png" width="130%">
     </td>
     <td align="center">
       <strong>Mobile View</strong><br>
-      <img src="public/images/mobile_view.png" width="22%">
+      <img src="public/images/mobile_view.png" width="70%">
     </td>
   </tr>
 </table>
