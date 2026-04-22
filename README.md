@@ -8,11 +8,11 @@
   <tr>
     <td align="center">
       <strong>Tablet View</strong><br>
-      <img src="public/images/tablet_view.png" width="130%">
+      <img src="public/images/tablet_view.png" width="120%">
     </td>
     <td align="center">
       <strong>Mobile View</strong><br>
-      <img src="public/images/mobile_view.png" width="70%">
+      <img src="public/images/mobile_view.png" width="80%">
     </td>
   </tr>
 </table>
