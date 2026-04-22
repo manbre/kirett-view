@@ -3,6 +3,7 @@
     <td colspan="2" align="center">
       <strong>Desktop Demo</strong><br>
       <img src="public/images/kirett-view.gif" width="100%">
+      <p>hallo</p>
     </td>
   </tr>
   <tr>
