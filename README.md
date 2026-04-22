@@ -18,7 +18,8 @@
         <strong>2:</strong> &nbsp;&nbsp;Combining Categories<br>
         <strong>3:</strong> &nbsp;&nbsp;Traversing Paths<br>
       <br>
-      In all three cases, neighboring nodes can be filtered by node type and path depth.
+      In all three cases, neighboring nodes can be filtered by node type and path depth.<br>
+      Unconnected nodes can also be excluded, which becomes especially useful at path depth 2.
        <br>
        <br>
     </td>
