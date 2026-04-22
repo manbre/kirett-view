@@ -1,4 +1,4 @@
-<table align="center">
+<table align="center" width="100%">
   <tr>
     <td colspan="3" align="center">
       <strong>Demo (Desktop View)</strong><br>
