@@ -1,4 +1,4 @@
-<img src="public/images/kirett-view.gif" width="90%">
+<img src="public/images/kirett-view.gif" width="95%">
 <table>
   <tr>
     <th>Tablet View</th>
@@ -6,10 +6,10 @@
   </tr>
   <tr>
     <td>
-      <img src="public/images/tablet_view.png" width="600">
+      <img src="public/images/tablet_view.png" width="73%">
     </td>
     <td>
-      <img src="public/images/mobile_view.png" width="220">
+      <img src="public/images/mobile_view.png" width="22%">
     </td>
   </tr>
 </table>
