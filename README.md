@@ -8,7 +8,7 @@
 
   <tr>
        <td colspan="2" align="center">
-     <strong>Use Cases</strong>
+     <strong>Use Cases</strong><br>
     </td>
     <td colspan="2" align="left">
      <strong>1:</strong><br>
