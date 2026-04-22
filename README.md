@@ -6,10 +6,10 @@
   </tr>
   <tr>
     <td>
-      <img src="public/images/tablet_view.png" width="100%">
+      <img src="public/images/tablet_view.png" width="130%">
     </td>
     <td>
-      <img src="public/images/mobile_view.png" width="100%">
+      <img src="public/images/mobile_view.png" width="70%">
     </td>
   </tr>
 </table>
